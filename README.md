@@ -1,16 +1,40 @@
-# e_tarabay
+# E-Tarabay Project Overview
 
-A new Flutter project.
+E-Tarabay is a modern, interactive Flutter-based educational mobile application designed for early childhood learning, primarily focused on Filipino learners (Tagalog/English). The app’s tagline, **"Ang Kabataan ay Pag-asa ng Bayan"** (The Youth are the Hope of the Nation), reflects its core mission of fostering foundational knowledge in young students.
 
-## Getting Started
+## Core Modules & Features
 
-This project is a starting point for a Flutter application.
+### Learning Modules (Pag-aaral)
+*   **Lessons**: Curated educational content for various subjects.
+*   **Matematika (Math)**: Interactive math exercises and games.
+*   **Magbasa (Reading)**: Dedicated screens for reading stories (**Kwento**) and poems (**Tula**).
+*   **Alphabet & Numbers**: Foundational literacy and numeracy.
 
-A few resources to get you started if this is your first Flutter project:
+### Creative & Social
+*   **Kulay (Coloring)**: An interactive coloring and art activities section.
+*   **Sundan (Tracing)**: Tracing exercises for motor skill development.
+*   **Pamilya (Family)**: Lessons focused on family values and identification.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Gamification (Achievements)
+*   **Awards & Achievements**: Motivation through visual rewards and milestones for completed tasks.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Audio & Visual
+*   Background music management via a dedicated **AudioManager**.
+*   Rich assets including custom illustrations and audio feedback for an engaging experience.
+
+## Technology Stack
+
+*   **Framework**: Flutter (Dart) for cross-platform mobile development.
+*   **Backend**: 
+    *   **Firebase Auth**: For user authentication across student, teacher, and parent roles.
+    *   **Firestore & Realtime Database**: For cloud synchronization of progress and data.
+*   **Local Storage**:
+    *   **Hive**: For fast, persistent local caching of user profiles and progress.
+    *   **Shared Preferences**: For simple app settings (e.g., language, music toggle).
+*   **State Management**: Provider package for handling app state (Language, User session, Audio).
+*   **Security**: `flutter_secure_storage` for protecting sensitive information such as PINs and login credentials.
+
+## Edge Cases
+
+*   **Offline Mode**: The app uses Hive and Shared Preferences for local data, but core authentication and dashboard features likely require an internet connection for Firebase synchronization.
+*   **Language Switching**: The app supports bilingual (English/Tagalog/Ilocano) toggling, affecting descriptions and content across screens.
