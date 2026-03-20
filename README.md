@@ -38,3 +38,11 @@ E-Tarabay is a modern, interactive Flutter-based educational mobile application 
 
 *   **Offline Mode**: The app uses Hive and Shared Preferences for local data, but core authentication and dashboard features likely require an internet connection for Firebase synchronization.
 *   **Language Switching**: The app supports bilingual (English/Tagalog/Ilocano) toggling, affecting descriptions and content across screens.
+
+## Credits
+
+Developed and Maintained by **BONFIRE BASE**.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
