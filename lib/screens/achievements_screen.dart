@@ -1,0 +1,373 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+import '../utils/constants.dart';
+import '../utils/translations.dart';
+
+class AchievementsScreen extends StatelessWidget {
+  const AchievementsScreen({super.key});
+
+  // Helper method to calculate achievement progress based on actual module progress
+  Map<String, dynamic> _calculateAchievementProgress(
+      UserProvider userProvider) {
+    final progress = userProvider.getAllProgress();
+
+    // Get progress from each module
+    final magbasaProgress = progress['magbasa'] as Map? ?? {};
+    final sundanProgress = progress['sundan'] as Map? ?? {};
+    final kulayProgress = progress['kulay'] as Map? ?? {};
+    final matematikaProgress = progress['matematika'] as Map? ?? {};
+    final pamilyaProgress = progress['pamilya'] as Map? ?? {};
+
+    // Calculate achievements based on actual progress
+    return {
+      // First Steps: Complete any 1 activity
+      'firstSteps': (progress['totalCompleted'] ?? 0) >= 1 ? 1 : 0,
+
+      // Alphabet: Complete all Magbasa Tayo activities
+      'alphabet': (magbasaProgress['totalCompleted'] ?? 0) >= 12 ? 1 : 0,
+
+      // Numbers: Complete all Matematika games
+      'numbers': (matematikaProgress['gamesCompleted'] ?? 0) >= 20 ? 1 : 0,
+
+      // Colors: Complete all Kulay-Saya activities
+      'colors': (kulayProgress['totalCompleted'] ?? 0) >= 4 ? 1 : 0,
+
+      // Shapes: Complete all Sundan Mo uppercase letters
+      'shapes': (sundanProgress['uppercase']?['completed'] ?? 0) >= 26 ? 1 : 0,
+
+      // Animals: Complete all Sundan Mo lowercase letters
+      'animals': (sundanProgress['lowercase']?['completed'] ?? 0) >= 26 ? 1 : 0,
+
+      // Bookworm: Complete all stories in Magbasa Tayo
+      'bookworm': (magbasaProgress['kwento']?['completed'] ?? 0) >= 4 ? 1 : 0,
+
+      // Star Student: Complete all Ang Aking Sarili games
+      'starStudent': (pamilyaProgress['gamesCompleted'] ?? 0) >= 20 ? 1 : 0,
+
+      // Math Whiz: Complete all Matematika levels
+      'mathWhiz': (matematikaProgress['completedLevels'] ?? 0) >= 7 ? 1 : 0,
+
+      // Family Hero: Complete all Ang Aking Sarili levels
+      'familyHero': (pamilyaProgress['completedLevels'] ?? 0) >= 5 ? 1 : 0,
+
+      // Writing Star: Complete all Sundan Mo numbers
+      'writingStar':
+          (sundanProgress['numbers']?['completed'] ?? 0) >= 10 ? 1 : 0,
+
+      // Songbird: Complete all songs in Magbasa Tayo
+      'songbird': (magbasaProgress['kanta']?['completed'] ?? 0) >= 10 ? 1 : 0,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final achievements = _calculateAchievementProgress(userProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          Translations.getAchievements(context),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: AppColors.success,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF8F9FF),
+              Colors.white,
+            ],
+          ),
+        ),
+        child: Column(
+          children: [
+            // Stars Counter
+            Container(
+              margin: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.star, size: 40, color: Colors.amber),
+                  const SizedBox(width: 10),
+                  Text(
+                    '${userProvider.userProfile?.stars ?? 0}',
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    Translations.getStars(context),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Achievements Grid
+            Expanded(
+              child: GridView.count(
+                padding: const EdgeInsets.all(16),
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 1.2,
+                children: [
+                  _buildAchievementCard(
+                    context,
+                    title: 'First Steps',
+                    emoji: '👣',
+                    color: AppColors.alphabet,
+                    progress: achievements['firstSteps'] ?? 0,
+                    total: 1,
+                    description: 'Complete your first activity',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Alphabet Master',
+                    emoji: '🔤',
+                    color: AppColors.alphabet,
+                    progress: achievements['alphabet'] ?? 0,
+                    total: 1,
+                    description: 'Complete all Magbasa Tayo activities',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Number Wizard',
+                    emoji: '🔢',
+                    color: AppColors.numbers,
+                    progress: achievements['numbers'] ?? 0,
+                    total: 1,
+                    description: 'Complete 20 Matematika games',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Color Artist',
+                    emoji: '🎨',
+                    color: AppColors.colors,
+                    progress: achievements['colors'] ?? 0,
+                    total: 1,
+                    description: 'Complete all Kulay-Saya activities',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Shape Creator',
+                    emoji: '⬛',
+                    color: AppColors.shapes,
+                    progress: achievements['shapes'] ?? 0,
+                    total: 1,
+                    description: 'Complete all uppercase letters',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Animal Friend',
+                    emoji: '🐶',
+                    color: AppColors.animals,
+                    progress: achievements['animals'] ?? 0,
+                    total: 1,
+                    description: 'Complete all lowercase letters',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Bookworm',
+                    emoji: '📚',
+                    color: AppColors.body,
+                    progress: achievements['bookworm'] ?? 0,
+                    total: 1,
+                    description: 'Complete all stories',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Star Student',
+                    emoji: '⭐',
+                    color: Colors.amber,
+                    progress: achievements['starStudent'] ?? 0,
+                    total: 1,
+                    description: 'Complete 20 Ang Aking Sarili games',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Math Whiz',
+                    emoji: '🧮',
+                    color: AppColors.numbers,
+                    progress: achievements['mathWhiz'] ?? 0,
+                    total: 1,
+                    description: 'Complete all Matematika levels',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Family Hero',
+                    emoji: '👨‍👩‍👧',
+                    color: AppColors.family,
+                    progress: achievements['familyHero'] ?? 0,
+                    total: 1,
+                    description: 'Complete all Ang Aking Sarili levels',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Writing Star',
+                    emoji: '✏️',
+                    color: Colors.orange,
+                    progress: achievements['writingStar'] ?? 0,
+                    total: 1,
+                    description: 'Complete all numbers',
+                  ),
+                  _buildAchievementCard(
+                    context,
+                    title: 'Songbird',
+                    emoji: '🎵',
+                    color: AppColors.colors,
+                    progress: achievements['songbird'] ?? 0,
+                    total: 1,
+                    description: 'Complete 10 songs',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAchievementCard(
+    BuildContext context, {
+    required String title,
+    required String emoji,
+    required Color color,
+    required int progress,
+    required int total,
+    required String description,
+  }) {
+    final percentage = progress / total;
+    final isCompleted = percentage >= 1;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          if (isCompleted)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(emoji, style: const TextStyle(fontSize: 24)),
+                    ),
+                    if (isCompleted)
+                      const Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 16,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 8,
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      isCompleted ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 16,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isCompleted ? 'Completed!' : 'In Progress',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: isCompleted ? Colors.green : AppColors.textLight,
+                    fontWeight:
+                        isCompleted ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

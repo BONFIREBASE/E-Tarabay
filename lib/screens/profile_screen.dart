@@ -1,0 +1,580 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+import '../utils/constants.dart';
+import '../utils/translations.dart';
+import '../login_screen.dart';
+import 'package:confetti/confetti.dart';
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  String _getMonthName(BuildContext context, int month) {
+    return Translations.getMonthName(context, month);
+  }
+
+  String _formatBirthday(BuildContext context, DateTime? birthday) {
+    if (birthday == null) return Translations.getNotSet(context);
+    return '${_getMonthName(context, birthday.month)} ${birthday.day}, ${birthday.year}';
+  }
+
+  void _logout(BuildContext context) async {
+    await Provider.of<UserProvider>(context, listen: false).clearLocalData();
+    if (!context.mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final userProfile = userProvider.userProfile;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text(
+          Translations.getMyProfile(context),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: AppColors.secondary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: userProfile == null
+          ? Center(child: Text(Translations.getNoProfileData(context)))
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // Profile Avatar
+                  _BirthdayAvatar(userProfile: userProfile),
+
+                  const SizedBox(height: 20),
+
+                  // Name
+                  Text(
+                    userProfile.name,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Age and Gender
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Text(
+                      '${Translations.getYearsOld(context, userProfile.age)} • ${userProfile.gender.toLowerCase() == 'male' ? '👦 ${Translations.getMale(context)}' : '👧 ${Translations.getFemale(context)}'}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Student Profile Card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        _buildProfileField(
+                          Translations.getFullName(context),
+                          userProfile.name,
+                          Icons.person_outline,
+                        ),
+                        const Divider(height: 20),
+                        _buildProfileField(
+                          Translations.getBirthday(context),
+                          _formatBirthday(context, userProfile.birthday),
+                          Icons.cake_outlined,
+                        ),
+                        const Divider(height: 20),
+                        _buildProfileField(
+                          Translations.getProfileAge(context),
+                          Translations.getYearsOld(context, userProfile.age),
+                          Icons.calendar_today_outlined,
+                        ),
+                        const Divider(height: 20),
+                        _buildProfileField(
+                          Translations.getGender(context),
+                          userProfile.gender.toLowerCase() == 'male' ? Translations.getMale(context) : Translations.getFemale(context),
+                          Icons.wc_outlined,
+                        ),
+                        const Divider(height: 20),
+                        
+                        // Parents Info (if student)
+                        if (userProvider.currentStudentId != null) ...[
+                          _buildProfileField(
+                            Translations.getParentNameLabel(context),
+                            userProfile.parentName.isNotEmpty ? userProfile.parentName : Translations.getNotSet(context),
+                            Icons.family_restroom_outlined,
+                          ),
+                          const Divider(height: 20),
+                          _buildProfileField(
+                            Translations.getParentContactLabel(context),
+                            userProfile.parentContact.isNotEmpty ? userProfile.parentContact : Translations.getNotSet(context),
+                            Icons.phone_outlined,
+                          ),
+                          const Divider(height: 20),
+                        ],
+
+                        // Member Since
+                        _buildProfileField(
+                          Translations.getMemberSince(context),
+                          'March 2025', // This is still hardcoded, consider localizing if needed
+                          Icons.calendar_today,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Stats Card
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.primary, AppColors.secondary],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStatItem(
+                          '${userProfile.stars}',
+                          Translations.getStars(context),
+                          Icons.star,
+                        ),
+                        _buildStatItem(
+                          '${userProfile.lessonsCompleted}',
+                          Translations.getLessons(context),
+                          Icons.menu_book,
+                        ),
+                        _buildStatItem(
+                          '${userProfile.achievements.length}',
+                          Translations.getBadges(context),
+                          Icons.emoji_events,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Edit Profile Button (Only if NOT student)
+                  if (userProvider.currentStudentId == null)
+                    OutlinedButton.icon(
+                      onPressed: () => _showEditProfileDialog(context, userProvider),
+                      icon: const Icon(Icons.edit),
+                      label: Text(Translations.getEditProfile(context)),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side:
+                            BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 12,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 16),
+
+                  // Logout Button
+                  TextButton.icon(
+                    onPressed: () => _logout(context),
+                    icon: const Icon(Icons.logout, color: Colors.red),
+                    label: Text(Translations.getLogout(context),
+                        style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildProfileField(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: AppColors.primary,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showEditProfileDialog(BuildContext context, UserProvider provider) {
+    final nameController = TextEditingController(text: provider.userProfile?.name);
+    DateTime? selectedDate = provider.userProfile?.birthday;
+    String selectedGender =
+        provider.userProfile?.gender.toLowerCase() == 'female'
+            ? Translations.getFemale(context)
+            : Translations.getMale(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            top: 20,
+            left: 20,
+            right: 20,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                Translations.getEditProfile(context),
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: Translations.getFullName(context),
+                  hintText: Translations.getEnterName(context),
+                  prefixIcon: const Icon(Icons.person, color: AppColors.primary),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.cake, color: AppColors.primary),
+                ),
+                title: Text(Translations.getBirthday(context),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                subtitle: Text(_formatBirthday(context, selectedDate),
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate ?? DateTime(2020),
+                    firstDate: DateTime(2010),
+                    lastDate: DateTime.now(),
+                  );
+                  if (picked != null) {
+                    setModalState(() => selectedDate = picked);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              Text(Translations.getGender(context),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  _GenderOption(
+                    label: Translations.getMale(context),
+                    icon: Icons.male,
+                    isSelected: selectedGender == Translations.getMale(context),
+                    onTap: () => setModalState(() => selectedGender = Translations.getMale(context)),
+                  ),
+                  const SizedBox(width: 12),
+                  _GenderOption(
+                    label: Translations.getFemale(context),
+                    icon: Icons.female,
+                    isSelected: selectedGender == Translations.getFemale(context),
+                    onTap: () => setModalState(() => selectedGender = Translations.getFemale(context)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (nameController.text.trim().isEmpty) return;
+                    await provider.updateUserProfile(
+                      name: nameController.text.trim(),
+                      gender: selectedGender.toLowerCase(),
+                      birthday: selectedDate,
+                    );
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                  ),
+                  child:
+                      Text(Translations.getSaveChanges(context), style: const TextStyle(color: Colors.white)),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String value, String label, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 28),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white.withOpacity(0.9),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GenderOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _GenderOption({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : Colors.grey.shade200,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: isSelected ? Colors.white : Colors.grey, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.grey.shade700,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BirthdayAvatar extends StatefulWidget {
+  final dynamic userProfile;
+
+  const _BirthdayAvatar({required this.userProfile});
+
+  @override
+  State<_BirthdayAvatar> createState() => _BirthdayAvatarState();
+}
+
+class _BirthdayAvatarState extends State<_BirthdayAvatar> {
+  late ConfettiController _confettiController;
+  bool _isBirthday = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
+
+    final birthday = widget.userProfile?.birthday;
+    if (birthday != null) {
+      final today = DateTime.now();
+      if (birthday.month == today.month && birthday.day == today.day) {
+        _isBirthday = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _confettiController.play();
+          }
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        if (_isBirthday)
+          ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            colors: const [
+              Colors.red,
+              Colors.blue,
+              Colors.green,
+              Colors.yellow,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple
+            ],
+          ),
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [AppColors.primary, AppColors.secondary],
+            ),
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              (widget.userProfile?.name != null && widget.userProfile.name.isNotEmpty)
+                  ? widget.userProfile.name[0].toUpperCase()
+                  : '?',
+              style: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

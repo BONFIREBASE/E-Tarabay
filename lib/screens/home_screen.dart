@@ -1,0 +1,831 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:confetti/confetti.dart';
+import '../main.dart';
+import '../providers/user_provider.dart';
+import '../utils/constants.dart';
+import '../utils/translations.dart';
+import 'matematika_screen.dart';
+import 'pamilya_screen.dart';
+import 'kulay_screen.dart';
+import 'sundan_screen.dart';
+import 'magbasa_screen.dart';
+import 'lessons_screen.dart';
+import 'awards_screen.dart';
+import 'settings_screen.dart';
+import 'parents_lock_screen.dart';
+import 'profile_screen.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+  late ConfettiController _confettiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 10));
+    // Start background music safely
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AudioManager>(context, listen: false)
+          .startBackgroundMusic('audio/tunog.mp3');
+      _checkBirthday();
+    });
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
+  void _checkBirthday() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final profile = userProvider.userProfile;
+    if (profile == null || profile.birthday == null) return;
+
+    final now = DateTime.now();
+    if (profile.birthday!.month == now.month &&
+        profile.birthday!.day == now.day) {
+      _confettiController.play();
+      showDialog(
+        context: context,
+        builder: (dialogContext) => Stack(
+          alignment: Alignment.center,
+          children: [
+            ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: true,
+              colors: const [
+                Colors.green,
+                Colors.blue,
+                Colors.pink,
+                Colors.orange,
+                Colors.purple
+              ],
+              numberOfParticles: 20,
+              gravity: 0.1,
+            ),
+            AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.cake, color: Colors.pink, size: 64),
+                  const SizedBox(height: 16),
+                  Text(
+                    Translations.getBirthdayGreeting(context, profile.name),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ).then((_) => _confettiController.stop());
+    }
+  }
+
+  // Get real stats from UserProvider with null safety
+  Map<String, dynamic> _getStats(UserProvider userProvider) {
+    if (!userProvider.isInitialized) {
+      return {'lessons': 0, 'stars': 0, 'awards': 0};
+    }
+    final progress = userProvider.getAllProgress();
+    return {
+      'lessons': progress['totalCompleted'] ?? 0,
+      'stars': userProvider.userProfile?.stars ?? 0,
+      'awards': userProvider.userProfile?.achievements.length ?? 0,
+    };
+  }
+
+  void _onNavItemTapped(int index) {
+    if (_selectedIndex == index) return;
+
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LessonsScreen()),
+        ).then((_) => setState(() => _selectedIndex = 0));
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AwardsScreen()),
+        ).then((_) => setState(() => _selectedIndex = 0));
+        break;
+      case 3:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SettingsScreen()),
+        ).then((_) => setState(() => _selectedIndex = 0));
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final stats = _getStats(userProvider);
+    final size = MediaQuery.of(context).size;
+    final padding = MediaQuery.of(context).padding;
+    final safeHeight = size.height - padding.top - padding.bottom;
+
+    // Get user name with null safety
+    String userName = userProvider.userProfile?.name ?? 'Noel';
+    String userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : 'N';
+    int userAge = userProvider.userProfile?.age ?? 2;
+
+    return Scaffold(
+      body: Container(
+        color: const Color(0xFFF5F7FA),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header Section
+              Container(
+                height: safeHeight * 0.22,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Profile Row
+                    Row(
+                      children: [
+                        // Profile Avatar
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ProfileScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  AppColors.primary,
+                                  AppColors.secondary,
+                                ],
+                              ),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                userInitial,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Name and Age
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                userName,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      Translations.getHomeAge(context, userAge),
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        color: AppColors.textLight,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _buildPerformanceGrade(userProvider),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // For Parents Button
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ParentsLockScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: AppColors.primary.withOpacity(0.2),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.lock_person,
+                                  size: 14,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  Translations.getParents(context),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Stats Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStatItem(
+                          '${stats['lessons']}',
+                          Translations.getLessons(context),
+                          Icons.menu_book,
+                          AppColors.primary,
+                        ),
+                        Container(
+                          height: 20,
+                          width: 1,
+                          color: Colors.grey.shade300,
+                        ),
+                        _buildStatItem(
+                          '${stats['stars']}',
+                          Translations.getStars(context),
+                          Icons.star,
+                          Colors.amber,
+                        ),
+                        Container(
+                          height: 20,
+                          width: 1,
+                          color: Colors.grey.shade300,
+                        ),
+                        _buildStatItem(
+                          '${stats['awards']}',
+                          Translations.getAwards(context),
+                          Icons.emoji_events,
+                          AppColors.success,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Cards Grid Section
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final cardHeight = (constraints.maxHeight - 24) / 3;
+
+                      return Column(
+                        children: [
+                          // Row 1 - Matematika & Pamilya
+                          SizedBox(
+                            height: cardHeight,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _buildImageCard(
+                                    title: Translations.getMatematika(context),
+                                    subtitle: Translations.getSundanMoKayaMo(
+                                      context,
+                                    ),
+                                    imagePath: 'assets/images/card1.png',
+                                    color: AppColors.numbers,
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MatematikaScreen(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildImageCard(
+                                    title: Translations.getAngAkingSarili(
+                                      context,
+                                    ),
+                                    subtitle: Translations.getAtAkingPamilya(
+                                      context,
+                                    ),
+                                    imagePath: 'assets/images/card2.png',
+                                    color: AppColors.family,
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const PamilyaScreen(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Row 2 - Kulay & Sundan
+                          SizedBox(
+                            height: cardHeight,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _buildImageCard(
+                                    title: Translations.getKulaySaya(context),
+                                    subtitle: Translations.getMagkulayTayo(
+                                      context,
+                                    ),
+                                    imagePath: 'assets/images/card3.png',
+                                    color: AppColors.colors,
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const KulayScreen(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildImageCard(
+                                    title: Translations.getSundanMo(context),
+                                    subtitle: Translations.getSundanMoKayaMo(
+                                      context,
+                                    ),
+                                    imagePath: 'assets/images/card4.png',
+                                    color: AppColors.success,
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SundanScreen(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Row 3 - Magbasa Tayo
+                          SizedBox(
+                            height: cardHeight,
+                            child: _buildWideImageCard(
+                              title: Translations.getMagbasaTitle(context),
+                              subtitle: Translations.getAlpabetoAtMgaSalita(
+                                context,
+                              ),
+                              imagePath: 'assets/images/card5.png',
+                              color: AppColors.alphabet,
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const MagbasaScreen(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      // Bottom Navigation Bar
+      bottomNavigationBar: Container(
+        height: 70,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(25),
+            topRight: Radius.circular(25),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 15,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  Icons.home_rounded,
+                  Translations.getHome(context),
+                  0,
+                ),
+                _buildNavItem(
+                  Icons.auto_stories_rounded,
+                  Translations.getLessons(context),
+                  1,
+                ),
+                _buildNavItem(
+                  Icons.emoji_events_rounded,
+                  Translations.getAwards(context),
+                  2,
+                ),
+                _buildNavItem(
+                  Icons.settings_rounded,
+                  Translations.getSettings(context),
+                  3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+    String value,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 16),
+        const SizedBox(width: 4),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            Text(
+              label.isNotEmpty ? label : '',
+              style: TextStyle(fontSize: 9, color: Colors.grey.shade500),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImageCard({
+    required String title,
+    required String subtitle,
+    required String imagePath,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+          ],
+          image: DecorationImage(
+            image: AssetImage(imagePath),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.2),
+              BlendMode.darken,
+            ),
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, color.withOpacity(0.7)],
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Text(
+                    title.isNotEmpty ? title : '',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: [Shadow(blurRadius: 5, color: Colors.black26)],
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Flexible(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    subtitle.isNotEmpty ? subtitle : '',
+                    style: TextStyle(
+                      fontSize: 8,
+                      color: color,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWideImageCard({
+    required String title,
+    required String subtitle,
+    required String imagePath,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+          ],
+          image: DecorationImage(
+            image: AssetImage(imagePath),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.2),
+              BlendMode.darken,
+            ),
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [Colors.black.withOpacity(0.3), Colors.transparent],
+            ),
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 16),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title.isNotEmpty ? title : '',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(blurRadius: 5, color: Colors.black26),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Text(
+                            subtitle.isNotEmpty ? subtitle : '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: color,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isActive = _selectedIndex == index;
+
+    return GestureDetector(
+      onTap: () => _onNavItemTapped(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isActive ? AppColors.primary : Colors.grey.shade400,
+              size: 20,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label.isNotEmpty ? label : '',
+              style: TextStyle(
+                fontSize: 9,
+                color: isActive ? AppColors.primary : Colors.grey.shade400,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPerformanceGrade(UserProvider userProvider) {
+    final progress = userProvider.getAllProgress();
+    final grade = progress['grade'] ?? 'Not Started';
+    final percentage = (progress['percentage'] as num?)?.toDouble() ?? 0.0;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            grade,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 1),
+          SizedBox(
+            width: 40,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: LinearProgressIndicator(
+                value: percentage / 100,
+                minHeight: 3,
+                backgroundColor: Colors.grey.shade200,
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,0 +1,101 @@
+name: e_tarabay
+description: "Anga Kabataan ay Pagasa ng Bayan"
+publish_to: 'none'
+version: 1.0.2+3
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2  
+
+  # UI and Icons
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.3.2
+  animated_text_kit: ^4.3.0
+  flutter_animate: ^4.5.2
+  
+  # State Management
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.3
+  
+  # Local Storage
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.1
+  audioplayers: ^6.1.1
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+  firebase_database: ^11.1.4
+  flutter_secure_storage: ^10.0.0
+  local_auth: ^2.3.0
+  confetti: ^0.8.0
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
+
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/images/splash_logo.png
+    - assets/images/male.png
+    - assets/images/female.png
+    - assets/images/intro1.png
+    - assets/images/intro2.png
+    - assets/images/intro3.png
+    - assets/images/intro4.png
+    - assets/images/intro5.png
+    - assets/images/card1.png
+    - assets/images/card2.png
+    - assets/images/card3.png
+    - assets/images/card4.png
+    - assets/images/card5.png
+    - assets/images/paint1.png
+    - assets/images/paint2.png
+    - assets/images/paint3.png
+    - assets/images/paint4.png
+    - assets/images/paint5.png
+    - assets/images/paint6.png
+    - assets/images/paint7.png
+    - assets/images/paint8.png
+    - assets/images/paint9.png
+    - assets/images/poem1.png
+    - assets/images/poem2.png
+    - assets/images/poem3.png
+    - assets/images/poem4.png
+    - assets/images/poem5.png
+    - assets/images/kwento1.png
+    - assets/images/kwento2.png
+    - assets/images/kwento3.png
+    - assets/images/kwento4.png
+    - assets/images/kwento5.png
+    - assets/images/song1.png
+    - assets/images/song2.png
+    - assets/images/song3.png
+    - assets/images/song4.png
+    - assets/images/song5.png
+    - assets/images/song6.png
+    - assets/images/song7.png
+    - assets/images/song8.png
+    - assets/audio/tunog.mp3
+    - assets/audio/Ania ti Nagan Mo by Kurtjam Kyle Silva Nono.mp3
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/images/logo.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"

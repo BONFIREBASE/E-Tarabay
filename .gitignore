@@ -47,3 +47,5 @@ android/app/google-services.json
 *.jks
 *.keystore
 .env
+build/
+.dart_tool/
