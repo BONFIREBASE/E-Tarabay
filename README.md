@@ -41,7 +41,7 @@ E-Tarabay is a modern, interactive Flutter-based educational mobile application 
 
 ## Credits
 
-Developed and Maintained by **BONFIRE BASE**.
+Maintained by [**BONFIRE BASE**](https://bonfire.base69.studio).
 
 ## License
 
