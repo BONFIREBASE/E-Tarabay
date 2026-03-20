@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import '../utils/translations.dart';
 import '../widgets/success_modal.dart';
 
 class ColoringCategory {
@@ -72,12 +73,14 @@ class MyCreation {
     this.isFavorite = false,
   });
 
-  String get timeAgo {
+  String getTimeAgoLocalized(BuildContext context) {
     final diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return Translations.getJustNow(context);
+    if (diff.inMinutes < 60)
+      return Translations.getTimeAgo(context, diff.inMinutes, 'm');
+    if (diff.inHours < 24)
+      return Translations.getTimeAgo(context, diff.inHours, 'h');
+    return Translations.getTimeAgo(context, diff.inDays, 'd');
   }
 }
 
@@ -432,16 +435,17 @@ class _KulayScreenState extends State<KulayScreen>
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: 'Napintas ti Artwork mo!',
-        subtitle: 'Natapos mo ang pangkulay sa ${_selectedPage!.name}!',
+        title: Translations.getBeautifulArtwork(context),
+        subtitle:
+            Translations.getFinishedColoring(context, _selectedPage!.name),
         score: _strokes.length,
         stars: 3,
-        primaryLabel: 'Idulin (Save)',
+        primaryLabel: '${Translations.getSave(context)} (Save)',
         onPrimaryTap: () {
           Navigator.pop(context);
           _saveCreation();
         },
-        secondaryLabel: 'Dadduma pay',
+        secondaryLabel: Translations.getOthers(context),
         onSecondaryTap: () {
           Navigator.pop(context);
           setState(() {
@@ -467,13 +471,13 @@ class _KulayScreenState extends State<KulayScreen>
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Text('💾 Save Your Artwork',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('💾 ${Translations.getSaveYourArtwork(context)}',
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: 'Give your artwork a name...',
+            hintText: Translations.getGiveArtworkName(context),
             filled: true,
             fillColor: Colors.grey.shade100,
             border: OutlineInputBorder(
@@ -484,7 +488,7 @@ class _KulayScreenState extends State<KulayScreen>
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
+              child: Text(Translations.getCancel(context))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -502,32 +506,40 @@ class _KulayScreenState extends State<KulayScreen>
               setState(() {
                 _myCreations.add(creation);
               });
-              
+
               // Sync to UserProvider
               if (mounted) {
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
                 final cat = _categories[_selectedCategory];
                 final pageIndex = cat.pages.indexOf(_selectedPage!);
-                userProvider.updateKulayProgress('coloring', true, category: cat.name, index: pageIndex);
-                
+                userProvider.updateKulayProgress('coloring', true,
+                    category: cat.name, index: pageIndex);
+
                 // Update specific keys for Parents Screen
                 try {
-                   final prefs = await SharedPreferences.getInstance();
-                   await prefs.setInt('kulay_total_creations', (prefs.getInt('kulay_total_creations') ?? 0) + 1);
-                   await prefs.setString('kulay_last_colored', _selectedPage!.name);
-                   await prefs.setInt('kulay_total_strokes', (prefs.getInt('kulay_total_strokes') ?? 0) + _strokes.length);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setInt('kulay_total_creations',
+                      (prefs.getInt('kulay_total_creations') ?? 0) + 1);
+                  await prefs.setString(
+                      'kulay_last_colored', _selectedPage!.name);
+                  await prefs.setInt(
+                      'kulay_total_strokes',
+                      (prefs.getInt('kulay_total_strokes') ?? 0) +
+                          _strokes.length);
                 } catch (e) {
-                   debugPrint('Error updating parents prefs: $e');
+                  debugPrint('Error updating parents prefs: $e');
                 }
               }
-              
+
               _saveCreationsToHive();
               if (mounted) {
                 Navigator.pop(context);
-                _snack('✓ Saved!');
+                _snack('✓ ${Translations.getSaved(context)}');
               }
             },
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
+            child: Text(Translations.getSave(context),
+                style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -614,7 +626,9 @@ class _KulayScreenState extends State<KulayScreen>
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: (isError ? Colors.red : AppColors.primary).withOpacity(0.2)),
+            border: Border.all(
+                color: (isError ? Colors.red : AppColors.primary)
+                    .withOpacity(0.2)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -622,16 +636,22 @@ class _KulayScreenState extends State<KulayScreen>
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                   color: (isError ? Colors.red : AppColors.primary).withOpacity(0.1),
-                   shape: BoxShape.circle,
+                  color: (isError ? Colors.red : AppColors.primary)
+                      .withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
-                child: Icon(isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
-                    color: isError ? Colors.red : AppColors.primary, size: 40),
+                child: Icon(
+                    isError
+                        ? Icons.error_outline_rounded
+                        : Icons.check_circle_outline_rounded,
+                    color: isError ? Colors.red : AppColors.primary,
+                    size: 40),
               ),
               const SizedBox(height: 20),
               Text(msg,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16)),
             ],
           ),
         ),
@@ -650,6 +670,17 @@ class _KulayScreenState extends State<KulayScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    // Real-time account deletion check
+    if (userProvider.isAccountDeleted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F3F8),
       appBar: _appBar(),
@@ -670,8 +701,8 @@ class _KulayScreenState extends State<KulayScreen>
         color: AppColors.textDark,
         onPressed: () => Navigator.pop(context),
       ),
-      title: const Text('Libro a Pangkulay',
-          style: TextStyle(
+      title: Text(Translations.getColoringBook(context),
+          style: const TextStyle(
               color: AppColors.textDark,
               fontSize: 20,
               fontWeight: FontWeight.bold)),
@@ -680,8 +711,9 @@ class _KulayScreenState extends State<KulayScreen>
         child: Container(
           color: Colors.white,
           child: Row(children: [
-            _tabBtn(0, Icons.brush_rounded, 'Color'),
-            _tabBtn(1, Icons.folder_open_rounded, 'Dagiti Pinarsuak'),
+            _tabBtn(0, Icons.brush_rounded, Translations.getColor(context)),
+            _tabBtn(1, Icons.folder_open_rounded,
+                Translations.getMyCreations(context)),
           ]),
         ),
       ),
@@ -746,11 +778,11 @@ class _KulayScreenState extends State<KulayScreen>
               ]),
           child: TextField(
             onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
-            decoration: const InputDecoration(
-              hintText: 'Biroken dagiti pangkulayan a pahina...',
-              prefixIcon: Icon(Icons.search, color: Colors.grey),
+            decoration: InputDecoration(
+              hintText: Translations.getSearchColoringPages(context),
+              prefixIcon: const Icon(Icons.search, color: Colors.grey),
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(vertical: 13),
+              contentPadding: const EdgeInsets.symmetric(vertical: 13),
             ),
           ),
         ),
@@ -819,7 +851,8 @@ class _KulayScreenState extends State<KulayScreen>
 
   Widget _pageCard(ColoringPage page, ColoringCategory cat) {
     // Check if this page is already completed
-    final bool isCompleted = _myCreations.any((c) => c.thumbnailPath == page.imagePath);
+    final bool isCompleted =
+        _myCreations.any((c) => c.thumbnailPath == page.imagePath);
 
     return GestureDetector(
       onTap: () {
@@ -865,7 +898,8 @@ class _KulayScreenState extends State<KulayScreen>
                         fit: BoxFit.contain,
                         filterQuality: FilterQuality.high,
                         color: isCompleted ? Colors.grey.shade400 : null,
-                        colorBlendMode: isCompleted ? BlendMode.saturation : null,
+                        colorBlendMode:
+                            isCompleted ? BlendMode.saturation : null,
                         errorBuilder: (_, __, ___) => Icon(Icons.color_lens,
                             size: 52, color: cat.color.withOpacity(0.4)),
                       ),
@@ -962,24 +996,33 @@ class _KulayScreenState extends State<KulayScreen>
         GestureDetector(
           onTap: () {
             setState(() => _isZoomMode = !_isZoomMode);
-            _snack(_isZoomMode ? 'Zoom mode: Multi-touch allowed' : 'Brush mode: Click to color');
+            _snack(_isZoomMode
+                ? 'Zoom mode: Multi-touch allowed'
+                : 'Brush mode: Click to color');
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-                color: _isZoomMode ? Colors.orange.withOpacity(0.15) : AppColors.primary.withOpacity(0.1),
+                color: _isZoomMode
+                    ? Colors.orange.withOpacity(0.15)
+                    : AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: _isZoomMode ? Colors.orange : AppColors.primary, width: 1)),
+                border: Border.all(
+                    color: _isZoomMode ? Colors.orange : AppColors.primary,
+                    width: 1)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(_isZoomMode ? Icons.zoom_in_rounded : Icons.brush_rounded, size: 14, color: _isZoomMode ? Colors.orange : AppColors.primary),
+                Icon(_isZoomMode ? Icons.zoom_in_rounded : Icons.brush_rounded,
+                    size: 14,
+                    color: _isZoomMode ? Colors.orange : AppColors.primary),
                 const SizedBox(width: 4),
                 Text(_isZoomMode ? 'Zoom' : 'Brush',
                     style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: _isZoomMode ? Colors.orange : AppColors.primary)),
+                        color:
+                            _isZoomMode ? Colors.orange : AppColors.primary)),
               ],
             ),
           ),
@@ -1045,10 +1088,10 @@ class _KulayScreenState extends State<KulayScreen>
         Positioned.fill(
           child: Listener(
             onPointerDown: (_) => setState(() => _pointerCount++),
-            onPointerUp: (_) =>
-                setState(() => _pointerCount = (_pointerCount - 1).clamp(0, 10)),
-            onPointerCancel: (_) =>
-                setState(() => _pointerCount = (_pointerCount - 1).clamp(0, 10)),
+            onPointerUp: (_) => setState(
+                () => _pointerCount = (_pointerCount - 1).clamp(0, 10)),
+            onPointerCancel: (_) => setState(
+                () => _pointerCount = (_pointerCount - 1).clamp(0, 10)),
             child: InteractiveViewer(
               transformationController: _transformationController,
               minScale: _minScale,
@@ -1057,7 +1100,8 @@ class _KulayScreenState extends State<KulayScreen>
               scaleEnabled: _isZoomMode,
               onInteractionUpdate: (details) {
                 if (_isZoomMode) {
-                   setState(() => _scale = _transformationController.value.getMaxScaleOnAxis());
+                  setState(() => _scale =
+                      _transformationController.value.getMaxScaleOnAxis());
                 }
               },
               child: Center(
@@ -1593,7 +1637,7 @@ class _KulayScreenState extends State<KulayScreen>
               Icon(Icons.schedule_rounded,
                   size: 10, color: Colors.grey.shade400),
               const SizedBox(width: 3),
-              Text(creation.timeAgo,
+              Text(creation.getTimeAgoLocalized(context),
                   style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
               const Spacer(),
               GestureDetector(

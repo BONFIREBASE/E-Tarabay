@@ -26,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   late ConfettiController _confettiController;
+  bool _isLogginOut = false;
 
   @override
   void initState() {
@@ -38,6 +39,54 @@ class _HomeScreenState extends State<HomeScreen> {
           .startBackgroundMusic('audio/tunog.mp3');
       _checkBirthday();
     });
+  }
+
+  void _showAccountDeletedDialog() {
+    if (_isLogginOut) return;
+    _isLogginOut = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Icon(Icons.warning_amber_rounded,
+              color: Colors.orange, size: 60),
+          content: const Text(
+            'Tapos na ang iyong access sa app na ito. I-consult ang iyong Teacher para sa susunod na hakbang',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          actions: [
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                ),
+                onPressed: () async {
+                  final userProvider =
+                      Provider.of<UserProvider>(context, listen: false);
+                  await userProvider.logout();
+                  if (mounted) {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/', (Route<dynamic> route) => false);
+                  }
+                },
+                child: const Text('OK'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -144,6 +193,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+
+    // Listen for account deletion in real-time
+    if (userProvider.isAccountDeleted && !_isLogginOut) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showAccountDeletedDialog();
+      });
+    }
+
     final stats = _getStats(userProvider);
     final size = MediaQuery.of(context).size;
     final padding = MediaQuery.of(context).padding;
@@ -273,8 +330,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         // For Parents Button
-                        GestureDetector(
-                          onTap: () {
+                        IconButton(
+                          onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -282,37 +339,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             );
                           },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: AppColors.primary.withOpacity(0.2),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.lock_person,
-                                  size: 14,
-                                  color: AppColors.primary,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  Translations.getParents(context),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          icon: const Icon(
+                            Icons.family_restroom,
+                            color: AppColors.primary,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor:
+                                AppColors.primary.withOpacity(0.08),
+                            padding: const EdgeInsets.all(10),
                           ),
                         ),
                       ],

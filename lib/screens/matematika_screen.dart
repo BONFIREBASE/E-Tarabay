@@ -7,8 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import '../utils/translations.dart';
 import '../widgets/success_modal.dart';
 
 // ─── CustomPainter: draws animated lines between matched nodes ───────────────
@@ -131,31 +133,46 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   final List<Map<String, dynamic>> _game1Levels = const [
     {
-      'question': 'Mano dagiti mansanas?',
+      'question_en': 'How many apples?',
+      'item_name_en': 'apples',
+      'item_name_il': 'mansanas',
+      'item_name_tl': 'mansanas',
       'objects': ['🍎', '🍎', '🍎'],
       'answers': [1, 2, 3],
       'correct': 3,
     },
     {
-      'question': 'Mano dagiti saging?',
+      'question_en': 'How many bananas?',
+      'item_name_en': 'bananas',
+      'item_name_il': 'saging',
+      'item_name_tl': 'saging',
       'objects': ['🍌', '🍌'],
       'answers': [1, 2, 3],
       'correct': 2,
     },
     {
-      'question': 'Mano dagiti aso?',
+      'question_en': 'How many dogs?',
+      'item_name_en': 'dogs',
+      'item_name_il': 'aso',
+      'item_name_tl': 'aso',
       'objects': ['🐶'],
       'answers': [1, 2, 3],
       'correct': 1,
     },
     {
-      'question': 'Mano dagiti isda?',
+      'question_en': 'How many fish?',
+      'item_name_en': 'fish',
+      'item_name_il': 'isda',
+      'item_name_tl': 'isda',
       'objects': ['🐟', '🐟', '🐟', '🐟'],
       'answers': [2, 3, 4],
       'correct': 4,
     },
     {
-      'question': 'Mano dagiti ibon?',
+      'question_en': 'How many birds?',
+      'item_name_en': 'birds',
+      'item_name_il': 'billit',
+      'item_name_tl': 'ibon',
       'objects': ['🐦', '🐦', '🐦', '🐦', '🐦'],
       'answers': [3, 4, 5],
       'correct': 5,
@@ -192,7 +209,9 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   final List<Map<String, dynamic>> _game3Levels = const [
     {
-      'instruction': 'Iparis ti bilang ti prutas iti umiso a numero.',
+      'target_cat_en': 'fruit',
+      'target_cat_il': 'prutas',
+      'target_cat_tl': 'prutas',
       'pairs': [
         {
           'objects': ['🍎'],
@@ -209,7 +228,9 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       ],
     },
     {
-      'instruction': 'Iparis ti bilang ti ayup iti umiso a numero.',
+      'target_cat_en': 'animal',
+      'target_cat_il': 'ayup',
+      'target_cat_tl': 'hayop',
       'pairs': [
         {
           'objects': ['🐶'],
@@ -226,7 +247,9 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       ],
     },
     {
-      'instruction': 'Iparis ti bilang ti prutas iti umiso a numero.',
+      'target_cat_en': 'fruit',
+      'target_cat_il': 'prutas',
+      'target_cat_tl': 'prutas',
       'pairs': [
         {
           'objects': ['🍌'],
@@ -269,7 +292,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   final List<Map<String, dynamic>> _game5Levels = const [
     {
-      'question': 'Ania ti ad-adu?',
+      'type': 'more',
       'leftObjects': ['🍎', '🍎', '🍎'],
       'leftCount': 3,
       'rightObjects': ['🍎'],
@@ -277,7 +300,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       'correct': 'left',
     },
     {
-      'question': 'Ania ti basbassit?',
+      'type': 'less',
       'leftObjects': ['🍌'],
       'leftCount': 1,
       'rightObjects': ['🍌', '🍌'],
@@ -285,7 +308,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       'correct': 'left',
     },
     {
-      'question': 'Ania ti ad-adu?',
+      'type': 'more',
       'leftObjects': ['🐶', '🐶'],
       'leftCount': 2,
       'rightObjects': ['🐶', '🐶', '🐶'],
@@ -293,7 +316,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       'correct': 'right',
     },
     {
-      'question': 'Pareho ti bilang?',
+      'type': 'equal',
       'leftObjects': ['🍎', '🍎'],
       'leftCount': 2,
       'rightObjects': ['🍎', '🍎'],
@@ -301,7 +324,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       'correct': 'equal',
     },
     {
-      'question': 'Ania ti ad-adu?',
+      'type': 'more',
       'leftObjects': ['🐟', '🐟', '🐟', '🐟'],
       'leftCount': 4,
       'rightObjects': ['🐟', '🐟'],
@@ -312,17 +335,17 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   final List<Map<String, dynamic>> _game6Levels = const [
     {
-      'instruction': 'Ayusin: 1 → 2 → 3',
+      'sequence': '1 → 2 → 3',
       'scrambled': [3, 1, 2],
       'correct': [1, 2, 3]
     },
     {
-      'instruction': 'Ayusin: 2 → 4 → 6',
+      'sequence': '2 → 4 → 6',
       'scrambled': [6, 2, 4],
       'correct': [2, 4, 6]
     },
     {
-      'instruction': 'Ayusin: 1 → 3 → 5',
+      'sequence': '1 → 3 → 5',
       'scrambled': [5, 1, 3],
       'correct': [1, 3, 5]
     },
@@ -519,7 +542,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
   void _stopTimer() => _timer?.cancel();
 
   void _onTimeout() {
-    _showFeedback('⏰ Naubos na ang oras! Subukan muli.', Colors.orange);
+    _showFeedback('⏰ ${Translations.getTimeOut(context)}', Colors.orange);
     _startTimer();
   }
 
@@ -608,6 +631,43 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     _startTimer();
   }
 
+  String _getLevelTitleLocalized(int index) {
+    switch (index) {
+      case 0:
+        return Translations.getCounting(context);
+      case 1:
+        return Translations.getDragNumber(context);
+      case 2:
+        return Translations.getLineMatch(context);
+      case 3:
+        return Translations.getPopBalloon(context);
+      case 4:
+        return Translations.getMoreOrLess(context);
+      case 5:
+        return Translations.getNumberPuzzle(context);
+      case 6:
+        return Translations.getNumberSequence(context);
+      default:
+        return '';
+    }
+  }
+
+  String _getHowManyFromMap(Map<String, dynamic> game) {
+    final lang = Provider.of<LanguageProvider>(context, listen: false);
+    final key = lang.currentLanguage == 'il'
+        ? 'item_name_il'
+        : (lang.currentLanguage == 'tl' ? 'item_name_tl' : 'item_name_en');
+    return Translations.getHowMany(context, game[key] ?? 'items');
+  }
+
+  String _getMatchFromMap(Map<String, dynamic> game) {
+    final lang = Provider.of<LanguageProvider>(context, listen: false);
+    final key = lang.currentLanguage == 'il'
+        ? 'target_cat_il'
+        : (lang.currentLanguage == 'tl' ? 'target_cat_tl' : 'target_cat_en');
+    return Translations.getMatchWithNumber(context, game[key] ?? 'items');
+  }
+
   void _advanceOrComplete() {
     final total = _currentGames.length;
     if (_currentGameIndex < total - 1) {
@@ -639,7 +699,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
     _starBurstController.forward(from: 0);
     _showFeedback(
-      '${List.filled(earned, '⭐').join()} Good Job! +${10 * earned} puntos',
+      '${List.filled(earned, '⭐').join()} ${Translations.getGoodJobPoints(context, 10 * earned)}',
       const Color(0xFF2E7D32),
     );
 
@@ -968,6 +1028,17 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    // Real-time account deletion check
+    if (userProvider.isAccountDeleted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FF),
       appBar: _buildAppBar(),
@@ -1156,7 +1227,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_levelTitles[_selectedLevel],
+              Text(_getLevelTitleLocalized(_selectedLevel),
                   style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w600)),
               Text('${_currentGameIndex + 1} / $total',
@@ -1404,7 +1475,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           _gameCard(
             child: Column(
               children: [
-                Text(game['question'] as String,
+                Text(_getHowManyFromMap(game),
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center),
@@ -1422,11 +1493,11 @@ class _MatematikaScreenState extends State<MatematikaScreen>
             ),
           ),
           const SizedBox(height: 28),
-          const Text('Piliem ti umiso a sungbat:',
+          Text(Translations.getSelectCorrectAnswer(context),
               style: TextStyle(
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: Colors.grey)),
+                  color: Colors.grey.shade600)),
           const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1634,13 +1705,13 @@ class _MatematikaScreenState extends State<MatematikaScreen>
         children: [
           // Instruction
           Text(
-            game['instruction'] as String,
+            _getMatchFromMap(game),
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 3),
           Text(
-            'I-tap ang grupo (kaliwa) → i-tap ang numero (kanan)',
+            Translations.getTapLeftTapRight(context),
             style: TextStyle(
                 fontSize: 11,
                 color: Colors.grey.shade500,
@@ -2176,7 +2247,11 @@ class _MatematikaScreenState extends State<MatematikaScreen>
         children: [
           _gameCard(
             child: Text(
-              game['question'] as String,
+              game['type'] == 'more'
+                  ? Translations.getWhichIsMore(context)
+                  : game['type'] == 'less'
+                      ? Translations.getWhichIsLess(context)
+                      : Translations.getIsSameNumber(context),
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -2322,7 +2397,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
             child: Column(
               children: [
                 Text(
-                  game['instruction'] as String,
+                  Translations.getArrange(context, game['sequence'] as String),
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
@@ -2491,7 +2566,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
             ),
           ),
           const SizedBox(height: 28),
-          const Text('Piliem ti umiso a sungbat:',
+          Text(Translations.getSelectCorrectAnswer(context),
               style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 13,

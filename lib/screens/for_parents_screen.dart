@@ -25,7 +25,6 @@ class _MagbasaKeys {
   static String activityKey(String cat, int i) => '${cat}_activity_$i';
 }
 
-
 class _MatematikaKeys {
   static String levelKey(int level, int game) =>
       'mat_level_${level}_game_$game';
@@ -395,7 +394,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                       fontWeight: FontWeight.bold)),
             ]),
             const SizedBox(height: 6),
-            Text("Narito ang progreso ng inyong anak sa E Tarabay.",
+            Text("Narito ang progreso ng inyong anak sa E-Tarabay.",
                 style: TextStyle(
                     color: Colors.white.withOpacity(0.9), fontSize: 13)),
           ]),

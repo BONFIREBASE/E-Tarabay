@@ -29,6 +29,37 @@ class Translations {
     return lang.translate('Next', 'Sumaruno', 'Susunod');
   }
 
+  static String getLevelCompleted(BuildContext context, int level) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Level $level Completed!', 'Level $level Nalpasen!',
+        'Level $level Natapos na!');
+  }
+
+  static String getProudOfYou(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'I am proud of you!', 'Ipagpannakkel ka!', 'Ipinagmamalaki kita!');
+  }
+
+  static String getAlreadyDone(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'You already finished this!', 'Nalpasem daytoyen!', 'Tapos mo na ito!');
+  }
+
+  static String getCategoryCompleted(BuildContext context, String cat) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'You completed all levels in $cat!',
+        'Nalpasem amin dagiti levels iti $cat!',
+        'Natapos mo ang lahat ng antas sa $cat!');
+  }
+
+  static String getFinished(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Finished! 🏆', 'Nalpasen! 🏆', 'Tapos na! 🏆');
+  }
+
   static String getPrevious(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
     return lang.translate('Previous', 'Ngauna', 'Nauna');
@@ -62,7 +93,7 @@ class Translations {
   // ========== HOME SCREEN ==========
   static String getAppTitle(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    return lang.translate('E Tarabay', 'E Tarabay', 'E Tarabay');
+    return lang.translate('E-Tarabay', 'E-Tarabay', 'E-Tarabay');
   }
 
   static String getParents(BuildContext context) {
@@ -441,6 +472,72 @@ class Translations {
         'No games available', 'Awan ti ay-ayam', 'Walang laro');
   }
 
+  static String getHowMany(BuildContext context, String item) {
+    final lang = Provider.of<LanguageProvider>(context);
+    // Simple pluralization logic for items
+    String en = 'How many $item?';
+    String il = 'Mano dagiti $item?';
+    String tl = 'Ilan ang mga $item?';
+    return lang.translate(en, il, tl);
+  }
+
+  static String getMatchWithNumber(BuildContext context, String category) {
+    final lang = Provider.of<LanguageProvider>(context);
+    String en = 'Match $category with correct number.';
+    String il = 'Iparis ti bilang ti $category iti umiso a numero.';
+    String tl = 'Itugma ang bilang ng $category sa tamang numero.';
+    return lang.translate(en, il, tl);
+  }
+
+  static String getWhichIsMore(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Which is more?', 'Ania ti ad-adu?', 'Alin ang mas marami?');
+  }
+
+  static String getWhichIsLess(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Which is less?', 'Ania ti basbassit?', 'Alin ang mas kaunti?');
+  }
+
+  static String getIsSameNumber(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Same number?', 'Pareho ti bilang?', 'Pareho ba ang bilang?');
+  }
+
+  static String getArrange(BuildContext context, String sequence) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Arrange: $sequence', 'Urnosen: $sequence', 'Ayusin: $sequence');
+  }
+
+  static String getIncorrectAnswer(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        '❌ INCORRECT ANSWER', '❌ MALI TI SUNGBAT', '❌ MALI ANG SAGOT');
+  }
+
+  static String getSelectCorrectAnswer(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Select the correct answer:',
+        'Piliem ti umiso a sungbat:', 'Piliin ang tamang sagot:');
+  }
+
+  static String getTryAgain(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Try Again', 'Padasen Manen', 'Subukan muli');
+  }
+
+  static String getTapLeftTapRight(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Tap the group (left) → tap the number (right)',
+        'I-tap ti grupo (kaliwa) → i-tap ti numero (kanan)',
+        'I-tap ang grupo (kaliwa) → i-tap ang numero (kanan)');
+  }
+
   // ========== PAMILYA SCREEN ==========
   static String getAngAkingSariliTitle(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
@@ -522,6 +619,182 @@ class Translations {
         'Ikaw ba ay babae o lalaki?');
   }
 
+  static String getGirl(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Girl', 'Babai', 'Babae');
+  }
+
+  static String getBoy(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Boy', 'Lalaki', 'Lalaki');
+  }
+
+  static String getWhatIsYourNameDescription(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Your name is what your family and friends call you. It is important!',
+        'Ti naganmo ket ti tawag kenka ti pamilyam ken gagayyemmo. Napateg dayta!',
+        'Ang iyong pangalan ay ang tawag sa iyo ng iyong pamilya at mga kaibigan. Mahalaga ito!');
+  }
+
+  static String getHowOldAreYouDescription(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Your age is the number of years since you were born. Celebrate every year!',
+        'Ti tawenmo ket ti bilang dagiti tawen manipud idi nayanakka. Napateg ti selebrasyon!',
+        'Ang iyong edad ay ang bilang ng mga taon mula nang isilang ka. Ipagdiwang ang bawat taon!');
+  }
+
+  static String getGenderDescription(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Knowing if you are a boy or a girl helps us know more about you!',
+        'Ti pannakammo no babai wenno lalaki ka ket makatulong kadakami a mangammo kenka!',
+        'Ang pag-alam kung ikaw ay lalaki o babae ay nakakatulong sa amin na makilala ka nang higit pa!');
+  }
+
+  static String getTypeNameHint(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Type your name here', 'I-type ti naganmo ditoy',
+        'I-type ang iyong pangalan dito');
+  }
+
+  static String getAgeHint(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Example: 5, 7, 10', 'Kas pagarigan: 5, 7, 10', 'Halimbawa: 5, 7, 10');
+  }
+
+  static String getGirlLabel(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('👧 Girl', '👧 Babai', '👧 Babae');
+  }
+
+  static String getBoyLabel(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('👦 Boy', '👦 Lalaki', '👦 Lalaki');
+  }
+
+  // Sarili Subtitles
+  static String getAboutMeSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('All About Me', 'Ammom ti bagim', 'Tungkol sa Akin');
+  }
+
+  static String getMyEmotionsSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Explain your feelings', 'Ilawlawagmo ti riknam',
+        'Ipaliwanag ang iyong damdamin');
+  }
+
+  static String getDailyRoutinesSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Learn daily activities',
+        'Ammuem dagiti inaldaw nga aramid', 'Alamin ang araw-araw na gawain');
+  }
+
+  static String getMyPreferencesSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'What do you like?', 'Ania ti kayatmo?', 'Ano ang gusto mo?');
+  }
+
+  // Pamilya Subtitles
+  static String getFamilyMembersSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Who are your family members?',
+        'Sino-sino dagiti pamilyam?',
+        'Sino-sino ang mga miyembro ng iyong pamilya?');
+  }
+
+  static String getFamilyRolesSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('What is everyone\'s job?',
+        'Ania ti trabaho ti tunggal maysa?', 'Ano ang tungkulin ng bawat isa?');
+  }
+
+  static String getFamilyActivitiesSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'What do you do together?',
+        'Ania ti aramidendayo a sangsangkamaysa?',
+        'Ano ang ginagawa ninyong magkasama?');
+  }
+
+  static String getFamilyTreeSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Who are your relatives?',
+        'Sino-sino dagiti kabagianmo?', 'Sino-sino ang mga kamag-anak mo?');
+  }
+
+  static String getMyHomeSubtitle(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Where do you live?', 'Sadino kayo nagtaeng?', 'Saan kayo nakatira?');
+  }
+
+  // Sarili Level 2: Emotions
+  static String getEmotionHappyQuestion(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'When are you HAPPY?', 'Kaano ka NARAG-O?', 'Kailan ka MASAYA?');
+  }
+
+  static String getEmotionSadQuestion(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'When are you SAD?', 'Kaano ka NALUNLUNGOT?', 'Kailan ka MALUNGKOT?');
+  }
+
+  static String getEmotionAngryQuestion(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'When are you ANGRY?', 'Kaano ka NAALIGUTGET?', 'Kailan ka GALIT?');
+  }
+
+  static String getEmotionSurprisedQuestion(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'When are you SURPRISED?', 'Kaano ka NASDAAW?', 'Kailan ka NAGULAT?');
+  }
+
+  // Sarili Level 3: Routines
+  static String getRoutineWakeUp(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Wake up in the morning', 'Agriing ti bigat', 'Gising sa umaga');
+  }
+
+  static String getRoutineBrushTeeth(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Brush your teeth', 'Agpuris/Agsepilio', 'Magsipilyo ng ngipin');
+  }
+
+  static String getRoutineTakeBath(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Take a bath', 'Agdigos', 'Maligo');
+  }
+
+  static String getRoutineEatBreakfast(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Eat breakfast', 'Agpamigat', 'Mag-almusal');
+  }
+
+  // Sarili Level 4: Preferences
+  static String getPreferenceFood(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('What is your favorite food?',
+        'Ania ti paboritom a makan?', 'Ano ang paborito mong pagkain?');
+  }
+
+  static String getPreferenceColor(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('What is your favorite color?',
+        'Ania ti paboritom a kulor?', 'Ano ang paborito mong kulay?');
+  }
+
   static String getWhenIsYourBirthday(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
     return lang.translate('When is your birthday?', 'Kaano ti kasangaymo?',
@@ -600,6 +873,73 @@ class Translations {
   }
 
   // ========== KULAY SCREEN ==========
+  static String getSearchColoringPages(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Search coloring pages...',
+        'Biroken dagiti pangkulayan a pahina...',
+        'Maghanap ng mga pahinang pangkulay...');
+  }
+
+  static String getBeautifulArtwork(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Beautiful Artwork!', 'Napintas ti Artwork mo!',
+        'Napakahusay na Artwork!');
+  }
+
+  static String getFinishedColoring(BuildContext context, String name) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('You finished coloring $name!',
+        'Nalpasmo ti nagkolor iti $name!', 'Natapos mo ang pagkulay sa $name!');
+  }
+
+  static String getSaveYourArtwork(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Save Your Artwork', 'Idulin ti Artwork-mo',
+        'I-save ang Iyong Artwork');
+  }
+
+  static String getGiveArtworkName(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Give your artwork a name...',
+        'Inaganem ti artwork-mo...', 'Bigyan ng pangalan ang iyong artwork...');
+  }
+
+  static String getColorSomethingFirst(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Color something first!', 'Agkolorka pay nga umuna!',
+        'Magkulay muna ng kahit ano!');
+  }
+
+  static String getJustNow(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('just now', 'ita laeng', 'ngayon lang');
+  }
+
+  static String getTimeAgo(BuildContext context, int amount, String unit) {
+    final lang = Provider.of<LanguageProvider>(context);
+    if (unit == 'm') {
+      return lang.translate('${amount}m ago', '${amount}m a napalabas',
+          '${amount}m ang nakalipas');
+    } else if (unit == 'h') {
+      return lang.translate('${amount}h ago', '${amount}h a napalabas',
+          '${amount}h ang nakalipas');
+    } else {
+      return lang.translate('${amount}d ago', '${amount}d a napalabas',
+          '${amount}d ang nakalipas');
+    }
+  }
+
+  static String getSaved(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Saved!', 'Naidulinen!', 'Nai-save na!');
+  }
+
+  static String getOthers(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Others', 'Dadduma pay', 'Iba pa');
+  }
+
   static String getColoringBook(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
     return lang.translate(
@@ -723,6 +1063,43 @@ class Translations {
   }
 
   // ========== SUNDAN SCREEN ==========
+  static String getSurotemKabaelam(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Surotem, Kabaelam!', 'Surotem, Kabaelam!', 'Sundan Mo, Kaya Mo!');
+  }
+
+  static String getUpper(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Upper', 'Dakkel', 'Malaki');
+  }
+
+  static String getLower(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Lower', 'Bassit', 'Maliit');
+  }
+
+  static String getLetterLabel(BuildContext context, String letter) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Letter $letter', 'Letra $letter', 'Titik $letter');
+  }
+
+  static String getPointsLabel(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Points', 'Puntos', 'Puntos');
+  }
+
+  static String getGoodJob(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Good Job! 🌟', 'Naglaingka! 🌟', 'Ang galing mo! 🌟');
+  }
+
+  static String getUlitin(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Ulitin', 'Uliten', 'Ulitin');
+  }
+
   static String getTraceTitle(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
     return lang.translate(
@@ -757,6 +1134,31 @@ class Translations {
   static String getReset(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
     return lang.translate('Reset', 'Ireser', 'Ulitin');
+  }
+
+  static String getFinishedThisLetter(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('You finished this letter!',
+        'Nalpasem daytoy nga letra!', 'Natapos mo ang titik na ito!');
+  }
+
+  static String getGoodJobPoints(BuildContext context, int points) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('🌟 Good Job! +$points points',
+        '🌟 Nagsayaat! +$points a puntos', '🌟 Ang galing! +$points puntos');
+  }
+
+  static String getTooHardSwitch(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate(
+        'Too hard? Let\'s try the next one!',
+        'Narigat unay? Padasentayo ti sumaruno!',
+        'Masyadong mahirap? Lipat tayo sa susunod!');
+  }
+
+  static String getReTrace(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    return lang.translate('Re-trace', 'Uliten', 'Bakas muli');
   }
 
   // ========== FOR PARENTS SCREEN ==========
@@ -1389,7 +1791,7 @@ class Translations {
   static String getWelcome(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
     return lang.translate(
-        'Welcome!', 'Naragsak a Pannakaidatun!', 'Maligayang Pagdating!');
+        'Welcome Back!', 'Naragsak nga Panagsubli', 'Maligayang Pagbabalik!');
   }
 
   static String getLoginPrompt(BuildContext context) {
@@ -1580,9 +1982,9 @@ class Translations {
   static String getWelcomeOnboardingTitle(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
     return lang.translate(
-        'Welcome to E Tarabay',
-        'Naragsak a Isasangbay iti E Tarabay',
-        'Maligayang Pagdating sa E Tarabay');
+        'Welcome to E-Tarabay',
+        'Naragsak a Isasangbay iti E-Tarabay',
+        'Maligayang Pagdating sa E-Tarabay');
   }
 
   static String getWelcomeOnboardingDesc(BuildContext context) {

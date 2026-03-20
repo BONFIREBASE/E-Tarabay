@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/user_provider.dart';
+import '../providers/language_provider.dart';
 import '../utils/constants.dart';
+import '../utils/translations.dart';
 import '../widgets/success_modal.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -154,7 +156,9 @@ class LetterTracingPainter extends CustomPainter {
       canvas.drawPath(
         _buildPath(tg),
         Paint()
-          ..color = isCompleted ? Colors.green : color.withOpacity(0.35)
+          ..color = isCompleted
+              ? Colors.green.withOpacity(0.15)
+              : color.withOpacity(0.25)
           ..style = PaintingStyle.stroke
           ..strokeWidth = guideStroke
           ..strokeCap = StrokeCap.round
@@ -179,12 +183,16 @@ class LetterTracingPainter extends CustomPainter {
     for (int i = 0; i < tg.length; i++) {
       final isVisited = visitedPoints.contains(i);
       final dotColor = isVisited
-          ? (isCompleted ? Colors.green : color)
-          : Colors.grey.shade400;
+          ? (isCompleted
+              ? Colors.green.withOpacity(0.4)
+              : color.withOpacity(0.5))
+          : Colors.grey.shade400.withOpacity(0.3);
 
       canvas.drawCircle(
           tg[i],
-          isVisited ? 8 : 4, // Subtle pulse when visited
+          isVisited
+              ? 6
+              : 3, // Smaller pulse when visited to stay behind drawing
           Paint()
             ..color = dotColor
             ..style = PaintingStyle.fill);
@@ -281,6 +289,8 @@ class _SundanScreenState extends State<SundanScreen>
   late AnimationController _confettiController;
   late AnimationController _warningController;
   late Animation<double> _warningAnimation;
+
+  late PageController _pageController;
 
   final List<_ConfettiParticle> _confettiParticles = [];
   final Random _rng = Random();
@@ -1264,6 +1274,8 @@ class _SundanScreenState extends State<SundanScreen>
     _warningAnimation = Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(parent: _warningController, curve: Curves.easeInOut));
 
+    _pageController = PageController(initialPage: _selectedIndex);
+
     _loadProgress();
     _initSmartResume();
   }
@@ -1328,6 +1340,7 @@ class _SundanScreenState extends State<SundanScreen>
         setState(() {
           _selectedMode = targetMode;
           _selectedIndex = targetIndex;
+          _pageController = PageController(initialPage: _selectedIndex);
           _resetTracing();
         });
       }
@@ -1342,6 +1355,7 @@ class _SundanScreenState extends State<SundanScreen>
     _pulseController.dispose();
     _confettiController.dispose();
     _warningController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -1352,17 +1366,27 @@ class _SundanScreenState extends State<SundanScreen>
   Future<void> _loadProgress() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
+      _completedUpper.clear();
+      _completedLower.clear();
+      _completedNums.clear();
+
       for (int i = 0; i < _uppercaseLetters.length; i++) {
         final k = SundanProgressKeys.upperKey(_uppercaseLetters[i].letter);
-        if (_prefs!.getBool(k) == true) _completedUpper.add(i);
+        if (_prefs!.getBool(k) == true) {
+          _completedUpper.add(i);
+        }
       }
       for (int i = 0; i < _lowercaseLetters.length; i++) {
         final k = SundanProgressKeys.lowerKey(_lowercaseLetters[i].letter);
-        if (_prefs!.getBool(k) == true) _completedLower.add(i);
+        if (_prefs!.getBool(k) == true) {
+          _completedLower.add(i);
+        }
       }
       for (int i = 0; i < _numbers.length; i++) {
         final k = SundanProgressKeys.numKey(_numbers[i].letter);
-        if (_prefs!.getBool(k) == true) _completedNums.add(i);
+        if (_prefs!.getBool(k) == true) {
+          _completedNums.add(i);
+        }
       }
     });
   }
@@ -1423,12 +1447,13 @@ class _SundanScreenState extends State<SundanScreen>
     if (_canvasSize == canvasSize) return;
     _canvasSize = canvasSize;
     const designW = 300.0;
-    const designH = 240.0;
-    const padding = 12.0; // Reduced padding
+    const designH = 260.0; // Increased design height to prevent clipping
+    const padding = 20.0; // Increased padding for safety
     final scaleX = (canvasSize.width - padding * 2) / designW;
     final scaleY = (canvasSize.height - padding * 2) / designH;
-    _canvasScale =
-        (scaleX < scaleY ? scaleX : scaleY) * 1.15; // Increased scale by 15%
+    _canvasScale = (scaleX < scaleY
+        ? scaleX
+        : scaleY); // Removed the 1.15 multiplier to keep it in view
     _canvasOffset = Offset(
       (canvasSize.width - designW * _canvasScale) / 2,
       (canvasSize.height - designH * _canvasScale) / 2,
@@ -1473,22 +1498,30 @@ class _SundanScreenState extends State<SundanScreen>
   void _onPanStart(DragStartDetails d) {
     if (_canvasSize == Size.zero) return;
     if (_isCompleted) {
-      _showFeedback('Nalpasem daytoyen! 🌟 (Good Job!)', Colors.green);
+      final lang = Provider.of<LanguageProvider>(context, listen: false);
+      _showFeedback(
+          lang.translate('You finished this already! 🌟',
+              'Nalpasem daytoyen! 🌟', 'Natapos mo na ito! 🌟'),
+          Colors.green);
       return;
     }
     final designPt = _toDesign(d.localPosition);
 
     // START ANYWHERE ON PATH: Child no longer forced into one starting dot
     if (!_isOnPath(designPt)) {
-      _triggerWarning('Magsimula sa linya!');
+      final lang = Provider.of<LanguageProvider>(context, listen: false);
+      _triggerWarning(lang.translate('Start on the line!',
+          'Mangrugika iti ayan ti linya!', 'Magsimula sa linya!'));
       return;
     }
 
     setState(() {
       _tracedPoints = [_toScreen(designPt)];
-      _visitedPoints = {};
+      // DO NOT reset visitedPoints here if we want to allow
+      // lifting the finger (multi-stroke).
+      // But if user starts a NEW clean stroke, we might want to keep progress.
+      // Keeping progress allows "smart" incomplete strokes.
       _outOfBounds = false;
-      _tracingProgress = 0.0;
     });
   }
 
@@ -1499,30 +1532,52 @@ class _SundanScreenState extends State<SundanScreen>
     final pts = _currentLetter.points;
 
     // 1. Path adherence check
+    // STRICTER ADHERENCE: Check if moving away too fast or starting mid-segment wrongfully
     if (!_isOnPath(designPt)) {
       setState(() => _outOfBounds = true);
-      _triggerWarning('Manatili sa loob ng linya!');
+      final lang = Provider.of<LanguageProvider>(context, listen: false);
+      _triggerWarning(lang.translate('Stay inside the line!',
+          'Agalwadka iti uneg ti linya!', 'Manatili sa loob ng linya!'));
       return;
     }
 
-    // 2. PROXIMITY DETECTION: Mark points as "covered" regardless of sequence
+    // 2. SMART PROXIMITY DETECTION:
+    // Mark points as "covered". We improve accuracy by checking if
+    // the user is tracing in the general direction or at least
+    // visiting the skeletal points.
+
+    // IMPROVEMENT: Ensure points are visited in a somewhat logical order
+    // We don't force strict order to avoid frustrating kids, but we track progress based on coverage
     for (int i = 0; i < pts.length; i++) {
-      if ((designPt - pts[i]).distance <= _hitRadius * 1.8) {
-        _visitedPoints.add(i);
+      double dist = (designPt - pts[i]).distance;
+      // Use dynamic hit radius based on difficulty
+      // DECREASED radius slightly for better precision requirement
+      double dynamicRadius =
+          _hitRadius * (1.2 + (4 - _currentLetter.difficulty) * 0.15);
+
+      if (dist <= dynamicRadius) {
+        // Only allow marking as visited if it's the next expected point
+        // or close to it, to prevent "scribbling" to win
+        if (_visitedPoints.isEmpty || i <= _visitedPoints.reduce(max) + 2) {
+          _visitedPoints.add(i);
+        }
       }
     }
 
     setState(() {
       _outOfBounds = false;
-      _tracingProgress = _visitedPoints.length / pts.length;
+      // Calculate progress more accurately based on coverage
+      _tracingProgress = (_visitedPoints.length / pts.length).clamp(0.0, 1.0);
+
       if (_tracedPoints.isEmpty ||
-          (screenPt - _tracedPoints.last).distance > 3.0) {
+          (screenPt - _tracedPoints.last).distance > 1.5) {
+        // Smoother trail with smaller distance threshold
         _tracedPoints.add(screenPt);
       }
     });
 
-    // 3. COMPLETION: If 90% of the skeletal points are covered
-    if (_tracingProgress >= 0.90 && !_isCompleted) {
+    // 3. COMPLETION: If 95% (increased for accuracy) of the skeletal points are covered
+    if (_tracingProgress >= 0.95 && !_isCompleted) {
       _completeTracing();
     }
   }
@@ -1536,6 +1591,7 @@ class _SundanScreenState extends State<SundanScreen>
   void _resetTracing() {
     setState(() {
       _tracedPoints = [];
+      // CORRECT: Check against the fresh completed sets
       _isCompleted = _currentCompletedSet.contains(_selectedIndex);
       _tracingProgress = 0.0;
       _visitedPoints = {};
@@ -1563,15 +1619,14 @@ class _SundanScreenState extends State<SundanScreen>
 
     _successController.forward(from: 0);
     _spawnConfetti();
-    _showFeedback('🌟 Good Job! +10 puntos', Colors.green);
+    _showFeedback(Translations.getGoodJobPoints(context, 10), Colors.green);
 
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
       if (_selectedIndex < _currentLetters.length - 1) {
-        setState(() {
-          _selectedIndex++;
-          _resetTracing();
-        });
+        _pageController.nextPage(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut);
       } else {
         _showCompletionDialog();
       }
@@ -1589,10 +1644,12 @@ class _SundanScreenState extends State<SundanScreen>
     });
 
     if (_wrongAttempts >= 5) {
-      _showFeedback('Masyadong mahirap? Lipat tayo sa susunod!', Colors.blue);
+      _showFeedback(Translations.getTooHardSwitch(context), Colors.blue);
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
-        _nextLetter();
+        _pageController.nextPage(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut);
       });
     }
   }
@@ -1631,6 +1688,15 @@ class _SundanScreenState extends State<SundanScreen>
     _confettiController.forward(from: 0);
   }
 
+  void _onPageChanged(int index) {
+    if (index != _selectedIndex) {
+      setState(() {
+        _selectedIndex = index;
+        _resetTracing();
+      });
+    }
+  }
+
   void _updateConfetti() {
     if (!mounted) return;
     setState(() {
@@ -1641,28 +1707,6 @@ class _SundanScreenState extends State<SundanScreen>
         p.opacity = (1.0 - _confettiController.value).clamp(0.0, 1.0);
       }
     });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  //  Reset / nav
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void _nextLetter() {
-    if (_selectedIndex < _currentLetters.length - 1) {
-      setState(() {
-        _selectedIndex++;
-        _resetTracing();
-      });
-    }
-  }
-
-  void _prevLetter() {
-    if (_selectedIndex > 0) {
-      setState(() {
-        _selectedIndex--;
-        _resetTracing();
-      });
-    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1718,6 +1762,17 @@ class _SundanScreenState extends State<SundanScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    // Real-time account deletion check
+    if (userProvider.isAccountDeleted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
+    }
+
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FF),
@@ -1729,8 +1784,8 @@ class _SundanScreenState extends State<SundanScreen>
           color: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Surotem, Kabaelam!',
-            style: TextStyle(
+        title: Text(Translations.getSurotemKabaelam(context),
+            style: const TextStyle(
                 color: AppColors.textDark,
                 fontSize: 20,
                 fontWeight: FontWeight.bold)),
@@ -1758,9 +1813,9 @@ class _SundanScreenState extends State<SundanScreen>
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildModeTab(0, 'ABC', 'Upper'),
-                  _buildModeTab(1, 'abc', 'Lower'),
-                  _buildModeTab(2, '123', 'Numbers'),
+                  _buildModeTab(0, 'ABC', Translations.getUpper(context)),
+                  _buildModeTab(1, 'abc', Translations.getLower(context)),
+                  _buildModeTab(2, '123', Translations.getNumbers(context)),
                 ]),
           ),
         ),
@@ -1791,7 +1846,9 @@ class _SundanScreenState extends State<SundanScreen>
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text('Letter ${_currentLetter.letter}',
+                  Text(
+                      Translations.getLetterLabel(
+                          context, _currentLetter.letter),
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 3),
@@ -1816,7 +1873,7 @@ class _SundanScreenState extends State<SundanScreen>
             ),
             const SizedBox(width: 6),
             Column(children: [
-              Text('Puntos',
+              Text(Translations.getPointsLabel(context),
                   style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
               Text('$_score',
                   style: const TextStyle(
@@ -1855,150 +1912,165 @@ class _SundanScreenState extends State<SundanScreen>
         // Navigation
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            IconButton(
-                icon: const Icon(Icons.arrow_left,
-                    size: 30, color: AppColors.primary),
-                onPressed: _prevLetter),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Text('${_selectedIndex + 1} / ${_currentLetters.length}',
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Colors.grey.shade600)),
-            IconButton(
-                icon: const Icon(Icons.arrow_right,
-                    size: 30, color: AppColors.primary),
-                onPressed: _nextLetter),
           ]),
         ),
 
         // Canvas
         Expanded(
-          child: Center(
-            child: AnimatedBuilder(
-              animation: _warningAnimation,
-              builder: (_, child) => Container(
-                width: size.width * 0.88,
-                height: size.width * 0.88,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  border: _outOfBounds
-                      ? Border.all(
-                          color: Colors.orange
-                              .withOpacity(0.6 + _warningAnimation.value * 0.4),
-                          width: 3)
-                      : Border.all(color: Colors.grey.shade100, width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _isCompleted
-                          ? Colors.green.withOpacity(0.25)
-                          : _currentLetter.color.withOpacity(0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    )
-                  ],
-                ),
-                child: child,
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: LayoutBuilder(builder: (_, constraints) {
-                  final cs = Size(constraints.maxWidth, constraints.maxHeight);
-                  _computeTransform(cs);
-                  return GestureDetector(
-                    onPanStart: _onPanStart,
-                    onPanUpdate: _onPanUpdate,
-                    onPanEnd: _onPanEnd,
-                    child: Stack(fit: StackFit.expand, children: [
-                      // Ghost
-                      Center(
-                          child: Opacity(
-                              opacity: 0.06,
-                              child: Text(_currentLetter.letter,
-                                  style: TextStyle(
-                                      fontSize: 180,
-                                      fontWeight: FontWeight.bold,
-                                      color: _currentLetter.color)))),
-                      // Tracing
-                      CustomPaint(
-                        painter: LetterTracingPainter(
-                          guidePoints: _currentLetter.points,
-                          tracedPoints: _tracedPoints,
-                          color: _currentLetter.color,
-                          isCompleted: _isCompleted,
-                          visitedPoints: _visitedPoints,
-                          scale: _canvasScale,
-                          offset: _canvasOffset,
-                        ),
-                      ),
-                      // Confetti
-                      if (_confettiParticles.isNotEmpty)
-                        CustomPaint(
-                            painter: _ConfettiPainter(_confettiParticles)),
-                      // Success overlay
-                      if (_isCompleted)
-                        Center(
-                          child: ScaleTransition(
-                            scale: _scaleAnimation,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 28, vertical: 18),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.92),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.green.withOpacity(0.4),
-                                      blurRadius: 20,
-                                      spreadRadius: 4)
-                                ],
-                              ),
-                              child: const Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.check_circle,
-                                        color: Colors.white, size: 48),
-                                    SizedBox(height: 8),
-                                    Text('Good Job! 🌟',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold)),
-                                  ]),
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: _currentLetters.length,
+            physics: _currentCompletedSet.contains(_selectedIndex)
+                ? const BouncingScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final letter = _currentLetters[index];
+              return Center(
+                child: AnimatedBuilder(
+                  animation: _warningAnimation,
+                  builder: (_, child) => Container(
+                    width: size.width * 0.88,
+                    height: size.width * 0.88,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      border: _outOfBounds && _selectedIndex == index
+                          ? Border.all(
+                              color: Colors.orange.withOpacity(
+                                  0.6 + _warningAnimation.value * 0.4),
+                              width: 3)
+                          : Border.all(color: Colors.grey.shade100, width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _isCompleted && _selectedIndex == index
+                              ? Colors.green.withOpacity(0.25)
+                              : letter.color.withOpacity(0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        )
+                      ],
+                    ),
+                    child: LayoutBuilder(builder: (_, constraints) {
+                      final cs =
+                          Size(constraints.maxWidth, constraints.maxHeight);
+                      _computeTransform(cs);
+                      return GestureDetector(
+                        onPanStart: _onPanStart,
+                        onPanUpdate: _onPanUpdate,
+                        onPanEnd: _onPanEnd,
+                        child: Stack(fit: StackFit.expand, children: [
+                          // Ghost (Ensuring it scales with the guide)
+                          Center(
+                              child: Opacity(
+                                  opacity: 0.04,
+                                  child: Text(letter.letter,
+                                      style: TextStyle(
+                                          fontSize: 220 * _canvasScale,
+                                          fontWeight: FontWeight.bold,
+                                          color: letter.color)))),
+                          // Tracing
+                          CustomPaint(
+                            painter: LetterTracingPainter(
+                              guidePoints: letter.points,
+                              tracedPoints: _selectedIndex == index
+                                  ? _tracedPoints
+                                  : [], // Only show tracing on active page
+                              color: letter.color,
+                              isCompleted: _currentCompletedSet.contains(index),
+                              visitedPoints:
+                                  _selectedIndex == index ? _visitedPoints : {},
+                              scale: _canvasScale,
+                              offset: _canvasOffset,
                             ),
                           ),
-                        ),
-                      // Pulsing start hint
-                      if (!_isCompleted &&
-                          _tracedPoints.isEmpty &&
-                          _canvasSize != Size.zero)
-                        AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (_, __) {
-                            final startScreen =
-                                _toScreen(_currentLetter.points.first);
-                            return Positioned(
-                              left: startScreen.dx - 22,
-                              top: startScreen.dy - 22,
-                              child: Transform.scale(
-                                  scale: _pulseAnimation.value,
-                                  child: Container(
-                                      width: 44,
-                                      height: 44,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color:
-                                              Colors.blue.withOpacity(0.2)))),
-                            );
-                          },
-                        ),
-                    ]),
-                  );
-                }),
-              ),
-            ),
+                          // Confetti
+                          if (_confettiParticles.isNotEmpty &&
+                              _selectedIndex == index)
+                            CustomPaint(
+                                painter: _ConfettiPainter(_confettiParticles)),
+                          // Success overlay (Moved to bottom of canvas)
+                          if (_isCompleted && _selectedIndex == index)
+                            Positioned(
+                              bottom: 20,
+                              left: 0,
+                              right: 0,
+                              child: ScaleTransition(
+                                scale: _scaleAnimation,
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 40),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.92),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                          color: Colors.green.withOpacity(0.4),
+                                          blurRadius: 15,
+                                          spreadRadius: 2)
+                                    ],
+                                  ),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.check_circle,
+                                            color: Colors.white, size: 28),
+                                        const SizedBox(width: 10),
+                                        Flexible(
+                                          child: Text(
+                                              Translations.getGoodJob(context),
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold),
+                                              overflow: TextOverflow.ellipsis),
+                                        ),
+                                      ]),
+                                ),
+                              ),
+                            ),
+                          // Pulsing start hint
+                          if (!_isCompleted &&
+                              _selectedIndex == index &&
+                              _tracedPoints.isEmpty &&
+                              _canvasSize != Size.zero)
+                            AnimatedBuilder(
+                              animation: _pulseAnimation,
+                              builder: (_, __) {
+                                final startScreen =
+                                    _toScreen(letter.points.first);
+                                return Positioned(
+                                  left: startScreen.dx - 22,
+                                  top: startScreen.dy - 22,
+                                  child: Transform.scale(
+                                      scale: _pulseAnimation.value,
+                                      child: Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.blue
+                                                  .withOpacity(0.2)))),
+                                );
+                              },
+                            ),
+                        ]),
+                      );
+                    }),
+                  ),
+                ),
+              );
+            },
           ),
         ),
 
@@ -2026,7 +2098,7 @@ class _SundanScreenState extends State<SundanScreen>
           child: OutlinedButton.icon(
             onPressed: _resetTracing,
             icon: const Icon(Icons.refresh),
-            label: const Text('Ulitin'),
+            label: Text(Translations.getUlitin(context)),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
               side: BorderSide(color: AppColors.primary.withOpacity(0.4)),
@@ -2056,7 +2128,6 @@ class _SundanScreenState extends State<SundanScreen>
         margin: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(children: [
           Text(icon,

@@ -15,6 +15,7 @@ class UserProvider extends ChangeNotifier {
   StreamSubscription<DocumentSnapshot>? _profileSubscription;
   bool _hasSyncedFromCloud = false;
   String? _currentRole; // 'student' or 'teacher'
+  bool _isAccountDeleted = false; // Flag to track if account was deleted
 
   Box get _profileBox => _pb!;
   Box get _progressBox => _gb!;
@@ -24,11 +25,13 @@ class UserProvider extends ChangeNotifier {
   bool get isInitialized => _isInitialized;
   String? get currentStudentId => _currentStudentId;
   String? get currentRole => _currentRole;
+  bool get isAccountDeleted => _isAccountDeleted;
 
   /// Set the current student ID (from RTDB login result) for syncing.
   void setCurrentStudentId(String? id) {
     _currentStudentId = id;
     if (_currentStudentId != null) {
+      _isAccountDeleted = false; // Reset when setting new user
       _prefs?.setString('session_student_id', id!);
       _hasSyncedFromCloud = false; // Reset for new user
       _startProfileListener();
@@ -55,6 +58,7 @@ class UserProvider extends ChangeNotifier {
     _currentRole = null;
     _userProfile = null;
     _hasSyncedFromCloud = false;
+    _isAccountDeleted = false;
     _stopProfileListener();
 
     if (_prefs != null) {
@@ -86,6 +90,14 @@ class UserProvider extends ChangeNotifier {
             _profileBox.put('currentUser', _userProfile!.toJson());
             notifyListeners();
           }
+        }
+      } else {
+        // Document does not exist - student might have been deleted by teacher
+        if (_currentStudentId != null) {
+          debugPrint(
+              'DEBUG: Account for $_currentStudentId does not exist on server.');
+          _isAccountDeleted = true;
+          notifyListeners();
         }
       }
     });
@@ -427,6 +439,9 @@ class UserProvider extends ChangeNotifier {
         await _prefs!.setInt('matematika_total', (currentScore + score));
         await _prefs!.setInt('matematika_stars', (currentStars + stars));
       }
+
+      // AWARD TO MAIN USER PROFILE
+      await addStars(stars);
     }
 
     await _progressBox.put('matematika_streak', streak);
@@ -539,7 +554,8 @@ class UserProvider extends ChangeNotifier {
 
   // PAMILYA (ANG AKING SARILI / PAMILYA) PROGRESS
   Future<void> updatePamilyaProgress(
-      int categoryIndex, int level, int gameIndex, bool completed) async {
+      int categoryIndex, int level, int gameIndex, bool completed,
+      {int earnedStars = 0}) async {
     await _ensureInitialized();
     if (!_isInitialized) return;
 
@@ -567,13 +583,16 @@ class UserProvider extends ChangeNotifier {
       int currentStars = _progressBox.get('pamilya_stars') ?? 0;
       int currentScore = _progressBox.get('pamilya_total') ?? 0;
 
-      await _progressBox.put('pamilya_stars', currentStars + 3);
+      await _progressBox.put('pamilya_stars', currentStars + earnedStars);
       await _progressBox.put('pamilya_total', currentScore + 10);
 
       if (_prefs != null) {
-        await _prefs!.setInt('pamilya_stars', currentStars + 3);
+        await _prefs!.setInt('pamilya_stars', currentStars + earnedStars);
         await _prefs!.setInt('pamilya_total', currentScore + 10);
       }
+
+      // AWARD TO MAIN USER PROFILE
+      await addStars(earnedStars);
     }
 
     // Update streak regardless of new completion (just playing counts)

@@ -712,6 +712,17 @@ class _MagbasaScreenState extends State<MagbasaScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    // Real-time account deletion check
+    if (userProvider.isAccountDeleted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
+    }
+
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -1642,10 +1653,11 @@ class SongScreen extends StatefulWidget {
 }
 
 class _SongScreenState extends State<SongScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   bool _isCompleted = false;
   int _currentLineIndex = 0;
   bool _isPlaying = false;
+  bool _wasPlayingBeforePause = false;
   late AnimationController _pulseController;
   late AudioPlayer _audioPlayer;
   StreamSubscription? _positionSubscription;
@@ -1656,6 +1668,7 @@ class _SongScreenState extends State<SongScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pulseController = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
     _audioPlayer = AudioPlayer();
@@ -1669,7 +1682,27 @@ class _SongScreenState extends State<SongScreen>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isPlaying) {
+        _wasPlayingBeforePause = true;
+        _audioPlayer.pause();
+        _pulseController.stop();
+        // Keep _isPlaying true so we know to resume
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (_wasPlayingBeforePause) {
+        _audioPlayer.resume();
+        _pulseController.repeat(reverse: true);
+        _wasPlayingBeforePause = false;
+      }
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pulseController.dispose();
     _positionSubscription?.cancel();
     _completeSubscription?.cancel();

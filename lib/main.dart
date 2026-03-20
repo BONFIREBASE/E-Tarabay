@@ -12,7 +12,7 @@ import 'utils/constants.dart';
 import 'screens/splash_screen.dart';
 
 // ========== AUDIO MANAGER (FOR BACKGROUND MUSIC) ==========
-class AudioManager extends ChangeNotifier {
+class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
   static final AudioManager _instance = AudioManager._internal();
   factory AudioManager() => _instance;
 
@@ -25,6 +25,7 @@ class AudioManager extends ChangeNotifier {
   bool _isPlaying = false;
   bool _isMusicEnabled = true;
   String? _currentAssetPath;
+  bool _wasPlayingBeforePause = false;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -36,6 +37,26 @@ class AudioManager extends ChangeNotifier {
     _isMusicEnabled = prefs.getBool('music_enabled') ?? true;
 
     _isInitialized = true;
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_isInitialized) return;
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isPlaying) {
+        _wasPlayingBeforePause = true;
+        _player.pause();
+        // We don't set _isPlaying = false because we want to remember it was playing
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (_wasPlayingBeforePause && _isMusicEnabled) {
+        _player.resume();
+        _wasPlayingBeforePause = false;
+      }
+    }
   }
 
   Future<void> startBackgroundMusic(String assetPath) async {
@@ -51,6 +72,7 @@ class AudioManager extends ChangeNotifier {
       await _player.setVolume(0.3);
       await _player.play(AssetSource(assetPath));
       _isPlaying = true;
+      _wasPlayingBeforePause = false;
       notifyListeners();
     } catch (e) {
       debugPrint('Error playing music: $e');
@@ -60,6 +82,7 @@ class AudioManager extends ChangeNotifier {
   Future<void> pauseMusic() async {
     await _player.pause();
     _isPlaying = false;
+    _wasPlayingBeforePause = false;
     notifyListeners();
   }
 
@@ -67,12 +90,14 @@ class AudioManager extends ChangeNotifier {
     if (!_isMusicEnabled) return;
     await _player.resume();
     _isPlaying = true;
+    _wasPlayingBeforePause = false;
     notifyListeners();
   }
 
   Future<void> stopMusic() async {
     await _player.stop();
     _isPlaying = false;
+    _wasPlayingBeforePause = false;
     notifyListeners();
   }
 
@@ -102,6 +127,7 @@ class AudioManager extends ChangeNotifier {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _player.dispose();
     super.dispose();
   }
@@ -155,7 +181,7 @@ class ETarabayApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'E Tarabay',
+      title: 'E-Tarabay',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

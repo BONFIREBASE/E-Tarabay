@@ -212,7 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'E Tarabay',
+                  'E-Tarabay',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -221,7 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Version 1.0.2',
+                  'Version 1.0.3',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade600,

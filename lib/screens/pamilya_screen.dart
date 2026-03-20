@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import '../utils/translations.dart';
 import '../widgets/success_modal.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../main.dart';
@@ -135,22 +136,6 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       Icons.celebration_rounded,
       Icons.account_tree_rounded,
       Icons.home_rounded
-    ],
-  ];
-
-  final List<List<String>> _categoryLevelSubtitles = [
-    [
-      'Ammom ti bagim',
-      'Ilawlawagmo ti riknam',
-      'Ammuem dagiti inaldaw nga aramid',
-      'Ania ti kayatmo?'
-    ],
-    [
-      'Sino-sino dagiti pamilyam?',
-      'Ania ti trabaho ti tunggal maysa?',
-      'Ania ti aramidendayo a sangsangkamaysa?',
-      'Sino-sino dagiti kabagianmo?',
-      'Sadino kayo nagtaeng?'
     ],
   ];
 
@@ -643,8 +628,102 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     },
   ];
 
-  // ─────────────────────────────────────────────────────────────────────────
-  //  Computed getters
+  String _getMainCategoryTitle(int index) {
+    if (index == 0)
+      return Translations.getAngAkingSarili(context).replaceAll('\n', ' ');
+    if (index == 1)
+      return Translations.getAtAkingPamilya(context).replaceAll('\n', ' ');
+    return '';
+  }
+
+  String _getLevelTitle(int catIndex, int lvlIndex) {
+    if (catIndex == 0) {
+      switch (lvlIndex) {
+        case 0:
+          return Translations.getAllAboutMe(context);
+        case 1:
+          return Translations.getMyEmotions(context);
+        case 2:
+          return Translations.getDailyRoutines(context);
+        case 3:
+          return Translations.getMyPreferences(context);
+      }
+    } else {
+      switch (lvlIndex) {
+        case 0:
+          return Translations.getFamilyMembers(context);
+        case 1:
+          return Translations.getFamilyRoles(context);
+        case 2:
+          return Translations.getFamilyActivities(context);
+        case 3:
+          return Translations.getFamilyTree(context);
+        case 4:
+          return Translations.getMyHome(context);
+      }
+    }
+    return '';
+  }
+
+  String _getLevelSubTitle(int catIndex, int lvlIndex) {
+    if (catIndex == 0) {
+      switch (lvlIndex) {
+        case 0:
+          return Translations.getAboutMeSubtitle(context);
+        case 1:
+          return Translations.getMyEmotionsSubtitle(context);
+        case 2:
+          return Translations.getDailyRoutinesSubtitle(context);
+        case 3:
+          return Translations.getMyPreferencesSubtitle(context);
+      }
+    } else {
+      switch (lvlIndex) {
+        case 0:
+          return Translations.getFamilyMembersSubtitle(context);
+        case 1:
+          return Translations.getFamilyRolesSubtitle(context);
+        case 2:
+          return Translations.getFamilyActivitiesSubtitle(context);
+        case 3:
+          return Translations.getFamilyTreeSubtitle(context);
+        case 4:
+          return Translations.getMyHomeSubtitle(context);
+      }
+    }
+    return '';
+  }
+
+  String _getGameString(Map<String, dynamic> game, String key) {
+    final id = game['id'] as String;
+    if (key == 'question') {
+      switch (id) {
+        case 'about_name':
+          return Translations.getWhatIsYourName(context);
+        case 'about_age':
+          return Translations.getHowOldAreYou(context);
+        case 'about_gender':
+          return Translations.getAreYouBoyOrGirl(context);
+      }
+    } else if (key == 'description') {
+      switch (id) {
+        case 'about_name':
+          return Translations.getWhatIsYourNameDescription(context);
+        case 'about_age':
+          return Translations.getHowOldAreYouDescription(context);
+        case 'about_gender':
+          return Translations.getGenderDescription(context);
+      }
+    } else if (key == 'hint') {
+      switch (id) {
+        case 'about_name':
+          return Translations.getTypeNameHint(context);
+        case 'about_age':
+          return Translations.getAgeHint(context);
+      }
+    }
+    return game[key] ?? '';
+  }
   // ─────────────────────────────────────────────────────────────────────────
 
   List<Map<String, dynamic>> get _currentGames {
@@ -812,6 +891,9 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         setState(() {
           _selectedMainCategory = savedMainCat;
           _selectedLevel = savedLevel;
+
+          final pProgress = userProvider.getPamilyaProgress();
+          _totalStars = pProgress['totalStars'] ?? 0;
 
           // Sync badges based on UserProvider before resetting level state
           for (int i = 0; i < _badges.length; i++) {
@@ -1038,8 +1120,12 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   void _saveQuestionProgress(int earned) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     userProvider.updatePamilyaProgress(
-        _selectedMainCategory, _selectedLevel, _currentGameIndex, true);
-    userProvider.addStars(earned);
+      _selectedMainCategory,
+      _selectedLevel,
+      _currentGameIndex,
+      true,
+      earnedStars: earned,
+    );
   }
 
   void _onWrong() {
@@ -1264,15 +1350,15 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: 'Level ${_selectedLevel + 1} Nalpasen!',
-        subtitle: _categoryLevelTitles[_selectedMainCategory][_selectedLevel],
+        title: Translations.getLevelCompleted(context, _selectedLevel + 1),
+        subtitle: _getLevelTitle(_selectedMainCategory, _selectedLevel),
         score: _totalScore,
         stars: avgStars,
         badges: _newlyEarnedBadges.map((b) => '${b.emoji} ${b.title}').toList(),
         primaryLabel: _selectedLevel <
                 _categoryLevelTitles[_selectedMainCategory].length - 1
-            ? 'Sumaruno'
-            : 'Nalpas! 🏆',
+            ? Translations.getNext(context)
+            : Translations.getFinished(context),
         onPrimaryTap: () {
           Navigator.pop(context);
           _newlyEarnedBadges = [];
@@ -1299,19 +1385,20 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: 'Ipagpannakkel ka!',
-        subtitle: 'Nalpasem amin dagiti levels iti $_currentMainTitle!',
+        title: Translations.getProudOfYou(context),
+        subtitle: Translations.getCategoryCompleted(
+            context, _getMainCategoryTitle(_selectedMainCategory)),
         score: _totalScore,
         stars: 3,
         badges: _badges
             .where((b) => b.isEarned)
             .map((b) => '${b.emoji} ${b.title}')
             .toList(),
-        primaryLabel: 'Agtuloy (Continue)',
+        primaryLabel: Translations.getContinue(context),
         onPrimaryTap: () {
           Navigator.pop(context);
         },
-        secondaryLabel: 'Dadduma pay (Back)',
+        secondaryLabel: Translations.getBack(context),
         onSecondaryTap: () {
           Navigator.pop(context);
         },
@@ -1384,6 +1471,118 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     );
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      centerTitle: false,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        color: AppColors.textDark,
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(_getMainCategoryTitle(_selectedMainCategory),
+              style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
+          Text(Translations.getLevel(context, _selectedLevel + 1),
+              style: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5)),
+        ],
+      ),
+      actions: [
+        _buildAppBarPill(
+          icon: '🏅',
+          label: '${_badges.where((b) => b.isEarned).length}',
+          color: Colors.amber,
+          onTap: _showBadgesModal,
+        ),
+        _buildTimerPill(),
+        _buildAppBarPill(
+          icon: '⭐',
+          label: '$_totalStars',
+          color: Colors.orange,
+        ),
+        const SizedBox(width: 8),
+      ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1.0),
+        child: Container(
+          color: Colors.grey.withOpacity(0.12),
+          height: 1.0,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppBarPill({
+    required String icon,
+    required String label,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withOpacity(0.2), width: 1.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(icon, style: const TextStyle(fontSize: 13)),
+            const SizedBox(width: 4),
+            Text(label,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: color.withOpacity(0.9))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimerPill() {
+    return AnimatedBuilder(
+      animation: _timerPulseAnim,
+      builder: (_, __) {
+        final urgent = _secondsLeft <= 10;
+        final color = urgent ? Colors.red : _currentMainColor;
+        return Transform.scale(
+          scale: urgent ? _timerPulseAnim.value : 1.0,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: color.withOpacity(0.25), width: 1.5),
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Icon(Icons.timer_rounded, color: color, size: 15),
+              const SizedBox(width: 4),
+              Text('$_secondsLeft',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 13, color: color)),
+            ]),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _playItemAudio(String path) async {
     try {
       await AudioManager.instance.pauseMusic();
@@ -1408,6 +1607,17 @@ class _PamilyaScreenState extends State<PamilyaScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    // Real-time account deletion check
+    if (userProvider.isAccountDeleted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FF),
       appBar: _buildAppBar(),
@@ -1425,94 +1635,6 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           if (_showCorrectOverlay) _buildCorrectOverlay(),
         ],
       ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-        color: AppColors.textDark,
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text(_currentMainTitle,
-          style: const TextStyle(
-              color: AppColors.textDark,
-              fontSize: 18,
-              fontWeight: FontWeight.bold)),
-      actions: [
-        // Badges button
-        GestureDetector(
-          onTap: _showBadgesModal,
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20)),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Text('🏅', style: TextStyle(fontSize: 14)),
-              const SizedBox(width: 4),
-              Text('${_badges.where((b) => b.isEarned).length}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: Colors.amber)),
-            ]),
-          ),
-        ),
-        // Timer
-        AnimatedBuilder(
-          animation: _timerPulseAnim,
-          builder: (_, __) {
-            final urgent = _secondsLeft <= 10;
-            return Transform.scale(
-              scale: urgent ? _timerPulseAnim.value : 1.0,
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: urgent
-                      ? Colors.red.withOpacity(0.15)
-                      : _currentMainColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.timer_rounded,
-                      color: urgent ? Colors.red : _currentMainColor, size: 16),
-                  const SizedBox(width: 4),
-                  Text('$_secondsLeft',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: urgent ? Colors.red : _currentMainColor)),
-                ]),
-              ),
-            );
-          },
-        ),
-        // Stars
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20)),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
-            const SizedBox(width: 4),
-            Text('$_totalStars',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.amber)),
-          ]),
-        ),
-        const SizedBox(width: 8),
-      ],
     );
   }
 
@@ -1549,18 +1671,26 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                         ]
                       : [],
                 ),
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Icon(_mainCategories[i]['icon'],
-                      color: active ? Colors.white : color, size: 20),
-                  const SizedBox(width: 8),
-                  Text(_mainCategories[i]['title'],
-                      style: TextStyle(
-                          color: active ? Colors.white : color,
-                          fontWeight:
-                              active ? FontWeight.bold : FontWeight.w500,
-                          fontSize: 14)),
-                ]),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(_mainCategories[i]['icon'],
+                              color: active ? Colors.white : color, size: 20),
+                          const SizedBox(width: 8),
+                          Text(_getMainCategoryTitle(i),
+                              style: TextStyle(
+                                  color: active ? Colors.white : color,
+                                  fontWeight: active
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  fontSize: 14)),
+                        ]),
+                  ),
+                ),
               ),
             ),
           );
@@ -1570,15 +1700,15 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   }
 
   Widget _buildLevelTabs() {
-    final titles = _categoryLevelTitles[_selectedMainCategory];
     final icons = _categoryLevelIcons[_selectedMainCategory];
+    final titlesCount = _categoryLevelIcons[_selectedMainCategory].length;
     return Container(
       color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
-          children: List.generate(titles.length, (i) {
+          children: List.generate(titlesCount, (i) {
             final active = _selectedLevel == i;
             final badgeIdx = _selectedMainCategory == 0 ? i : 4 + i;
             final earned =
@@ -1587,7 +1717,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               onTap: () {
                 if (earned && !active) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: const Text('Nalpasem daytoyen! (Done already!)'),
+                    content: Text(Translations.getAlreadyDone(context)),
                     backgroundColor: _currentMainColor,
                     duration: const Duration(seconds: 1),
                   ));
@@ -1644,16 +1774,14 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                        _categoryLevelTitles[_selectedMainCategory]
-                            [_selectedLevel],
+                    Text(_getLevelTitle(_selectedMainCategory, _selectedLevel),
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: _currentMainColor)),
                     Text(
-                        _categoryLevelSubtitles[_selectedMainCategory]
-                            [_selectedLevel],
+                        _getLevelSubTitle(
+                            _selectedMainCategory, _selectedLevel),
                         style: TextStyle(
                             fontSize: 11, color: Colors.grey.shade600)),
                   ]),
@@ -1873,7 +2001,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             ),
             const SizedBox(width: 14),
             Expanded(
-                child: Text(game['question'],
+                child: Text(_getGameString(game, 'question'),
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold))),
           ]),
@@ -1893,7 +2021,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               Icon(Icons.lightbulb_rounded, color: _currentMainColor, size: 18),
               const SizedBox(width: 8),
               Expanded(
-                  child: Text(game['description'],
+                  child: Text(_getGameString(game, 'description'),
                       style: TextStyle(
                           fontSize: 13, color: Colors.grey.shade700))),
             ]),
@@ -1940,7 +2068,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         controller: ctrl,
         style: const TextStyle(fontSize: 18),
         decoration: InputDecoration(
-          hintText: game['hint'],
+          hintText: _getGameString(game, 'hint'),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
           filled: true,
           fillColor: Colors.grey.shade50,
@@ -1958,8 +2086,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        child: const Text('Idulin',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        child: Text(Translations.getSave(context),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ),
     ]);
   }
@@ -1971,7 +2099,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         keyboardType: TextInputType.number,
         style: const TextStyle(fontSize: 18),
         decoration: InputDecoration(
-          hintText: game['hint'],
+          hintText: _getGameString(game, 'hint'),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
           filled: true,
           fillColor: Colors.grey.shade50,
@@ -1989,8 +2117,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        child: const Text('Idulin',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        child: Text(Translations.getSave(context),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ),
     ]);
   }
@@ -2021,10 +2149,13 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                     : [],
               ),
               child: Column(children: [
-                Text(game['options'][i].split(' ').first,
+                Text(i == 0 ? '👧' : '👦',
                     style: const TextStyle(fontSize: 36)),
                 const SizedBox(height: 6),
-                Text(game['options'][i].split(' ').last,
+                Text(
+                    i == 0
+                        ? Translations.getGirl(context)
+                        : Translations.getBoy(context),
                     style: TextStyle(
                         color: sel ? Colors.white : Colors.grey.shade800,
                         fontWeight: FontWeight.w600,

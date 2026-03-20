@@ -32,7 +32,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     // Explicitly listen to language changes so the entire screen updates instantly
     Provider.of<LanguageProvider>(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -67,7 +67,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               _buildLanguageStep(),
             ],
           ),
-          
+
           // Navigation Controls
           Positioned(
             bottom: 40,
@@ -85,41 +85,42 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       height: 8,
                       width: _currentPage == index ? 24 : 8,
                       decoration: BoxDecoration(
-                        color: _currentPage == index 
-                            ? AppColors.primary 
+                        color: _currentPage == index
+                            ? AppColors.primary
                             : Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     );
                   }),
                 ),
-                
+
                 // Next/Finish Button
                 if (_currentPage < 4)
-                IconButton(
-                  onPressed: () {
-                    _pageController.nextPage(
-                      duration: 500.ms,
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.all(16),
-                  ),
-                ).animate(key: ValueKey(_currentPage)).scale(delay: 200.ms)
+                  IconButton(
+                    onPressed: () {
+                      _pageController.nextPage(
+                        duration: 500.ms,
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                  ).animate(key: ValueKey(_currentPage)).scale(delay: 200.ms)
                 else
-                ElevatedButton(
-                  onPressed: _completeOnboarding,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  ),
-                  child: Text(Translations.getGetStarted(context)),
-                ).animate().fadeIn().scale(),
+                  ElevatedButton(
+                    onPressed: _completeOnboarding,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
+                    ),
+                    child: Text(Translations.getGetStarted(context)),
+                  ).animate().fadeIn().scale(),
               ],
             ),
           ),
@@ -169,7 +170,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         duration: 300.ms,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.shade50,
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.grey.shade200,
@@ -260,7 +263,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 repeatForever: true,
                 animatedTexts: [
                   FadeAnimatedText(
-                    'Welcome to\nE Tarabay',
+                    'Welcome to\nE-Tarabay',
                     textStyle: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -271,7 +274,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     duration: const Duration(seconds: 3),
                   ),
                   FadeAnimatedText(
-                    'Maligayang Pagdating sa\nE Tarabay',
+                    'Maligayang Pagdating sa\nE-Tarabay',
                     textStyle: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -282,7 +285,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     duration: const Duration(seconds: 3),
                   ),
                   FadeAnimatedText(
-                    'Naragsak a Isasangbay iti\nE Tarabay',
+                    'Naragsak a Isasangbay iti\nE-Tarabay',
                     textStyle: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,

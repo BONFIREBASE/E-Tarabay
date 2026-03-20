@@ -49,20 +49,22 @@ class _LoginScreenState extends State<LoginScreen> {
       final studentId = result['studentId'] as String;
 
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      
+
       // Set session data
       userProvider.setCurrentStudentId(studentId);
       userProvider.setCurrentRole('student');
 
-      // 1. Sync EVERYTHING from Firebase FIRST. 
+      // 1. Sync EVERYTHING from Firebase FIRST.
       // This restores their profile and all progress keys to local Hive/SharedPreferences.
       try {
-        await userProvider.syncFromFirebase().timeout(const Duration(seconds: 8));
+        await userProvider
+            .syncFromFirebase()
+            .timeout(const Duration(seconds: 8));
       } catch (e) {
         debugPrint('Firebase sync failed or timed out: $e');
       }
 
-      // 2. If for some reason we still don't have a profile (e.g. sync failed or Firestore doc is empty), 
+      // 2. If for some reason we still don't have a profile (e.g. sync failed or Firestore doc is empty),
       // then we create one from the studentData we got during login.
       if (userProvider.userProfile == null) {
         final profile = studentData['profile'] as Map<String, dynamic>?;
@@ -87,7 +89,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       setState(() => _isLoading = false);
-      _showErrorDialog(result['message'] ?? Translations.getLoginError(context));
+      _showErrorDialog(
+          result['message'] ?? Translations.getLoginError(context));
     }
   }
 
@@ -99,7 +102,10 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             const Icon(Icons.error_outline, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text(message, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white))),
+            Expanded(
+                child: Text(message,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white))),
           ],
         ),
         backgroundColor: Colors.red.shade600,
@@ -142,8 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     width: 60,
                                     height: 60,
                                     decoration: BoxDecoration(
-                                      color:
-                                          AppColors.primary.withOpacity(0.1),
+                                      color: AppColors.primary.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: const Icon(
@@ -154,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   const SizedBox(width: 16),
                                   const Text(
-                                    'E Tarabay',
+                                    'E-Tarabay',
                                     style: TextStyle(
                                       fontSize: 28,
                                       fontWeight: FontWeight.bold,
@@ -168,22 +173,30 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(height: 40),
 
                               // Welcome text
-                              Text(
-                                Translations.getWelcome(context),
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textDark,
+                              SizedBox(
+                                width: double.infinity,
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      Translations.getWelcome(context),
+                                      style: const TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textDark,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      Translations.getLoginPrompt(context),
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: AppColors.textLight,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                Translations.getLoginPrompt(context),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.textLight,
-                                ),
-                                textAlign: TextAlign.center,
                               ),
 
                               const SizedBox(height: 40),
@@ -218,7 +231,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 controller: _passwordController,
                                 obscureText: _obscurePassword,
                                 decoration: InputDecoration(
-                                  labelText: '${Translations.getPassword(context)} (LRN)',
+                                  labelText:
+                                      '${Translations.getPassword(context)} (LRN)',
                                   prefixIcon: const Icon(
                                     Icons.lock_outline,
                                     color: AppColors.primary,
@@ -293,8 +307,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     );
                                   },
                                   style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(color: AppColors.primary, width: 2),
-                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                    side: const BorderSide(
+                                        color: AppColors.primary, width: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 24, vertical: 12),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
