@@ -496,8 +496,9 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           firstUncompletedLevel = l;
           break;
         }
-        if (l == _levelTitles.length - 1)
+        if (l == _levelTitles.length - 1) {
           firstUncompletedLevel = _levelTitles.length - 1;
+        }
       }
 
       if (mounted) {
@@ -2567,7 +2568,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           ),
           const SizedBox(height: 28),
           Text(Translations.getSelectCorrectAnswer(context),
-              style: TextStyle(
+              style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                   color: Colors.grey)),

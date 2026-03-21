@@ -295,11 +295,11 @@ class _SundanScreenState extends State<SundanScreen>
   final List<_ConfettiParticle> _confettiParticles = [];
   final Random _rng = Random();
 
-  static const double _hitRadius = 20.0;
+  static const double _hitRadius = 18.0;
 
-  // ── Progress tracking (SharedPreferences) ──────────────────────────────────
+
   SharedPreferences? _prefs;
-  // Completed sets per mode
+
   final Set<int> _completedUpper = {};
   final Set<int> _completedLower = {};
   final Set<int> _completedNums = {};
@@ -331,14 +331,19 @@ class _SundanScreenState extends State<SundanScreen>
         difficulty: 3,
         points: [
           Offset(120, 60), // Top left
+          Offset(120, 120), // Middle left
           Offset(120, 180), // Bottom left
-          Offset(120, 60), // Back to top
-          Offset(155, 60), // Top curve mid
-          Offset(170, 90), // Top curve outer
+          Offset(120, 120), // Back to middle
+          Offset(120, 60), // Back up to top
+          Offset(145, 60), // Top curve starts
+          Offset(170, 75), // Top curve apex
+          Offset(170, 100), // Top curve coming in
           Offset(120, 115), // Middle intersect
-          Offset(175, 125), // Bottom curve outer
-          Offset(175, 170), // Bottom curve lower
-          Offset(120, 180) // Bottom end
+          Offset(150, 120), // Bottom curve starts
+          Offset(175, 135), // Bottom curve apex
+          Offset(175, 165), // Bottom curve lower
+          Offset(150, 180), // Bottom curve bottom
+          Offset(120, 180) // Finish
         ]),
     LetterData(
         letter: 'C',
@@ -1284,7 +1289,7 @@ class _SundanScreenState extends State<SundanScreen>
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      // Safety wait for provider initialization (same as SplashScreen fix)
+      
       int retryCount = 0;
       while (!userProvider.isInitialized && retryCount < 10) {
         await Future.delayed(const Duration(milliseconds: 200));
@@ -1551,15 +1556,22 @@ class _SundanScreenState extends State<SundanScreen>
     for (int i = 0; i < pts.length; i++) {
       double dist = (designPt - pts[i]).distance;
       // Use dynamic hit radius based on difficulty
-      // DECREASED radius slightly for better precision requirement
       double dynamicRadius =
-          _hitRadius * (1.2 + (4 - _currentLetter.difficulty) * 0.15);
+          _hitRadius * (1.1 + (4 - _currentLetter.difficulty) * 0.12);
 
       if (dist <= dynamicRadius) {
-        // Only allow marking as visited if it's the next expected point
-        // or close to it, to prevent "scribbling" to win
-        if (_visitedPoints.isEmpty || i <= _visitedPoints.reduce(max) + 2) {
-          _visitedPoints.add(i);
+        if (_visitedPoints.isEmpty) {
+          // Force starting at the beginning (index 0 or 1 for some slack)
+          if (i <= 1) {
+            _visitedPoints.add(i);
+          }
+        } else {
+          // Sequential progress only: can only visit i if it's already visited 
+          // or it's the next point after the current maximum visited point.
+          int maxV = _visitedPoints.reduce(max);
+          if (i <= maxV + 1) {
+            _visitedPoints.add(i);
+          }
         }
       }
     }

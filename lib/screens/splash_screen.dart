@@ -48,6 +48,8 @@ class _SplashScreenState extends State<SplashScreen> {
       retryCount++;
     }
 
+    if (!mounted) return;
+
     // Fallback: Manually check prefs if provider still hasn't loaded role
     String? role = userProvider.currentRole;
     String? studentId = userProvider.currentStudentId;

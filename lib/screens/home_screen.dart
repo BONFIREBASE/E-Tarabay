@@ -75,10 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   final userProvider =
                       Provider.of<UserProvider>(context, listen: false);
                   await userProvider.logout();
-                  if (mounted) {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/', (Route<dynamic> route) => false);
-                  }
+                  if (!mounted) return;
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/', (Route<dynamic> route) => false);
                 },
                 child: const Text('OK'),
               ),
@@ -525,7 +524,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Bottom Navigation Bar
       bottomNavigationBar: Container(
-        height: 70,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: const BorderRadius.only(
@@ -542,7 +540,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -796,7 +794,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () => _onNavItemTapped(index),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

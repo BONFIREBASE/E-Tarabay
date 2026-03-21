@@ -76,10 +76,12 @@ class MyCreation {
   String getTimeAgoLocalized(BuildContext context) {
     final diff = DateTime.now().difference(date);
     if (diff.inMinutes < 1) return Translations.getJustNow(context);
-    if (diff.inMinutes < 60)
+    if (diff.inMinutes < 60) {
       return Translations.getTimeAgo(context, diff.inMinutes, 'm');
-    if (diff.inHours < 24)
+    }
+    if (diff.inHours < 24) {
       return Translations.getTimeAgo(context, diff.inHours, 'h');
+    }
     return Translations.getTimeAgo(context, diff.inDays, 'd');
   }
 }

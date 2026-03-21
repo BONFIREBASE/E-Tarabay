@@ -915,8 +915,9 @@ class UserProvider extends ChangeNotifier {
           'Y',
           'Z'
         ];
-        if (index < allUpper.length)
+        if (index < allUpper.length) {
           prefKey = 'sundan_upper_${allUpper[index]}';
+        }
       } else if (mode == 'lowercase') {
         const allLower = [
           'a',
@@ -946,11 +947,14 @@ class UserProvider extends ChangeNotifier {
           'y',
           'z'
         ];
-        if (index < allLower.length)
+        if (index < allLower.length) {
           prefKey = 'sundan_lower_${allLower[index]}';
+        }
       } else if (mode == 'numbers') {
         const allNums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-        if (index < allNums.length) prefKey = 'sundan_num_${allNums[index]}';
+        if (index < allNums.length) {
+          prefKey = 'sundan_num_${allNums[index]}';
+        }
       }
 
       if (prefKey.isNotEmpty) {
@@ -1053,13 +1057,19 @@ class UserProvider extends ChangeNotifier {
       final allNums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 
       for (var l in allUpper) {
-        if (_prefs!.getBool('sundan_upper_$l') == true) uppercaseCompleted++;
+        if (_prefs!.getBool('sundan_upper_$l') == true) {
+          uppercaseCompleted++;
+        }
       }
       for (var l in allLower) {
-        if (_prefs!.getBool('sundan_lower_$l') == true) lowercaseCompleted++;
+        if (_prefs!.getBool('sundan_lower_$l') == true) {
+          lowercaseCompleted++;
+        }
       }
       for (var n in allNums) {
-        if (_prefs!.getBool('sundan_num_$n') == true) numbersCompleted++;
+        if (_prefs!.getBool('sundan_num_$n') == true) {
+          numbersCompleted++;
+        }
       }
     }
 
@@ -1183,10 +1193,18 @@ class UserProvider extends ChangeNotifier {
   }
 
   String _getGradeFromPercentage(double percentage) {
-    if (percentage >= 90) return 'Outstanding';
-    if (percentage >= 80) return 'Very Satisfactory';
-    if (percentage >= 75) return 'Satisfactory';
-    if (percentage > 0) return 'Developing';
+    if (percentage >= 90) {
+      return 'Outstanding';
+    }
+    if (percentage >= 80) {
+      return 'Very Satisfactory';
+    }
+    if (percentage >= 75) {
+      return 'Satisfactory';
+    }
+    if (percentage > 0) {
+      return 'Developing';
+    }
     return 'Not Started';
   }
 

@@ -629,10 +629,12 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   ];
 
   String _getMainCategoryTitle(int index) {
-    if (index == 0)
+    if (index == 0) {
       return Translations.getAngAkingSarili(context).replaceAll('\n', ' ');
-    if (index == 1)
+    }
+    if (index == 1) {
       return Translations.getAtAkingPamilya(context).replaceAll('\n', ' ');
+    }
     return '';
   }
 
