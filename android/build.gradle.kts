@@ -5,13 +5,13 @@ allprojects {
     }
 }
 
-val safeBuildDir = file("C:/flutter_builds/e_tarabay_v2")
-
-rootProject.layout.buildDirectory.set(safeBuildDir)
+rootProject.layout.buildDirectory.set(file("../build"))
 
 subprojects {
-    val subprojectBuildDir = safeBuildDir.resolve(project.name)
-    project.layout.buildDirectory.set(subprojectBuildDir)
+    project.layout.buildDirectory.set(rootProject.layout.buildDirectory.dir(project.name))
+}
+
+subprojects {
     project.evaluationDependsOn(":app")
 }
 

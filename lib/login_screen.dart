@@ -1,3 +1,4 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/user_provider.dart';
@@ -5,8 +6,6 @@ import 'services/auth_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/teacher_login_screen.dart';
 import 'utils/constants.dart';
-import 'utils/translations.dart';
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -33,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text.trim();
 
     if (username.isEmpty || password.isEmpty) {
-      _showErrorDialog(Translations.getEnterUsernamePassword(context));
+      _showErrorDialog(AppLocalizations.of(context)!.enterUsernamePassword);
       return;
     }
 
@@ -90,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       setState(() => _isLoading = false);
       _showErrorDialog(
-          result['message'] ?? Translations.getLoginError(context));
+          result['message'] ?? AppLocalizations.of(context)!.loginError);
     }
   }
 
@@ -178,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Column(
                                   children: [
                                     Text(
-                                      Translations.getWelcome(context),
+                                      AppLocalizations.of(context)!.welcome,
                                       style: const TextStyle(
                                         fontSize: 24,
                                         fontWeight: FontWeight.bold,
@@ -188,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      Translations.getLoginPrompt(context),
+                                      AppLocalizations.of(context)!.loginPrompt,
                                       style: const TextStyle(
                                         fontSize: 14,
                                         color: AppColors.textLight,
@@ -205,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               TextField(
                                 controller: _usernameController,
                                 decoration: InputDecoration(
-                                  labelText: Translations.getUsername(context),
+                                  labelText: AppLocalizations.of(context)!.username,
                                   prefixIcon: const Icon(
                                     Icons.person_outline,
                                     color: AppColors.primary,
@@ -232,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 obscureText: _obscurePassword,
                                 decoration: InputDecoration(
                                   labelText:
-                                      '${Translations.getPassword(context)} (LRN)',
+                                      '${AppLocalizations.of(context)!.password} (LRN)',
                                   prefixIcon: const Icon(
                                     Icons.lock_outline,
                                     color: AppColors.primary,
@@ -281,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     elevation: 2,
                                   ),
                                   child: Text(
-                                    Translations.getLoginButton(context),
+                                    AppLocalizations.of(context)!.loginButton,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
@@ -320,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: AppColors.primary,
                                   ),
                                   label: Text(
-                                    Translations.getTeacherLoginButton(context),
+                                    AppLocalizations.of(context)!.teacherLoginButton,
                                     style: const TextStyle(
                                       color: AppColors.primary,
                                       fontSize: 16,

@@ -1,9 +1,9 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import 'matematika_screen.dart';
 import 'pamilya_screen.dart';
 import 'kulay_screen.dart';
@@ -247,7 +247,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          Translations.getLessons(context),
+          AppLocalizations.of(context)!.lessons,
           style:
               const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
@@ -259,7 +259,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-            tooltip: 'Refresh',
+            tooltip: AppLocalizations.of(context)!.refresh,
             onPressed: () {
               setState(() => _isLoading = true);
               _loadProgress();
@@ -274,20 +274,23 @@ class _LessonsScreenState extends State<LessonsScreen> {
           children: [
             _buildHeader(context),
             const SizedBox(height: 20),
-            _buildSectionTitle(context, Translations.getMatematika(context)),
+            _buildSectionTitle(
+                context, AppLocalizations.of(context)!.matematika),
             _buildMatematikaCard(context),
             const SizedBox(height: 16),
             _buildSectionTitle(
-                context, Translations.getAngAkingSariliTitle(context)),
+                context, AppLocalizations.of(context)!.angAkingSariliTitle),
             _buildPamilyaCard(context),
             const SizedBox(height: 16),
-            _buildSectionTitle(context, Translations.getKulaySaya(context)),
+            _buildSectionTitle(
+                context, AppLocalizations.of(context)!.kulaySaya),
             _buildKulayCard(context),
             const SizedBox(height: 16),
-            _buildSectionTitle(context, Translations.getSundanMo(context)),
+            _buildSectionTitle(context, AppLocalizations.of(context)!.sundanMo),
             _buildSundanCard(context),
             const SizedBox(height: 16),
-            _buildSectionTitle(context, Translations.getMagbasaTitle(context)),
+            _buildSectionTitle(
+                context, AppLocalizations.of(context)!.magbasaTitle),
             _buildMagbasaCard(context),
           ],
         ),
@@ -312,7 +315,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            Translations.getLessons(context),
+            AppLocalizations.of(context)!.lessons,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -321,7 +324,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '$_totalCompleted/$_totalActivities ${Translations.getActivities(context)}',
+            '$_totalCompleted/$_totalActivities ${AppLocalizations.of(context)!.activities}',
             style: const TextStyle(color: Colors.white70),
           ),
           const SizedBox(height: 12),
@@ -364,8 +367,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
   Widget _buildMatematikaCard(BuildContext context) {
     return _buildLessonCard(
       context: context,
-      title: Translations.getMatematika(context),
-      subtitle: '$_matDone/$_matTotal ${Translations.getActivities(context)}',
+      title: AppLocalizations.of(context)!.matematika,
+      subtitle:
+          '$_matDone/$_matTotal ${AppLocalizations.of(context)!.activities}',
       icon: Icons.calculate,
       color: AppColors.numbers,
       progress: _matTotal > 0 ? _matDone / _matTotal : 0.0,
@@ -384,9 +388,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
   Widget _buildPamilyaCard(BuildContext context) {
     return _buildLessonCard(
       context: context,
-      title: Translations.getAngAkingSariliTitle(context),
+      title: AppLocalizations.of(context)!.angAkingSariliTitle,
       subtitle:
-          '$_pamilyaDone/$_pamilyaTotal ${Translations.getLevels(context)}',
+          '$_pamilyaDone/$_pamilyaTotal ${AppLocalizations.of(context)!.levels}',
       icon: Icons.person,
       color: AppColors.family,
       progress: _pamilyaTotal > 0 ? _pamilyaDone / _pamilyaTotal : 0.0,
@@ -404,9 +408,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
   Widget _buildKulayCard(BuildContext context) {
     return _buildLessonCard(
       context: context,
-      title: Translations.getKulaySaya(context),
+      title: AppLocalizations.of(context)!.kulaySaya,
       subtitle:
-          '$_kulayDone/$_kulayTotal ${Translations.getActivities(context)}',
+          '$_kulayDone/$_kulayTotal ${AppLocalizations.of(context)!.activities}',
       icon: Icons.palette,
       color: AppColors.colors,
       progress: _kulayTotal > 0 ? _kulayDone / _kulayTotal : 0.0,
@@ -424,9 +428,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
   Widget _buildSundanCard(BuildContext context) {
     return _buildLessonCard(
       context: context,
-      title: Translations.getSundanMo(context),
+      title: AppLocalizations.of(context)!.sundanMo,
       subtitle:
-          '$_sundanDone/$_sundanTotal ${Translations.getActivities(context)}',
+          '$_sundanDone/$_sundanTotal ${AppLocalizations.of(context)!.activities}',
       icon: Icons.edit,
       color: AppColors.success,
       progress: _sundanTotal > 0 ? _sundanDone / _sundanTotal : 0.0,
@@ -444,9 +448,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
   Widget _buildMagbasaCard(BuildContext context) {
     return _buildLessonCard(
       context: context,
-      title: Translations.getMagbasaTitle(context),
+      title: AppLocalizations.of(context)!.magbasaTitle,
       subtitle:
-          '$_magbasaDone/$_magbasaTotal ${Translations.getActivities(context)}',
+          '$_magbasaDone/$_magbasaTotal ${AppLocalizations.of(context)!.activities}',
       icon: Icons.menu_book,
       color: AppColors.alphabet,
       progress: _magbasaTotal > 0 ? _magbasaDone / _magbasaTotal : 0.0,
@@ -470,12 +474,12 @@ class _LessonsScreenState extends State<LessonsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('🌟 $title'),
-        content: const Text('Natapos mo na ang araling ito! Magaling! Pumili naman ng ibang laro.'),
+        title: Text(title),
+        content: Text(AppLocalizations.of(context)!.lessonFinishedPrompt),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(AppLocalizations.of(context)!.okButton),
           ),
         ],
       ),
@@ -509,14 +513,13 @@ class _LessonsScreenState extends State<LessonsScreen> {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: isCompleted ? Colors.green.withOpacity(0.1) : color.withOpacity(0.1),
+                      color: isCompleted
+                          ? Colors.green.withOpacity(0.1)
+                          : color.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      isCompleted ? Icons.check_circle : icon, 
-                      color: isCompleted ? Colors.green : color, 
-                      size: 28
-                    ),
+                    child: Icon(isCompleted ? Icons.check_circle : icon,
+                        color: isCompleted ? Colors.green : color, size: 28),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -528,7 +531,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: isCompleted ? Colors.green.shade700 : AppColors.textDark,
+                            color: isCompleted
+                                ? Colors.green.shade700
+                                : AppColors.textDark,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -536,8 +541,12 @@ class _LessonsScreenState extends State<LessonsScreen> {
                           isCompleted ? 'TAPOS NA!' : subtitle,
                           style: TextStyle(
                             fontSize: 14,
-                            color: isCompleted ? Colors.green : Colors.grey.shade600,
-                            fontWeight: isCompleted ? FontWeight.bold : FontWeight.normal,
+                            color: isCompleted
+                                ? Colors.green
+                                : Colors.grey.shade600,
+                            fontWeight: isCompleted
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
                       ],
@@ -556,8 +565,11 @@ class _LessonsScreenState extends State<LessonsScreen> {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: progress.clamp(0.0, 1.0),
-                  backgroundColor: isCompleted ? Colors.green.withOpacity(0.1) : Colors.grey.shade100,
-                  valueColor: AlwaysStoppedAnimation<Color>(isCompleted ? Colors.green : color),
+                  backgroundColor: isCompleted
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.grey.shade100,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      isCompleted ? Colors.green : color),
                   minHeight: 6,
                 ),
               ),

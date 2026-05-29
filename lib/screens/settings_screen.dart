@@ -1,10 +1,9 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/language_provider.dart';
-import '../main.dart'; // Import AudioManager
-import '../utils/constants.dart';
-import '../utils/translations.dart';
+import '../main.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -51,117 +50,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
     final audioManager = Provider.of<AudioManager>(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surfaceContainerHighest,
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
-          Translations.getSettings(context),
-          style: const TextStyle(
+          loc.settingsTitle,
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: colorScheme.onSurface,
           ),
         ),
-        backgroundColor: AppColors.textLight,
+        backgroundColor: colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
-          // Language Section
-          Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
+          _sectionHeader(loc.language),
+          Card.filled(
+            clipBehavior: Clip.antiAlias,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    Translations.getLanguage(context),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                ),
-                const Divider(height: 1),
-
-                // English Option
-                _buildLanguageOption(
-                  context,
-                  language: 'English',
+                _LanguageTile(
+                  flag: '🇺🇸',
+                  label: 'English',
                   code: 'en',
                   isSelected: languageProvider.currentLanguageCode == 'en',
-                  flag: '🇺🇸',
+                  onTap: () => _setLanguage('en'),
                 ),
-
-                // Ilocano Option
-                _buildLanguageOption(
-                  context,
-                  language: 'Ilocano',
-                  code: 'il',
-                  isSelected: languageProvider.currentLanguageCode == 'il',
+                const Divider(height: 0, indent: 72),
+                _LanguageTile(
                   flag: '🇵🇭',
+                  label: 'Filipino',
+                  code: 'fil',
+                  isSelected: languageProvider.currentLanguageCode == 'fil',
+                  onTap: () => _setLanguage('fil'),
                 ),
-
-                // Filipino Option
-                _buildLanguageOption(
-                  context,
-                  language: 'Filipino',
-                  code: 'tl',
-                  isSelected: languageProvider.currentLanguageCode == 'tl',
+                const Divider(height: 0, indent: 72),
+                _LanguageTile(
                   flag: '🇵🇭',
+                  label: 'Ilokano',
+                  code: 'ilo',
+                  isSelected: languageProvider.currentLanguageCode == 'ilo',
+                  onTap: () => _setLanguage('ilo'),
                 ),
               ],
             ),
           ),
 
-          // Sound & Music Settings
-          Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
+          const SizedBox(height: 20),
+
+          // ── Audio ────────────────────────────────────────────────────────────
+          _sectionHeader('Audio'),
+          Card.filled(
+            clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
-                _buildSwitchTile(
-                  icon: Icons.volume_up,
-                  title: Translations.getSound(context),
+                SwitchListTile(
+                  secondary: _IconBadge(icon: Icons.volume_up_rounded),
+                  title: Text(loc.sound),
                   value: _soundEnabled,
                   onChanged: (value) {
                     setState(() => _soundEnabled = value);
-                    SharedPreferences.getInstance().then((prefs) {
-                      prefs.setBool('sound_enabled', value);
-                    });
+                    SharedPreferences.getInstance().then(
+                      (prefs) => prefs.setBool('sound_enabled', value),
+                    );
                   },
                 ),
-                const Divider(height: 1, indent: 60),
-                _buildSwitchTile(
-                  icon: Icons.music_note,
-                  title: Translations.getMusic(context),
+                const Divider(height: 0, indent: 72),
+                SwitchListTile(
+                  secondary: _IconBadge(icon: Icons.music_note_rounded),
+                  title: Text(loc.music),
                   value: _musicEnabled,
                   onChanged: _toggleMusic,
                 ),
@@ -169,178 +137,201 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // Notifications
-          Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: _buildSwitchTile(
-              icon: Icons.notifications,
-              title: Translations.getNotifications(context),
+          const SizedBox(height: 20),
+
+          // ── Notifications ──────────────────────────────────────────────────
+          _sectionHeader(loc.notifications),
+          Card.filled(
+            clipBehavior: Clip.antiAlias,
+            child: SwitchListTile(
+              secondary: _IconBadge(icon: Icons.notifications_rounded),
+              title: Text(loc.notifications),
               value: _notificationsEnabled,
               onChanged: (value) {
                 setState(() => _notificationsEnabled = value);
-                SharedPreferences.getInstance().then((prefs) {
-                  prefs.setBool('notifications_enabled', value);
-                });
+                SharedPreferences.getInstance().then(
+                  (prefs) => prefs.setBool('notifications_enabled', value),
+                );
               },
             ),
           ),
 
-          // App Info with Music Status
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(16),
-            ),
+          const SizedBox(height: 24),
+
+          // ── App Info ─────────────────────────────────────────────────────────
+          Center(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.auto_stories,
-                  size: 40,
-                  color: AppColors.primary,
+                ClipOval(
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'E-Tarabay',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Version 1.0.3',
+                  '${loc.version} 1.0.4',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                    fontSize: 13,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 if (audioManager.isPlaying) ...[
-                  const SizedBox(height: 8),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.music_note,
-                          size: 14, color: AppColors.primary),
-                      SizedBox(width: 4),
-                      Text(
-                        'Background music playing',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
+                  const SizedBox(height: 10),
+                  _MusicPill(text: loc.backgroundMusicPlaying),
                 ],
               ],
             ),
           ),
+
+          const SizedBox(height: 24),
         ],
       ),
     );
   }
 
-  Widget _buildLanguageOption(
-    BuildContext context, {
-    required String language,
-    required String code,
-    required bool isSelected,
-    required String flag,
-  }) {
-    final languageProvider =
-        Provider.of<LanguageProvider>(context, listen: false);
+  Future<void> _setLanguage(String code) async {
+    final provider = Provider.of<LanguageProvider>(context, listen: false);
+    await provider.setLanguage(code);
+    setState(() {});
+  }
 
-    return InkWell(
-      onTap: () async {
-        await languageProvider.setLanguage(code);
-        setState(() {});
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withOpacity(0.1)
-                    : Colors.grey.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  flag.isNotEmpty ? flag : '🏳️',
-                  style: const TextStyle(fontSize: 20),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                language.isNotEmpty ? language : 'Unknown',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? AppColors.primary : AppColors.textDark,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: AppColors.primary,
-                size: 20,
-              ),
-          ],
+  Widget _sectionHeader(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );
   }
+}
 
-  Widget _buildSwitchTile({
-    required IconData icon,
-    required String title,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return SwitchListTile(
-      secondary: Container(
-        padding: const EdgeInsets.all(8),
+// ─────────────────────────────────────────────────────────────────────────────
+//  LANGUAGE TILE
+// ─────────────────────────────────────────────────────────────────────────────
+class _LanguageTile extends StatelessWidget {
+  final String flag;
+  final String label;
+  final String code;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _LanguageTile({
+    required this.flag,
+    required this.label,
+    required this.code,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ListTile(
+      onTap: onTap,
+      leading: Container(
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.1),
+          color: isSelected
+              ? colorScheme.primaryContainer
+              : colorScheme.surfaceContainerHighest,
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: AppColors.primary,
-          size: 20,
-        ),
+        child: Center(child: Text(flag, style: const TextStyle(fontSize: 20))),
       ),
       title: Text(
-        title.isNotEmpty ? title : '',
-        style: const TextStyle(
+        label,
+        style: TextStyle(
           fontSize: 16,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textDark,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          color: isSelected ? colorScheme.primary : colorScheme.onSurface,
         ),
       ),
-      value: value,
-      onChanged: onChanged,
-      activeColor: AppColors.primary,
+      trailing: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: isSelected
+            ? Icon(Icons.check_circle_rounded,
+                key: const ValueKey('selected'), color: colorScheme.primary)
+            : const SizedBox(key: ValueKey('empty'), width: 24),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ICON BADGE
+// ─────────────────────────────────────────────────────────────────────────────
+class _IconBadge extends StatelessWidget {
+  final IconData icon;
+
+  const _IconBadge({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: colorScheme.primary, size: 20),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MUSIC PILL
+// ─────────────────────────────────────────────────────────────────────────────
+class _MusicPill extends StatelessWidget {
+  final String text;
+
+  const _MusicPill({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.music_note_rounded, size: 14, color: colorScheme.primary),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

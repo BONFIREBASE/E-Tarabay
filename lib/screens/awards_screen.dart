@@ -3,14 +3,11 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/language_provider.dart';
 import '../utils/constants.dart';
+import 'package:e_tarabay/l10n/app_localizations.dart';
 
 class AwardsScreen extends StatelessWidget {
   const AwardsScreen({super.key});
 
-  String _t(BuildContext context, String en, String il, String tl) {
-    final lang = Provider.of<LanguageProvider>(context, listen: false);
-    return lang.translate(en, il, tl);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +17,7 @@ class AwardsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _t(context, 'Awards', 'Dagiti Premio', 'Mga Gantimpala'),
+          AppLocalizations.of(context)!.awards,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -70,8 +67,7 @@ class AwardsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            _t(context, 'No Awards Yet', 'Awan pay ti Premio',
-                'Wala pang Gantimpala'),
+            AppLocalizations.of(context)!.noAwardsYet,
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -82,11 +78,7 @@ class AwardsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              _t(
-                  context,
-                  'Complete activities to earn awards!',
-                  'Lpasen dagiti aktibidad tapno makapremio!',
-                  'Kumpletuhin ang mga aktibidad para makakuha ng gantimpala!'),
+              AppLocalizations.of(context)!.completeActivitiesToEarn,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade600,
@@ -104,10 +96,8 @@ class AwardsScreen extends StatelessWidget {
     final List<Map<String, dynamic>> awardsData = [
       {
         'id': 'first_steps',
-        'title':
-            _t(context, 'First Steps', 'Umuna nga Addang', 'Unang Hakbang'),
-        'description': _t(context, 'Complete your first activity',
-            'Lpasen ti umuna nga aktibidad', 'Kumpletuhin ang unang aktibidad'),
+        'title': AppLocalizations.of(context)!.firstSteps,
+        'description': AppLocalizations.of(context)!.firstStepsDesc,
         'icon': Icons.directions_walk,
         'color': AppColors.primary,
         'progress': achievements['firstSteps'] ?? 0,
@@ -116,13 +106,8 @@ class AwardsScreen extends StatelessWidget {
       },
       {
         'id': 'math_wizard',
-        'title':
-            _t(context, 'Math Whiz', 'Nalaing iti Math', 'Magaling sa Math'),
-        'description': _t(
-            context,
-            'Complete 10 math games',
-            'Lpasen ti 10 nga ay-ayam iti math',
-            'Kumpletuhin ang 10 laro sa math'),
+        'title': AppLocalizations.of(context)!.mathWhiz,
+        'description': AppLocalizations.of(context)!.numberWizardDesc,
         'icon': Icons.calculate,
         'color': AppColors.numbers,
         'progress': achievements['mathWizard'] ?? 0,
@@ -131,9 +116,8 @@ class AwardsScreen extends StatelessWidget {
       },
       {
         'id': 'reading_star',
-        'title': _t(context, 'Bookworm', 'Nalaing Agbasa', 'Mahilig Magbasa'),
-        'description': _t(context, 'Read 5 stories', 'Basaen ti 5 nga sarita',
-            'Magbasa ng 5 kwento'),
+        'title': AppLocalizations.of(context)!.bookworm,
+        'description': AppLocalizations.of(context)!.bookwormDesc,
         'icon': Icons.menu_book,
         'color': AppColors.alphabet,
         'progress': achievements['readingStar'] ?? 0,
@@ -142,13 +126,8 @@ class AwardsScreen extends StatelessWidget {
       },
       {
         'id': 'color_artist',
-        'title':
-            _t(context, 'Color Artist', 'Nalaing Agkolor', 'Mahusay Magkulay'),
-        'description': _t(
-            context,
-            'Complete 4 coloring activities',
-            'Lpasen ti 4 nga aktibidad ti panagkolor',
-            'Kumpletuhin ang 4 na aktibidad sa pagkulay'),
+        'title': AppLocalizations.of(context)!.colorArtist,
+        'description': AppLocalizations.of(context)!.colorArtistDesc,
         'icon': Icons.palette,
         'color': AppColors.colors,
         'progress': achievements['colorArtist'] ?? 0,
@@ -157,10 +136,8 @@ class AwardsScreen extends StatelessWidget {
       },
       {
         'id': 'family_hero',
-        'title':
-            _t(context, 'Family Hero', 'Bida ti Pamilia', 'Bida ng Pamilya'),
-        'description': _t(context, 'Complete all family levels',
-            'Lpasen amin a family level', 'Kumpletuhin lahat ng family levels'),
+        'title': AppLocalizations.of(context)!.familyHero,
+        'description': AppLocalizations.of(context)!.familyHeroDesc,
         'icon': Icons.family_restroom,
         'color': AppColors.family,
         'progress': achievements['familyHero'] ?? 0,
@@ -169,13 +146,8 @@ class AwardsScreen extends StatelessWidget {
       },
       {
         'id': 'writing_star',
-        'title':
-            _t(context, 'Writing Star', 'Nalaing Agsurat', 'Magaling Magsulat'),
-        'description': _t(
-            context,
-            'Trace all letters and numbers',
-            'Suroten amin a letra ken numero',
-            'Sundan lahat ng titik at numero'),
+        'title': AppLocalizations.of(context)!.writingStar,
+        'description': AppLocalizations.of(context)!.writingStarDesc,
         'icon': Icons.edit,
         'color': Colors.orange,
         'progress': achievements['writingStar'] ?? 0,
@@ -184,9 +156,8 @@ class AwardsScreen extends StatelessWidget {
       },
       {
         'id': 'songbird',
-        'title': _t(context, 'Songbird', 'Nalaing Agkanta', 'Mahusay Kumanta'),
-        'description': _t(context, 'Learn all 13 songs',
-            'Adalen amin a 13 a kanta', 'Matutunan lahat ng 13 kanta'),
+        'title': AppLocalizations.of(context)!.songbird,
+        'description': AppLocalizations.of(context)!.songbirdDesc,
         'icon': Icons.music_note,
         'color': AppColors.animals,
         'progress': achievements['songbird'] ?? 0,
@@ -195,10 +166,8 @@ class AwardsScreen extends StatelessWidget {
       },
       {
         'id': 'perfect_score',
-        'title': _t(context, 'Perfect Score', 'Perpekto nga Puntos',
-            'Perpektong Puntos'),
-        'description': _t(context, 'Get perfect score in 3 games',
-            'Agperpekto iti 3 nga ay-ayam', 'Mag-perpekto sa 3 laro'),
+        'title': AppLocalizations.of(context)!.perfectScore,
+        'description': AppLocalizations.of(context)!.perfectScoreDesc,
         'icon': Icons.star,
         'color': Colors.amber,
         'progress': achievements['perfectScore'] ?? 0,

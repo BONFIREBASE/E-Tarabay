@@ -1,7 +1,6 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
-
 class StudentDetailScreen extends StatelessWidget {
   final String studentName;
   final Map<String, dynamic> studentData;
@@ -42,7 +41,7 @@ class StudentDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(Translations.getStudentProgressTitle(context, studentName),
+        title: Text(AppLocalizations.of(context)!.studentProgressTitle(studentName),
             style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -74,7 +73,7 @@ class StudentDetailScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(Translations.getOverallProgress(context),
+                      Text(AppLocalizations.of(context)!.overallProgress,
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -102,17 +101,17 @@ class StudentDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                        _buildStatColumn(
-                          Translations.getActivities(context), '$totalCompleted / $totalActivities'),
-                      _buildStatColumn(Translations.getStars(context), '${profile['stars'] ?? 0} ⭐'),
+                          AppLocalizations.of(context)!.activities, '$totalCompleted / $totalActivities'),
+                      _buildStatColumn(AppLocalizations.of(context)!.stars, '${profile['stars'] ?? 0} ⭐'),
                       _buildStatColumn(
-                          Translations.getLessons(context), '${profile['lessonsCompleted'] ?? 0} 📚'),
+                          AppLocalizations.of(context)!.lessons, '${profile['lessonsCompleted'] ?? 0} 📚'),
                     ],
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-             Text(Translations.getModuleBreakdown(context),
+             Text(AppLocalizations.of(context)!.moduleBreakdown,
                 style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -120,41 +119,41 @@ class StudentDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
              _buildModuleCard(
-              title: Translations.getMagbasaTitle(context),
+              title: AppLocalizations.of(context)!.magbasaTitle,
               icon: Icons.menu_book,
               color: AppColors.alphabet,
               completed: magbasa['totalCompleted'] ?? 0,
               total: magbasa['totalActivities'] ?? 23,
             ),
             _buildModuleCard(
-              title: Translations.getTraceTitle(context),
+              title: AppLocalizations.of(context)!.traceTitle,
               icon: Icons.edit,
               color: AppColors.success,
               completed: sundan['totalCompleted'] ?? 0,
               total: sundan['totalActivities'] ?? 62,
             ),
             _buildModuleCard(
-              title: Translations.getKulaySaya(context),
+              title: AppLocalizations.of(context)!.kulaySaya,
               icon: Icons.palette,
               color: AppColors.colors,
               completed: kulay['totalCompleted'] ?? 0,
               total: kulay['totalActivities'] ?? 4,
             ),
             _buildModuleCard(
-              title: Translations.getMatematika(context),
+              title: AppLocalizations.of(context)!.matematika,
               icon: Icons.calculate,
               color: AppColors.numbers,
               completed: matematika['gamesCompleted'] ?? 0,
               total: matematika['totalGames'] ?? 31,
-              extraInfo: Translations.getScoreLabel(context, matematika['totalScore'] ?? 0),
+              extraInfo: AppLocalizations.of(context)!.scoreLabel(matematika['totalScore'] ?? 0),
             ),
             _buildModuleCard(
-              title: Translations.getAngAkingSariliTitle(context),
+              title: AppLocalizations.of(context)!.angAkingSariliTitle,
               icon: Icons.family_restroom,
               color: AppColors.family,
               completed: pamilya['gamesCompleted'] ?? 0,
               total: pamilya['totalGames'] ?? 25,
-              extraInfo: Translations.getScoreLabel(context, pamilya['totalScore'] ?? 0),
+              extraInfo: AppLocalizations.of(context)!.scoreLabel(pamilya['totalScore'] ?? 0),
             ),
           ],
         ),

@@ -1,12 +1,14 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:audioplayers/audioplayers.dart';
+import '../data/magbasa_content.dart';
+import '../providers/language_provider.dart';
 import '../main.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import 'dart:async';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -25,6 +27,9 @@ class _MagbasaScreenState extends State<MagbasaScreen>
   late SharedPreferences _prefs;
   bool _isLoading = true;
 
+  String get _currentLang =>
+      Provider.of<LanguageProvider>(context, listen: false).currentLanguageCode;
+
   // ── Progress ───────────────────────────────────────────────────────────────
   final Map<String, Map<String, dynamic>> _categoryProgress = {
     'tula': {
@@ -35,30 +40,35 @@ class _MagbasaScreenState extends State<MagbasaScreen>
       'image': 'assets/images/category_tula.png',
       'activities': [
         {
+          'id': 'sipsipat',
           'title': 'Sipsipat',
           'completed': false,
           'type': 'poem',
           'image': 'assets/images/poem1.png'
         },
         {
+          'id': 'adda_asok',
           'title': 'Adda Asok',
           'completed': false,
           'type': 'poem',
           'image': 'assets/images/poem2.png'
         },
         {
+          'id': 'ti_pusak',
           'title': 'Ti Pusak',
           'completed': false,
           'type': 'poem',
           'image': 'assets/images/poem3.png'
         },
         {
+          'id': 'ni_tatang',
           'title': 'Ni Tatang',
           'completed': false,
           'type': 'poem',
           'image': 'assets/images/poem4.png'
         },
         {
+          'id': 'panagsepilio',
           'title': 'Panagsepilio',
           'completed': false,
           'type': 'poem',
@@ -74,30 +84,35 @@ class _MagbasaScreenState extends State<MagbasaScreen>
       'image': 'assets/images/category_kwento.png',
       'activities': [
         {
+          'id': 'ni_marti',
           'title': 'Ni Marti ken Kalapati',
           'completed': false,
           'type': 'story',
           'image': 'assets/images/kwento1.png'
         },
         {
+          'id': 'ni_didi',
           'title': 'Ni Didi a Naayat iti Kendi',
           'completed': false,
           'type': 'story',
           'image': 'assets/images/kwento2.png'
         },
         {
+          'id': 'ni_milio',
           'title': 'Ni Milio a Managsepilio',
           'completed': false,
           'type': 'story',
           'image': 'assets/images/kwento3.png'
         },
         {
+          'id': 'ni_neneng',
           'title': 'Ni Neneng a Dina Kayat ti Nateng',
           'completed': false,
           'type': 'story',
           'image': 'assets/images/kwento4.png'
         },
         {
+          'id': 'ni_kikay',
           'title': 'Ni Kikay a di Agsagsaysay',
           'completed': false,
           'type': 'story',
@@ -113,84 +128,98 @@ class _MagbasaScreenState extends State<MagbasaScreen>
       'image': 'assets/images/category_kanta.png',
       'activities': [
         {
+          'id': 'ania_ti_naganmo',
           'title': 'Ania ti Naganmo?',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_nagan.png'
         },
         {
+          'id': 'ania_ti_naganmo_full',
           'title': 'Ania ti Nagan Mo (Full)',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_nagan.png'
         },
         {
+          'id': 'uppat_a_pato',
           'title': 'Uppat a Pato',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_pato.png'
         },
         {
+          'id': 'duat_imak',
           'title': 'Duat\' Imak',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_imak.png'
         },
         {
+          'id': 'agrimat_rimat',
           'title': 'Agrimat-rimat Bassit a Bituen',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_bituen.png'
         },
         {
+          'id': 'bassit_a_lawwalawwa',
           'title': 'Bassit a Lawwalawwa',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_lawwa.png'
         },
         {
+          'id': 'lay_lay_lay',
           'title': 'Lay, Lay, Lay, Apo Lakay',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_lakay.png'
         },
         {
+          'id': 'maysa_dua_baduya',
           'title': 'Maysa, Dua, Baduya',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_baduya.png'
         },
         {
+          'id': 'ni_nanangko',
           'title': 'Ni Nanangko',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_nanang.png'
         },
         {
+          'id': 'adda_bullilisingko',
           'title': 'Adda Bullilisingko',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_bullilis.png'
         },
         {
+          'id': 'da_tarong',
           'title': 'Da Tarong, Kamatis ken Paria',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_tarong.png'
         },
         {
+          'id': 'nanumo_a_kalapaw',
           'title': 'Nanumo a Kalapaw',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_kalapaw.png'
         },
         {
+          'id': 'nagmulaak_iti_katuday',
           'title': 'Nagmulaak iti Katuday',
           'completed': false,
           'type': 'song',
           'image': 'assets/images/song_katuday.png'
         },
         {
+          'id': 'lima_a_tinapay',
           'title': 'Lima a Tinapay ken dua nga Ikan',
           'completed': false,
           'type': 'song',
@@ -201,388 +230,22 @@ class _MagbasaScreenState extends State<MagbasaScreen>
   };
 
   // ── Poem data ──────────────────────────────────────────────────────────────
-  final Map<String, Map<String, dynamic>> _poemData = {
-    'Sipsipat': {
-      'title': 'Sipsipat',
-      'content': [
-        'Sipsipat, sipsipat',
-        'Addaanak patupat',
-        'Kanek ti agpatpatnag',
-        'Bayat ti panagbasak',
-      ],
-      'image': 'assets/images/poem1.png',
-    },
-    'Adda Asok': {
-      'title': 'Adda Asok',
-      'content': [
-        'Adda asok',
-        'Bond Puraw a burbor',
-        'Gog-gog-gog-gog',
-        'No agtaul',
-        'Titit, asok, gog-gog-gog',
-        'Titit, asok, gog-gog-gog-gog!',
-      ],
-      'image': 'assets/images/poem2.png',
-    },
-    'Ti Pusak': {
-      'title': 'Ti Pusak',
-      'content': [
-        'Adda pusak a bassit',
-        'Kolornat nangisit',
-        'Dina kayat ti pansit',
-        'Ngem kayatnat ikan a babassit.',
-        '',
-        'Tunggal makitanak ti pusak',
-        'Dagus nga asitgannak',
-        'Miaw-miaw-miaw kunana',
-        'Ikkak metten iti kanenna',
-      ],
-      'image': 'assets/images/poem3.png',
-    },
-    'Ni Tatang': {
-      'title': 'Ni Tatang',
-      'content': [
-        'Ni Tatang naanus unay',
-        'No tiempo ti tudtudo',
-        'Isu pay ti nangted balay',
-        'Isu pay ti mangituray',
-        'Kadakami nga agkakabbalay.',
-        '',
-        'Mapan latta agarado',
-        'Agmulmulat nadumaduma',
-        'A taraon ti pamiliana.',
-      ],
-      'image': 'assets/images/poem4.png',
-    },
-    'Panagsepilio': {
-      'title': 'Panagsepilio',
-      'content': [
-        'Panagsepilio',
-        'Agmalem, mamitlo',
-        'Sang-aw, nabanglo',
-        'Nakaprespresko',
-      ],
-      'image': 'assets/images/poem5.png',
-    },
-  };
+  Map<String, Map<String, dynamic>> get _poemData {
+    MagbasaContent.setLanguage(_currentLang);
+    return MagbasaContent.getPoemData();
+  }
 
   // ── Story data ─────────────────────────────────────────────────────────────
-  final Map<String, Map<String, dynamic>> _storyData = {
-    'Ni Marti ken Kalapati': {
-      'title': 'Ni Marti ken Kalapati',
-      'content': [
-        'Maysa nga aldaw, nagpasiar ni Marti idiay igid ti kali.',
-        'Nakakita ni Marti iti kalapati idiay igid ti kali.',
-        'Nakita ni Marti a tukkol gayam ti payyak ti kalapati.',
-        'Pinidut ni Marti ti kalapati ket inyawidna idiay balayda.',
-        'Impupok ni Marti ti kalapati sana inagasan.',
-        'Pinakan ken pinainum ni Marti ti kalapati.',
-        'Idi immimbagen, pinalsutan ni Marti ti kalapati.',
-        'Makaay-ayat ni Marti ta natulonganna ti kalapati.',
-      ],
-      'image': 'assets/images/kwento1.png',
-    },
-    'Ni Didi a Naayat iti Kendi': {
-      'title': 'Ni Didi a Naayat iti Kendi',
-      'content': [
-        'Naayat ni Didi iti kendi.',
-        'Tunggal ikkan ni Nanangna iti balonna a kuarta iti inaldaw, igatang amin ni Didi iti kendi.',
-        'Inaldaw latta a mangmangan ni Didi iti kendi.',
-        'Uray idiay balayda, adda latta kendi a kankanen ni Didi.',
-        'Kasta unay sakit ti ngipenna.',
-        'Maysa nga aldaw, nangliwat ni Didi idiay eskuelada.',
-        'Impakita ni Nanangna iti dentista.',
-        'Naduktalan ti dentista nga adu ti naperdi a ngipen ni Didi.',
-        'Nanipud idin, saanen a mangmangan ni Didi iti kendi.',
-      ],
-      'image': 'assets/images/kwento2.png',
-    },
-    'Ni Milio a Managsepilio': {
-      'title': 'Ni Milio a Managsepilio',
-      'content': [
-        'Managsepilio ni Milio.',
-        'Tunggal malpas a mangan, agsepilio a kanayon ni Milio.',
-        'Maysa nga aldaw, nagtsek ni Maestrana iti ngipen dagiti adalanna.',
-        'Nadlaw ni Maestrana a nadalus dagiti ngipen ni Milio.',
-        'Pinalakpakanda ni Milio.',
-        'Naragsak a nagawid ni Milio.',
-        'Intultuloy ni Milio ti kanayon nga inna panagsepilio.',
-      ],
-      'image': 'assets/images/kwento3.png',
-    },
-    'Ni Neneng a Dina Kayat ti Nateng': {
-      'title': 'Ni Neneng a Dina Kayat ti Nateng',
-      'content': [
-        'Di pulos kayat ni Neneng ti agsida iti nateng.',
-        'Uray no ibaga ni Nanangna nga agsida iti nateng, di latta kayat ni Neneng.',
-        'Maysa nga aldaw, nagkapsut ni Neneng idiay eskuelada.',
-        'Impan ti Maestrana ni Neneng iti klinika.',
-        'Naammuan ti doktor a saan nga agsidsida ni Neneng iti nateng.',
-        'Imbaga ti doktor nga agsida ni Neneng iti nateng.',
-        'Manipud idin, kanayonen nga agsidsida ni Neneng iti nateng.',
-      ],
-      'image': 'assets/images/kwento4.png',
-    },
-    'Ni Kikay a di Agsagsaysay': {
-      'title': 'Ni Kikay a di Agsagsaysay',
-      'content': [
-        'Di pulos kayat ni Kikay ti agsagaysay.',
-        'Uray ayaban ni Nanangna, di latta pulos kayat ni Kikay ti agsagaysay.',
-        'Idiay eskuelada, awan manggayat a makikatugaw kenni Kikay.',
-        'Rugpaw ti buokna ken adu pay ti kutona.',
-        'Nagsangsangit ni Kikay ta awan mayat a makiay-ayam kenkuana.',
-        'Idi agawid idiay balayda kalpasan ti klaseda, nakasabat iti baket.',
-        'Rugpaw ti buok ti baket.',
-        'Nagbuteng ni Kikay ket nagtartaray a nagawid balayda.',
-        'Manipud idin, kanayonen nga agsagsagaysay ni Kikay.',
-        'Immadu dagiti gagayyemna ket kanayon payen a naragsak ni Kikay.',
-      ],
-      'image': 'assets/images/kwento5.png',
-    },
-  };
+  Map<String, Map<String, dynamic>> get _storyData {
+    MagbasaContent.setLanguage(_currentLang);
+    return MagbasaContent.getStoryData();
+  }
 
   // ── Song data ──────────────────────────────────────────────────────────────
-  final Map<String, Map<String, dynamic>> _songData = {
-    'Ania ti Naganmo?': {
-      'title': 'Ania ti Naganmo?',
-      'tune': 'Audio Recording',
-      'lyrics': [
-        'Ania ti naganmo',
-        'Ibagam man gayyemko',
-        'Abrasaenta man',
-        'Dayta dakulapmo',
-        'Aginnisemta pay',
-        'Iti makaay-ayo',
-        'Agsala, agkanta',
-        'Itung-ed ti ulo.',
-      ],
-      'image': 'assets/images/song_nagan.png',
-      'audioPath': 'audio/Ania ti Nagan Mo by Kurtjam Kyle Silva Nono.mp3',
-      'action': 'Wave hands and dance',
-    },
-    'Ania ti Nagan Mo (Full)': {
-      'title': 'Ania ti Nagan Mo (Full)',
-      'tune': 'Leron, Leron Sinta',
-      'lyrics': [
-        'Ania ti naganmo',
-        'Ibagam man gayyemko',
-        'Abrasaenta man',
-        'Dayta dakulapmo',
-        'Aginnisemta pay',
-        'Iti makaay-ayo',
-        'Agsala, agkanta',
-        'Itung-ed ti ulo.',
-      ],
-      'image': 'assets/images/song_nagan.png',
-      'action': 'Listen and follow the song',
-    },
-    'Uppat a Pato': {
-      'title': 'Uppat a Pato',
-      'tune': 'Original',
-      'lyrics': [
-        'Uppat a pato',
-        'Ti nakitak',
-        'Dua ti nalukmeg',
-        'Dua ti nakuttong',
-        'Agkukuyogda',
-        'Ngem tay kabassitan',
-        'Atiddog ti ipusna',
-        'Karinggoran kunana',
-        '"Kuak-kuak-kuak!"',
-      ],
-      'image': 'assets/images/song_pato.png',
-      'action': 'Count with fingers and waddle like a duck',
-    },
-    'Duat\' Imak': {
-      'title': 'Duat\' Imak',
-      'tune': 'I Have Two Hands',
-      'lyrics': [
-        'Duat imak',
-        'Kannigid ken kannawan',
-        'Ingatok ida nadalusda',
-        'Agsipatda, maysa, dua',
-        '',
-        'Nadalus nga ima, makaay-ayoda.',
-      ],
-      'image': 'assets/images/song_imak.png',
-      'action': 'Show your hands and clap',
-    },
-    'Agrimat-rimat Bassit a Bituen': {
-      'title': 'Agrimat-rimat Bassit a Bituen',
-      'tune': 'Twinkle, Twinkle Little Star',
-      'lyrics': [
-        'Agrimat-rimat, bassit a bituen',
-        'Masdaawannak no aniaka',
-        'Idiay ngatuen ti lubong',
-        'Kasla diamante idiay langit',
-        'Agrimat-rimat, bassit a bituen',
-        'Masdaawannak no aniaka.',
-      ],
-      'image': 'assets/images/song_bituen.png',
-      'action': 'Twinkle fingers like stars',
-    },
-    'Bassit a Lawwalawwa': {
-      'title': 'Bassit a Lawwalawwa',
-      'tune': 'Itsy Bitsy Spider',
-      'lyrics': [
-        'Bassit a lawwalawwa',
-        'Immuli diay sanga',
-        'Rimmuar ti tudo',
-        'Dagus nagbasa',
-        'Rimmuar ti init',
-        'Amin nagmaga',
-        'Bassit a lawwalawwa',
-        'Immuli diay sanga',
-      ],
-      'image': 'assets/images/song_lawwa.png',
-      'action': 'Spider hand movements climbing up',
-    },
-    'Lay, Lay, Lay, Apo Lakay': {
-      'title': 'Lay, Lay, Lay, Apo Lakay',
-      'tune': 'Fly, Fly, the Butterfly',
-      'lyrics': [
-        'Lay, lay, lay, Apo Lakay',
-        'Pimmasiar idiay Paoay',
-        'Gimmatang iti wasay',
-        'Lay, lay, lay, Apo Lakay.',
-        '',
-        'Lay, lay, lay, Apo Lakay',
-        'Nagbaklay iti pagay',
-        'Iti tambak nagtalaytay',
-        'Lay, lay, lay, Apo Lakay.',
-        '',
-        'Lay, lay, lay, Apo Lakay',
-        'Simmang-at sadiay bantay',
-        'Agala iti lipay',
-        'Lay, lay, lay, Apo Lakay.',
-        '',
-        'Lay, lay, lay, Apo Lakay',
-        'Nagpakat iti sigay',
-        'Pagala iti layalay',
-        'Lay, lay, lay, Apo Lakay.',
-      ],
-      'image': 'assets/images/song_lakay.png',
-      'action': 'Flutter like a butterfly',
-    },
-    'Maysa, Dua, Baduya': {
-      'title': 'Maysa, Dua, Baduya',
-      'tune': 'Original',
-      'lyrics': [
-        'Maysa, dua, baduya',
-        'Tallo, uppat, patupat',
-        'Lima, innem, kankanen',
-        'Pito, walo, ginao',
-        'Siam, pullo, mangantayo',
-        'Lubi-lubi.',
-      ],
-      'image': 'assets/images/song_baduya.png',
-      'action': 'Count with fingers 1-10',
-    },
-    'Ni Nanangko': {
-      'title': 'Ni Nanangko',
-      'tune': 'Original',
-      'lyrics': [
-        'Ni Nanangko ay-ayatennak',
-        'Ub-ubbaennak no masakitak',
-        'Barukongnat pagsadsadagak',
-        'Ayatna nga agbiagak.',
-        '',
-        'Naragsak ti aldaw ni Nanangko',
-        'Nayanak iti bulan ti Mayo',
-        'Panaglalangto ti kaykayo',
-        'Bungbungadat adu.',
-      ],
-      'image': 'assets/images/song_nanang.png',
-      'action': 'Hug yourself and sway',
-    },
-    'Adda Bullilisingko': {
-      'title': 'Adda Bullilisingko',
-      'tune': 'Original',
-      'lyrics': [
-        'Adda bullilisingko',
-        'A nalaing nga agsirko',
-        'Dutdotnat makaayayo',
-        'Adu ti agrayo.',
-        '',
-        'Gustona ti saba',
-        'Ibusennat maysa',
-        'Ngem no ngadan kumanta',
-        'Ay maayayoka.',
-      ],
-      'image': 'assets/images/song_bullilis.png',
-      'action': 'Flap arms like a chicken',
-    },
-    'Da Tarong, Kamatis ken Paria': {
-      'title': 'Da Tarong, Kamatis ken Paria',
-      'tune': 'Original',
-      'lyrics': [
-        'Iti bigbigat nga agsapa',
-        'Agtatamdagak man idiay tawa',
-        'Adda da Tarong, Kamatis Paria',
-        'Nangngegko ida nga agsasarita',
-        '',
-        'Ti kunan Tarong kadakuada',
-        'Siak kaimasan kadakay a dua',
-        'Ni ngarud Paria simmungbat ita',
-        'Bay-am man, Tarong napalangguadka.',
-        '',
-        'Ni Kamatis immisem laeng',
-        'Ay kakabsatko inkay agparbeng',
-        'Ta no addaak iti dinengdeng',
-        'Ni pinakbet naimas laeng.',
-      ],
-      'image': 'assets/images/song_tarong.png',
-      'action': 'Point to different vegetables',
-    },
-    'Nanumo a Kalapaw': {
-      'title': 'Nanumo a Kalapaw',
-      'tune': 'Bahay Kubo',
-      'lyrics': [
-        'Nanumo a kalapaw',
-        'Kawayan ken pan-aw',
-        'Ngem napno ti aglawlaw',
-        'Natnateng naimas unay',
-        'Karabasa, tabungaw',
-        'Kamatis, marunggay',
-        'Tarong, sili, patani',
-      ],
-      'image': 'assets/images/song_kalapaw.png',
-      'action': 'Make roof shape with hands',
-    },
-    'Nagmulaak iti Katuday': {
-      'title': 'Nagmulaak iti Katuday',
-      'tune': 'Magtanim ay di Biro',
-      'lyrics': [
-        'Nagmulaak iti katuday',
-        'Idiay igid ti bambantay',
-        'Napan met kinaraykay',
-        'Ni nadawel a kannaway.',
-        '',
-        'Aluadam kannaway',
-        'Ta putputdek ta ramramay',
-        'Aramidek a sagaysay',
-        'Sagaysay ni Lola Kikay.',
-      ],
-      'image': 'assets/images/song_katuday.png',
-      'action': 'Planting motion',
-    },
-    'Lima a Tinapay ken dua nga Ikan': {
-      'title': 'Lima a Tinapay ken dua nga Ikan',
-      'tune': 'Original',
-      'lyrics': [
-        'Lima a tinapay ken dua nga ikan (3x)',
-        'Intugot diay ubing',
-        '',
-        'Lima a tinapay ken dua nga ikan (3x)',
-        'Ni Hesus nagkararag.',
-        '',
-        'Immadu tay tinapay, immadu met tay ikan (3x)',
-        'Ket nabsogda amin.',
-      ],
-      'image': 'assets/images/song_tinapay.png',
-      'action': 'Show five fingers then two fingers',
-    },
-  };
+  Map<String, Map<String, dynamic>> get _songData {
+    MagbasaContent.setLanguage(_currentLang);
+    return MagbasaContent.getSongData();
+  }
 
   // ─────────────────────────────────────────────────────────────────────────
   //  Lifecycle
@@ -678,7 +341,6 @@ class _MagbasaScreenState extends State<MagbasaScreen>
       if (!mounted) return;
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       userProvider.updateMagbasaProgress(category, activityIndex, true);
-      userProvider.addStars(3);
     }
   }
 
@@ -743,7 +405,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          Translations.getMagbasaTitle(context),
+          AppLocalizations.of(context)!.magbasaTitle,
           style: const TextStyle(
               color: AppColors.textDark,
               fontSize: 20,
@@ -798,7 +460,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      Translations.getTotalProgress(context),
+                      AppLocalizations.of(context)!.totalProgress,
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -829,7 +491,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                     ]),
                     const SizedBox(height: 4),
                     Text(
-                      '$totalCompleted/$totalActivities ${Translations.getCompleted(context).toLowerCase()}',
+                      '$totalCompleted/$totalActivities ${AppLocalizations.of(context)!.completed.toLowerCase()}',
                       style: TextStyle(
                           color: Colors.white.withOpacity(0.9), fontSize: 12),
                     ),
@@ -880,10 +542,10 @@ class _MagbasaScreenState extends State<MagbasaScreen>
     final catImage = data['image'] as String;
 
     String title = category == 'tula'
-        ? Translations.getPoems(context)
+        ? AppLocalizations.of(context)!.poems
         : category == 'kwento'
-            ? Translations.getStories(context)
-            : Translations.getSongs(context);
+            ? AppLocalizations.of(context)!.stories
+            : AppLocalizations.of(context)!.songs;
 
     return Container(
       color: Colors.grey.shade50,
@@ -973,14 +635,21 @@ class _MagbasaScreenState extends State<MagbasaScreen>
             itemCount: activities.length,
             itemBuilder: (_, index) {
               final activity = activities[index];
+              final id = activity['id'] as String;
+              final contentData = category == 'tula'
+                  ? _poemData[id]
+                  : category == 'kwento'
+                      ? _storyData[id]
+                      : _songData[id];
+              final displayTitle = contentData?['title'] ?? activity['title'];
               return _buildActivityItem(
-                title: activity['title'],
+                title: displayTitle,
                 type: activity['type'],
                 isCompleted: activity['completed'],
                 color: color,
                 imagePath: activity['image'],
-                onTap: () => _navigateToActivity(
-                    category, index, activity['title'], activity['type']),
+                onTap: () =>
+                    _navigateToActivity(category, index, id, activity['type']),
               );
             },
           ),
@@ -1076,7 +745,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                               color: color.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12)),
                           child: Text(
-                            Translations.getCompleted(context),
+                            AppLocalizations.of(context)!.completed,
                             style: TextStyle(
                                 fontSize: 11,
                                 color: color,
@@ -1107,14 +776,17 @@ class _MagbasaScreenState extends State<MagbasaScreen>
   }
 
   Future<void> _navigateToActivity(
-      String category, int index, String title, String type) async {
+      String category, int index, String id, String type) async {
     Widget screen;
     if (category == 'tula') {
-      screen = PoemScreen(poemTitle: title, poemData: _poemData[title]!);
+      final data = _poemData[id]!;
+      screen = PoemScreen(poemTitle: data['title'], poemData: data);
     } else if (category == 'kwento') {
-      screen = StoryScreen(storyTitle: title, storyData: _storyData[title]!);
+      final data = _storyData[id]!;
+      screen = StoryScreen(storyTitle: data['title'], storyData: data);
     } else {
-      screen = SongScreen(songTitle: title, songData: _songData[title]!);
+      final data = _songData[id]!;
+      screen = SongScreen(songTitle: data['title'], songData: data);
     }
 
     final completed = await Navigator.push<bool>(
@@ -1167,7 +839,7 @@ class PoemScreen extends StatelessWidget {
                 icon: const Icon(Icons.check_circle_outline,
                     color: Colors.white, size: 18),
                 label: Text(
-                  Translations.getDone(context),
+                  AppLocalizations.of(context)!.done,
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
@@ -1346,12 +1018,12 @@ class PoemScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         scrollable: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.check_circle, color: _poemColor, size: 48),
             SizedBox(height: 16),
-            Text('✓ Nalpas! Naimbag ti panagbasam!',
+            Text(AppLocalizations.of(context)!.readingFinishedGood,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -1412,7 +1084,7 @@ class StoryScreen extends StatelessWidget {
                 icon: const Icon(Icons.check_circle_outline,
                     color: Colors.white, size: 18),
                 label: Text(
-                  Translations.getDone(context),
+                  AppLocalizations.of(context)!.done,
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
@@ -1614,12 +1286,12 @@ class StoryScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         scrollable: true,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.check_circle, color: _storyColor, size: 48),
             SizedBox(height: 16),
-            Text('✓ Nalpas! Naragsak ti panagbasam!',
+            Text(AppLocalizations.of(context)!.readingFinishedHappy,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -1802,7 +1474,7 @@ class _SongScreenState extends State<SongScreen>
             onPressed: () {
               setState(() => _isCompleted = true);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(Translations.getCompleted(context)),
+                content: Text(AppLocalizations.of(context)!.completed),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
@@ -1814,7 +1486,7 @@ class _SongScreenState extends State<SongScreen>
               });
             },
             child: Text(
-              Translations.getDone(context),
+              AppLocalizations.of(context)!.done,
               style: const TextStyle(
                   color: Colors.white, fontWeight: FontWeight.bold),
             ),
@@ -1852,7 +1524,7 @@ class _SongScreenState extends State<SongScreen>
 
           const SizedBox(height: 12),
           Text(
-            '${Translations.getTune(context)}: $tune',
+            '${AppLocalizations.of(context)!.tune}: $tune',
             style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade600,
@@ -1870,7 +1542,7 @@ class _SongScreenState extends State<SongScreen>
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               const Icon(Icons.directions_run, color: _songColor),
               const SizedBox(width: 8),
-              Text('${Translations.getAction(context)}: $action',
+              Text('${AppLocalizations.of(context)!.action}: $action',
                   style: const TextStyle(fontWeight: FontWeight.w500)),
             ]),
           ),

@@ -1,8 +1,8 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 
 class AchievementsScreen extends StatelessWidget {
   const AchievementsScreen({super.key});
@@ -68,7 +68,7 @@ class AchievementsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          Translations.getAchievements(context),
+          AppLocalizations.of(context)!.achievements,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -123,7 +123,7 @@ class AchievementsScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    Translations.getStars(context),
+                    AppLocalizations.of(context)!.stars,
                     style: const TextStyle(
                       fontSize: 18,
                       color: AppColors.textLight,
@@ -144,111 +144,127 @@ class AchievementsScreen extends StatelessWidget {
                 children: [
                   _buildAchievementCard(
                     context,
-                    title: 'First Steps',
+                    title: AppLocalizations.of(context)!.achievementFirstSteps,
                     emoji: '👣',
                     color: AppColors.alphabet,
                     progress: achievements['firstSteps'] ?? 0,
                     total: 1,
-                    description: 'Complete your first activity',
+                    description:
+                        AppLocalizations.of(context)!.achievementFirstStepsDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Alphabet Master',
+                    title:
+                        AppLocalizations.of(context)!.achievementAlphabetMaster,
                     emoji: '🔤',
                     color: AppColors.alphabet,
                     progress: achievements['alphabet'] ?? 0,
                     total: 1,
-                    description: 'Complete all Magbasa Tayo activities',
+                    description: AppLocalizations.of(context)!
+                        .achievementAlphabetMasterDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Number Wizard',
+                    title:
+                        AppLocalizations.of(context)!.achievementNumberWizard,
                     emoji: '🔢',
                     color: AppColors.numbers,
                     progress: achievements['numbers'] ?? 0,
                     total: 1,
-                    description: 'Complete 20 Matematika games',
+                    description: AppLocalizations.of(context)!
+                        .achievementNumberWizardDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Color Artist',
+                    title: AppLocalizations.of(context)!.achievementColorArtist,
                     emoji: '🎨',
                     color: AppColors.colors,
                     progress: achievements['colors'] ?? 0,
                     total: 1,
-                    description: 'Complete all Kulay-Saya activities',
+                    description: AppLocalizations.of(context)!
+                        .achievementColorArtistDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Shape Creator',
+                    title:
+                        AppLocalizations.of(context)!.achievementShapeCreator,
                     emoji: '⬛',
                     color: AppColors.shapes,
                     progress: achievements['shapes'] ?? 0,
                     total: 1,
-                    description: 'Complete all uppercase letters',
+                    description: AppLocalizations.of(context)!
+                        .achievementShapeCreatorDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Animal Friend',
+                    title:
+                        AppLocalizations.of(context)!.achievementAnimalFriend,
                     emoji: '🐶',
                     color: AppColors.animals,
                     progress: achievements['animals'] ?? 0,
                     total: 1,
-                    description: 'Complete all lowercase letters',
+                    description: AppLocalizations.of(context)!
+                        .achievementAnimalFriendDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Bookworm',
+                    title: AppLocalizations.of(context)!.achievementBookworm,
                     emoji: '📚',
                     color: AppColors.body,
                     progress: achievements['bookworm'] ?? 0,
                     total: 1,
-                    description: 'Complete all stories',
+                    description:
+                        AppLocalizations.of(context)!.achievementBookwormDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Star Student',
+                    title: AppLocalizations.of(context)!.achievementStarStudent,
                     emoji: '⭐',
                     color: Colors.amber,
                     progress: achievements['starStudent'] ?? 0,
                     total: 1,
-                    description: 'Complete 20 Ang Aking Sarili games',
+                    description: AppLocalizations.of(context)!
+                        .achievementStarStudentDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Math Whiz',
+                    title: AppLocalizations.of(context)!.achievementMathWhiz,
                     emoji: '🧮',
                     color: AppColors.numbers,
                     progress: achievements['mathWhiz'] ?? 0,
                     total: 1,
-                    description: 'Complete all Matematika levels',
+                    description:
+                        AppLocalizations.of(context)!.achievementMathWhizDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Family Hero',
+                    title: AppLocalizations.of(context)!.achievementFamilyHero,
                     emoji: '👨‍👩‍👧',
                     color: AppColors.family,
                     progress: achievements['familyHero'] ?? 0,
                     total: 1,
-                    description: 'Complete all Ang Aking Sarili levels',
+                    description:
+                        AppLocalizations.of(context)!.achievementFamilyHeroDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Writing Star',
+                    title: AppLocalizations.of(context)!.achievementWritingStar,
                     emoji: '✏️',
                     color: Colors.orange,
                     progress: achievements['writingStar'] ?? 0,
                     total: 1,
-                    description: 'Complete all numbers',
+                    description: AppLocalizations.of(context)!
+                        .achievementWritingStarDesc,
                   ),
                   _buildAchievementCard(
                     context,
-                    title: 'Songbird',
+                    title: AppLocalizations.of(context)!.achievementSongbird,
                     emoji: '🎵',
                     color: AppColors.colors,
                     progress: achievements['songbird'] ?? 0,
                     total: 1,
-                    description: 'Complete 10 songs',
+                    description:
+                        AppLocalizations.of(context)!.achievementSongbirdDesc,
                   ),
                 ],
               ),

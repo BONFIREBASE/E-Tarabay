@@ -412,37 +412,8 @@ class UserProvider extends ChangeNotifier {
   }
 
   // MATEMATIKA PROGRESS
-  Future<void> updateMatematikaProgress(
-      int level, int stars, int score, int streak) async {
+  Future<void> updateMatematikaProgress(int streak) async {
     await _ensureInitialized();
-    List<dynamic> completedLevels = _progressBox.get('matematika_levels') ??
-        [false, false, false, false, false, false, false];
-
-    // Only add stars if this level wasn't previously completed
-    bool isNewCompletion = false;
-    if (level < completedLevels.length) {
-      if (completedLevels[level] == false) {
-        isNewCompletion = true;
-      }
-      completedLevels[level] = true;
-      await _progressBox.put('matematika_levels', completedLevels);
-    }
-
-    if (isNewCompletion) {
-      int currentStars = _progressBox.get('matematika_stars') ?? 0;
-      await _progressBox.put('matematika_stars', currentStars + stars);
-
-      int currentScore = _progressBox.get('matematika_total') ?? 0;
-      await _progressBox.put('matematika_total', currentScore + score);
-
-      if (_prefs != null) {
-        await _prefs!.setInt('matematika_total', (currentScore + score));
-        await _prefs!.setInt('matematika_stars', (currentStars + stars));
-      }
-
-      // AWARD TO MAIN USER PROFILE
-      await addStars(stars);
-    }
 
     await _progressBox.put('matematika_streak', streak);
     await _progressBox.put(
@@ -451,6 +422,38 @@ class UserProvider extends ChangeNotifier {
     if (_prefs != null) {
       await _prefs!.setInt('matematika_streak', streak);
     }
+
+    await _syncToFirebase();
+    notifyListeners();
+  }
+
+  Future<void> awardMatematikaLevelCompletion(
+      int level, int stars, int score) async {
+    await _ensureInitialized();
+    List<dynamic> completedLevels = _progressBox.get('matematika_levels') ??
+        [false, false, false, false, false, false, false];
+
+    if (level >= completedLevels.length) return;
+
+    bool isNewCompletion = completedLevels[level] == false;
+    if (!isNewCompletion) return;
+
+    completedLevels[level] = true;
+    await _progressBox.put('matematika_levels', completedLevels);
+
+    int currentStars = _progressBox.get('matematika_stars') ?? 0;
+    await _progressBox.put('matematika_stars', currentStars + stars);
+
+    int currentScore = _progressBox.get('matematika_total') ?? 0;
+    await _progressBox.put('matematika_total', currentScore + score);
+
+    if (_prefs != null) {
+      await _prefs!.setInt('matematika_total', (currentScore + score));
+      await _prefs!.setInt('matematika_stars', (currentStars + stars));
+    }
+
+    // AWARD TO MAIN USER PROFILE
+    await addStars(stars);
 
     await _syncToFirebase();
     notifyListeners();
@@ -473,15 +476,6 @@ class UserProvider extends ChangeNotifier {
     // Ensure consistency:
     if (isNewGameCompletion) {
       // Logic to ensure level is marked as started/touched
-    }
-
-    // Update level completion in Hive (if all games in level are done)
-    List<dynamic> completedLevels = List.from(
-        _progressBox.get('matematika_levels') ??
-            [false, false, false, false, false, false, false]);
-    if (level < completedLevels.length) {
-      completedLevels[level] = true;
-      await _progressBox.put('matematika_levels', completedLevels);
     }
 
     // Update SharedPreferences
@@ -605,13 +599,27 @@ class UserProvider extends ChangeNotifier {
       await _prefs!.setInt('pamilya_streak', streak + 1);
     }
 
-    // Update level completion in Hive
+    await _syncToFirebase();
+    notifyListeners();
+  }
+
+  Future<void> awardPamilyaLevelCompletion(int categoryIndex, int level) async {
+    await _ensureInitialized();
+    if (!_isInitialized) return;
+
     final globalIdx = categoryIndex == 0 ? level : 4 + level;
     List<dynamic> completedLevels =
         List.from(_progressBox.get('pamilya_levels') ?? List.filled(9, false));
-    if (globalIdx < completedLevels.length) {
-      completedLevels[globalIdx] = true;
-      await _progressBox.put('pamilya_levels', completedLevels);
+    if (globalIdx >= completedLevels.length) return;
+
+    bool isNewCompletion = completedLevels[globalIdx] == false;
+    if (!isNewCompletion) return;
+
+    completedLevels[globalIdx] = true;
+    await _progressBox.put('pamilya_levels', completedLevels);
+
+    if (_prefs != null) {
+      await _prefs!.setBool('pamilya_level_$globalIdx', true);
     }
 
     await _syncToFirebase();
@@ -1312,6 +1320,11 @@ class UserProvider extends ChangeNotifier {
   bool isKulayActivityCompleted(String activity) {
     if (!_isInitialized) return false;
     return _progressBox.get('kulay_$activity') ?? false;
+  }
+
+  bool isKulayPageCompleted(String category, int index) {
+    if (!_isInitialized) return false;
+    return _progressBox.get('kulay_page_${category}_$index') ?? false;
   }
 
   bool isSundanActivityCompleted(String mode, int index) {

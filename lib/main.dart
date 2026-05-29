@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -175,6 +177,27 @@ void main() async {
   );
 }
 
+// Fallback delegate that loads English MaterialLocalizations for unsupported locales
+class _MaterialFallback extends LocalizationsDelegate<MaterialLocalizations> {
+  const _MaterialFallback();
+
+  static const delegate = _MaterialFallback();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) async {
+    final target = GlobalMaterialLocalizations.delegate.isSupported(locale)
+        ? locale
+        : const Locale('en');
+    return GlobalMaterialLocalizations.delegate.load(target);
+  }
+
+  @override
+  bool shouldReload(_MaterialFallback old) => false;
+}
+
 class ETarabayApp extends StatelessWidget {
   const ETarabayApp({super.key});
 
@@ -183,6 +206,20 @@ class ETarabayApp extends StatelessWidget {
     return MaterialApp(
       title: 'E-Tarabay',
       debugShowCheckedModeBanner: false,
+      locale:
+          Locale(Provider.of<LanguageProvider>(context).currentLanguageCode),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        _MaterialFallback.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('fil'),
+        Locale('ilo'),
+      ],
       theme: ThemeData(
         useMaterial3: true,
         primaryColor: AppColors.primary,

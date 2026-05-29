@@ -1,3 +1,4 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constants.dart';
@@ -314,7 +315,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           color: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Para sa mga Nagannak',
+        title: Text(AppLocalizations.of(context)!.forParents,
             style: TextStyle(
                 color: AppColors.textDark,
                 fontSize: 18,
@@ -327,7 +328,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
               setState(() => _isLoading = true);
               _loadAllProgress();
             },
-            tooltip: 'Refresh',
+            tooltip: AppLocalizations.of(context)!.refresh,
           ),
         ],
         bottom: PreferredSize(
@@ -337,12 +338,12 @@ class _ForParentsScreenState extends State<ForParentsScreen>
             indicatorColor: AppColors.primary,
             labelColor: AppColors.primary,
             unselectedLabelColor: Colors.grey,
-            tabs: const [
-              Tab(text: 'Overview'),
-              Tab(text: 'Kulay-Saya'),
-              Tab(text: 'Sundan Mo'),
-              Tab(text: 'Magbasa'),
-              Tab(text: 'Matematika'),
+            tabs: [
+              Tab(text: AppLocalizations.of(context)!.overviewTab),
+              Tab(text: AppLocalizations.of(context)!.kulaySaya),
+              Tab(text: AppLocalizations.of(context)!.sundanMoTab),
+              Tab(text: AppLocalizations.of(context)!.magbasaTab),
+              Tab(text: AppLocalizations.of(context)!.matematikaTab),
             ],
           ),
         ),
@@ -384,17 +385,18 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           gradient: [const Color(0xFF667EEA), const Color(0xFF764BA2)],
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [
-              Icon(Icons.waving_hand_rounded, color: Colors.white, size: 28),
-              SizedBox(width: 10),
-              Text('Kumusta!',
+            Row(children: [
+              const Icon(Icons.waving_hand_rounded,
+                  color: Colors.white, size: 28),
+              const SizedBox(width: 10),
+              Text(AppLocalizations.of(context)!.hello,
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold)),
             ]),
             const SizedBox(height: 6),
-            Text("Narito ang progreso ng inyong anak sa E-Tarabay.",
+            Text(AppLocalizations.of(context)!.forParentsSubtitle,
                 style: TextStyle(
                     color: Colors.white.withOpacity(0.9), fontSize: 13)),
           ]),
@@ -406,9 +408,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Expanded(
               child: _summaryCard(
             icon: '🎨',
-            label: 'Kulay-Saya',
+            label: AppLocalizations.of(context)!.kulaySaya,
             value: '$totalKulay/$maxKulay',
-            subtitle: 'pahina',
+            subtitle: AppLocalizations.of(context)!.pagesLabel,
             color: Colors.orange,
             progress: maxKulay > 0 ? totalKulay / maxKulay : 0,
           )),
@@ -416,9 +418,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Expanded(
               child: _summaryCard(
             icon: '✏️',
-            label: 'Sundan Mo',
+            label: AppLocalizations.of(context)!.sundanMoTab,
             value: '$totalSundan/$maxSundan',
-            subtitle: 'letra',
+            subtitle: AppLocalizations.of(context)!.lettersLabel,
             color: Colors.indigo,
             progress: maxSundan > 0 ? totalSundan / maxSundan : 0,
           )),
@@ -430,9 +432,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Expanded(
               child: _summaryCard(
             icon: '📖',
-            label: 'Magbasa',
+            label: AppLocalizations.of(context)!.magbasaTab,
             value: '$totalMagbasa/$maxMagbasa',
-            subtitle: 'aktibidad',
+            subtitle: AppLocalizations.of(context)!.activitiesLabel,
             color: const Color(0xFFFF6B6B),
             progress: maxMagbasa > 0 ? totalMagbasa / maxMagbasa : 0,
           )),
@@ -440,9 +442,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Expanded(
               child: _summaryCard(
             icon: '🔢',
-            label: 'Matematika',
+            label: AppLocalizations.of(context)!.matematikaTab,
             value: '$totalMat/$maxMat',
-            subtitle: 'laro',
+            subtitle: AppLocalizations.of(context)!.gamesLabel,
             color: Colors.teal,
             progress: maxMat > 0 ? totalMat / maxMat : 0,
           )),
@@ -452,9 +454,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Expanded(
               child: _summaryCard(
             icon: '🖼️',
-            label: 'Mga Obra',
+            label: AppLocalizations.of(context)!.artworksLabel,
             value: '$_kulayTotalCreations',
-            subtitle: 'nasave',
+            subtitle: AppLocalizations.of(context)!.savedCountLabel,
             color: Colors.teal,
             progress: null,
           )),
@@ -462,9 +464,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Expanded(
               child: _summaryCard(
             icon: '🖊️',
-            label: 'Mga Subukan',
+            label: AppLocalizations.of(context)!.attemptsLabel,
             value: '$_sundanTotalAttempts',
-            subtitle: 'attempts',
+            subtitle: AppLocalizations.of(context)!.attemptsCountLabel,
             color: Colors.deepPurple,
             progress: null,
           )),
@@ -472,15 +474,19 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         const SizedBox(height: 20),
 
         // Recent activity
-        _sectionHeader('Pinakabagong Gawain', Icons.history_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.recentActivity,
+            Icons.history_rounded),
         const SizedBox(height: 10),
-        _recentActivityCard('🎨 Kulay-Saya', _kulayLastColored, Colors.orange),
+        _recentActivityCard('🎨 ${AppLocalizations.of(context)!.kulaySaya}',
+            _kulayLastColored, Colors.orange),
         const SizedBox(height: 8),
-        _recentActivityCard('✏️ Sundan Mo', _sundanLastActivity, Colors.indigo),
+        _recentActivityCard('✏️ ${AppLocalizations.of(context)!.sundanMoTab}',
+            _sundanLastActivity, Colors.indigo),
         const SizedBox(height: 20),
 
         // Quick tips
-        _sectionHeader('Tips para sa Magulang', Icons.lightbulb_rounded),
+        _sectionHeader(
+            AppLocalizations.of(context)!.forParents, Icons.lightbulb_rounded),
         const SizedBox(height: 10),
         _tipCard('🎨', 'Kulay-Saya',
             'Hikayatin ang inyong anak na kulayin ang lahat ng pahina sa bawat kategorya.'),
@@ -516,10 +522,10 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           gradient: [Colors.orange.shade400, Colors.deepOrange.shade400],
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [
-              Text('🎨', style: TextStyle(fontSize: 28)),
-              SizedBox(width: 10),
-              Text('Kulay-Saya Progress',
+            Row(children: [
+              const Text('🎨', style: TextStyle(fontSize: 28)),
+              const SizedBox(width: 10),
+              Text(AppLocalizations.of(context)!.kulaySayaProgress,
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -565,7 +571,8 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         const SizedBox(height: 16),
 
         // Last colored
-        _infoRow(Icons.access_time, 'Pinakabagong Kulay', _kulayLastColored),
+        _infoRow(Icons.access_time, AppLocalizations.of(context)!.recentColor,
+            _kulayLastColored),
         const SizedBox(height: 16),
 
         // Per-category breakdown
@@ -767,9 +774,10 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  const Text('Kabuuang Nai-save',
+                  Text(AppLocalizations.of(context)!.totalSaved,
                       style: TextStyle(fontSize: 13, color: Colors.grey)),
-                  Text('$_kulayTotalCreations obra',
+                  Text(
+                      '$_kulayTotalCreations ${AppLocalizations.of(context)!.artworks}',
                       style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -807,10 +815,10 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           gradient: [Colors.indigo.shade400, Colors.purple.shade400],
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [
-              Text('✏️', style: TextStyle(fontSize: 28)),
-              SizedBox(width: 10),
-              Text('Sundan Mo Progress',
+            Row(children: [
+              const Text('✏️', style: TextStyle(fontSize: 28)),
+              const SizedBox(width: 10),
+              Text(AppLocalizations.of(context)!.sundanMoProgress,
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -854,13 +862,13 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           ]),
         ),
         const SizedBox(height: 12),
-        _infoRow(
-            Icons.star_rounded, 'Pinakabagong Gawain', _sundanLastActivity),
+        _infoRow(Icons.star_rounded,
+            AppLocalizations.of(context)!.recentActivity, _sundanLastActivity),
         const SizedBox(height: 20),
 
         // ── Uppercase ────────────────────────────────────────────────────────
         _tracingSection(
-          title: 'Uppercase Letters (A–Z)',
+          title: AppLocalizations.of(context)!.uppercaseLettersTitle,
           icon: '🔠',
           color: Colors.indigo,
           total: _allUpper.length,
@@ -874,7 +882,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
         // ── Lowercase ───────────────────────────────────────────────────────
         _tracingSection(
-          title: 'Lowercase Letters (a–z)',
+          title: AppLocalizations.of(context)!.lowercaseLettersTitle,
           icon: '🔡',
           color: Colors.purple,
           total: _allLower.length,
@@ -888,7 +896,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
         // ── Numbers ──────────────────────────────────────────────────────────
         _tracingSection(
-          title: 'Numbers (1–10)',
+          title: AppLocalizations.of(context)!.numbersTitle,
           icon: '🔢',
           color: Colors.teal,
           total: _allNums.length,
@@ -932,10 +940,10 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           gradient: [const Color(0xFFFF6B6B), const Color(0xFFFFB347)],
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [
-              Text('📖', style: TextStyle(fontSize: 28)),
-              SizedBox(width: 10),
-              Text('Magbasa Progress',
+            Row(children: [
+              const Text('📖', style: TextStyle(fontSize: 28)),
+              const SizedBox(width: 10),
+              Text(AppLocalizations.of(context)!.magbasaProgress,
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -1109,10 +1117,10 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           gradient: [Colors.teal.shade400, Colors.cyan.shade400],
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [
-              Text('🔢', style: TextStyle(fontSize: 28)),
-              SizedBox(width: 10),
-              Text('Matematika Progress',
+            Row(children: [
+              const Text('🔢', style: TextStyle(fontSize: 28)),
+              const SizedBox(width: 10),
+              Text(AppLocalizations.of(context)!.matematikaProgress,
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,

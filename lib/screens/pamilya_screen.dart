@@ -1,9 +1,11 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../data/pamilya_content.dart';
+import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import '../widgets/success_modal.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../main.dart';
@@ -14,8 +16,8 @@ import 'dart:async';
 // ─────────────────────────────────────────────────────────────────────────────
 class FamilyBadge {
   final String emoji;
-  final String title;
-  final String description;
+  String title;
+  String description;
   final Color color;
   bool isEarned;
 
@@ -49,6 +51,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   int _totalScore = 0;
   int _totalStars = 0;
   int _levelStars = 0;
+  int _levelScore = 0;
   int _wrongAttempts = 0;
 
   // ── Timer ──────────────────────────────────────────────────────────────────
@@ -99,29 +102,18 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   bool _characterHappy = false;
   late AudioPlayer _audioPlayer;
 
+  String get _currentLang =>
+      Provider.of<LanguageProvider>(context, listen: false).currentLanguageCode;
+
   // ─────────────────────────────────────────────────────────────────────────
   //  DATA
   // ─────────────────────────────────────────────────────────────────────────
 
-  final List<Map<String, dynamic>> _mainCategories = const [
-    {'title': 'Ti Bagik', 'icon': Icons.person, 'color': Color(0xFFFF6B6B)},
-    {
-      'title': 'Ti Pamilyak',
-      'icon': Icons.family_restroom,
-      'color': Color(0xFF4ECDC4)
-    },
-  ];
+  List<Map<String, dynamic>> get _mainCategories =>
+      PamilyaContent.getMainCategories(_currentLang);
 
-  final List<List<String>> _categoryLevelTitles = [
-    ['Maipanggep Kaniak', 'Dagiti Riknak', 'Inaldaw nga Aramid', 'Paboritok'],
-    [
-      'Dagiti Miyembro ti Pamilya',
-      'Trabaho iti Pamilya',
-      'Aramid ti Pamilya',
-      'Puno ti Pamilya',
-      'Ti Balaymi'
-    ],
-  ];
+  List<List<String>> get _categoryLevelTitles =>
+      PamilyaContent.getCategoryLevelTitles(_currentLang);
 
   final List<List<IconData>> _categoryLevelIcons = [
     [
@@ -140,500 +132,47 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   ];
 
   // ── Sarili Level 1 ─────────────────────────────────────────────────────────
-  final List<Map<String, dynamic>> _sariliLevel1Games = [
-    {
-      'id': 'about_name',
-      'question': 'Ania ti naganmo?',
-      'type': 'text_input',
-      'hint': 'I-type ti naganmo ditoy',
-      'icon': '👤',
-      'description':
-          'Ti naganmo ket ti tawag kenka ti pamilyam ken gagayyemmo. Napateg dayta!',
-    },
-    {
-      'id': 'about_age',
-      'question': 'Mano ti tawenmo?',
-      'type': 'age_input',
-      'hint': 'Kas pagarigan: 5, 7, 10',
-      'icon': '🎂',
-      'description':
-          'Ti tawenmo ket ti bilang dagiti tawen manipud idi nayanakka. Kapadas ti selebrar!',
-    },
-    {
-      'id': 'about_gender',
-      'question': 'Babai ka kadi wenno lalaki?',
-      'type': 'choice',
-      'options': ['👧 Babai', '👦 Lalaki'],
-      'values': [0, 1],
-      'icon': '👤',
-      'description':
-          'Ti kasarianmo ket paset ti kinataom. Napateg ken naan-anay.',
-    },
-    {
-      'id': 'about_birthday',
-      'question': 'Kaano ti pannakayanakmo?',
-      'type': 'info',
-      'icon': '🎉',
-      'info': 'Ti pannakayanakmo ket ti aldaw idi nayanakka.',
-      'example': 'Kas pagarigan: Enero 15, 2018 — Aldaw ti Pannakayanak!',
-      'description': 'Selebrasyon ti pannakayanakmo kadua ti pamilyam.',
-    },
-    {
-      'id': 'about_home',
-      'question': 'Sadino ti pagtaengam?',
-      'type': 'text_input',
-      'hint': 'Nagan ti siudad wenno ili',
-      'icon': '🏠',
-      'description':
-          'Ti pagtaengam ket ti lugar a pagyanam a kadua ti pamilyam. Naimbag ti balay!',
-    },
-  ];
+  List<Map<String, dynamic>> get _sariliLevel1Games =>
+      PamilyaContent.getSariliLevel1Games(_currentLang);
 
   // ── Sarili Level 2: Emotions (full Ilocano) ────────────────────────────────
-  final List<Map<String, dynamic>> _sariliLevel2Games = const [
-    {
-      'id': 'emotion_happy',
-      'question': 'Kaano ka NARAG-O?',
-      'choices': [
-        '🎁 No adda regalo wenno sorpresa',
-        '😢 No mananatangken',
-        '😴 No matuturog'
-      ],
-      'correct': 0,
-      'explanation':
-          'Nalinteg! Narag-o tayo no adda nasayaat a mapasamak kas ti regalo wenno pesta.',
-      'tip': 'Ngumingiti ka ken ibagam ti ragsak mo iti pamilyam!'
-    },
-    {
-      'id': 'emotion_sad',
-      'question': 'Kaano ka NALUNLUNGOT?',
-      'choices': [
-        '🎂 No adda kasangay',
-        '🧸 No mawanen ti paboritom a laruan',
-        '🍦 No kumkumanen ti ice cream'
-      ],
-      'correct': 1,
-      'explanation':
-          'Nalinteg! Normal ti maglunglungot no adda mawanen wenno no adda di nasayaat a napasamak.',
-      'tip': 'No nalunglungot ka, yakap ti nanangmo wenno amam.'
-    },
-    {
-      'id': 'emotion_angry',
-      'question': 'Kaano ka NAALIGUTGET?',
-      'choices': [
-        '🎮 No nanalo iti laro',
-        '🧸 No adda baro a laruan',
-        '👊 No inala ti laruanmo nga awan pannakaisuro'
-      ],
-      'correct': 2,
-      'explanation':
-          'Nalinteg! Naaligutgettayo no adda di umiso wenno di nalinteg a napasamak.',
-      'tip': 'No naaligutget ka, sumrek ti angin ken bilangen iti lima.'
-    },
-    {
-      'id': 'emotion_surprised',
-      'question': 'Kaano ka NASDAAW?',
-      'choices': [
-        '🎁 No adda di inayan a sorpresa',
-        '🍚 No mangan',
-        '😴 No matulog'
-      ],
-      'correct': 0,
-      'explanation': 'Nalinteg! Nasdaaw tayo no adda di inayan a napasamak.',
-      'tip': 'Mabalin a mangsdaaw — simmuroten ti pannakaadal!'
-    },
-    {
-      'id': 'emotion_sleepy',
-      'question': 'Kaano ka MAUYONG?',
-      'choices': [
-        '🌅 No bigbigat kalpasan ti panagtilmon',
-        '🌙 No rabii na',
-        '☀️ No agalagad'
-      ],
-      'correct': 1,
-      'explanation':
-          'Nalinteg! Mauyong tayo no rabii na ta oras na ti matulog.',
-      'tip': 'Agtugaw nang nasapa tapno lumaki nang naruay!'
-    },
-    {
-      'id': 'emotion_scared',
-      'question': 'Kaano ka NATAKOT?',
-      'choices': [
-        '🌈 No adda balangaw',
-        '⚡ No adda kimat ken kulog',
-        '☀️ No init ti aldaw'
-      ],
-      'correct': 1,
-      'explanation': 'Nalinteg! Natakot tayo iti nalaing a sirak kas ti kulog.',
-      'tip': 'No natakot ka, yakap ti nanangmo wenno amam.'
-    },
-  ];
+  List<Map<String, dynamic>> get _sariliLevel2Games =>
+      PamilyaContent.getSariliLevel2Games(_currentLang);
 
   // ── Sarili Level 3: Daily Routines ─────────────────────────────────────────
-  final List<Map<String, dynamic>> _sariliLevel3Games = const [
-    {
-      'id': 'routine_morning',
-      'question':
-          'Ania ti umuna nga aramidenmo no BIGBIGAT kalpasan ti panagtilmon?',
-      'choices': [
-        '🛏️ Agtilmon ken agbangon',
-        '🍳 Kumanen ti agahon',
-        '📺 Ag-TV'
-      ],
-      'correct': 0,
-      'explanation':
-          'Nalinteg! Umuna nga agtilmon ken agbangon sakbay ti sabali nga gapuanan.',
-      'tip': 'Agbangon nang nasapa tapno naandam iti intero nga aldaw!'
-    },
-    {
-      'id': 'routine_afternoon',
-      'question': 'Ania ti kaslakami nga aramidenmo iti MALEM?',
-      'choices': [
-        '📚 Agadal wenno aglaro',
-        '🍚 Kumanen ti pangaldaw',
-        '😴 Matulog ti intero nga malem'
-      ],
-      'correct': 0,
-      'explanation': 'Nalinteg! Iti malem, agadal tayo wenno aglaro.',
-      'tip': 'Pagtalinaeden ti oras para iti panagadal ken panaglaro!'
-    },
-    {
-      'id': 'routine_evening',
-      'question': 'Ania ti mabalin nga aramidenmo sakbay ti PANAGTUROG?',
-      'choices': [
-        '🪥 Agsuplit',
-        '🍪 Kumanen ti merienda',
-        '📱 Aglaro iti cellphone'
-      ],
-      'correct': 0,
-      'explanation':
-          'Nalinteg! Napateg ti panagsuplit sakbay ti panagturog tapno maprotektaran ti ngipen.',
-      'tip': 'Ti nasuyat nga ngipen ket iwas sakit!'
-    },
-    {
-      'id': 'routine_hygiene',
-      'question': 'Kasano ti maprotektaranmo ti bagim iti sakit?',
-      'choices': [
-        '🧼 Aghugas iti ima',
-        '🪥 Agsuplit laeng',
-        '💧 Uminom iti danum'
-      ],
-      'correct': 0,
-      'explanation': 'Nalinteg! Ti panaghugas iti ima ket iwas sakit.',
-      'tip': 'Aghugas iti ima sakbay ti panangan ken kalpasan ti banio!'
-    },
-  ];
+  List<Map<String, dynamic>> get _sariliLevel3Games =>
+      PamilyaContent.getSariliLevel3Games(_currentLang);
 
   // ── Sarili Level 4: Preferences ────────────────────────────────────────────
-  final List<Map<String, dynamic>> _sariliLevel4Games = const [
-    {
-      'id': 'preference_food',
-      'question': 'Ania ti paboritom nga MAKAN?',
-      'options': ['🍚 Sinanglaw', '🐟 Pinakbet', '🍛 Dinengdeng', '🍖 Bagnet'],
-      'emojis': ['🍚', '🐟', '🍛', '🍖'],
-      'description': 'Dagiti nailian nga makan ti Ilocos! Umili ka!'
-    },
-    {
-      'id': 'preference_color',
-      'question': 'Ania ti paboritom nga KULOR?',
-      'options': [
-        '🔴 Nalabbaga',
-        '🔵 Natimgas',
-        '🟢 Nalabbag-o',
-        '🟡 Nadarang'
-      ],
-      'emojis': ['🔴', '🔵', '🟢', '🟡'],
-      'description': 'Pumili ka iti paboritom nga kulor!'
-    },
-    {
-      'id': 'preference_game',
-      'question': 'Ania ti paboritom nga LARO?',
-      'options': ['🪀 Piko', '🏃 Taguan', '🧩 Puzzle', '🎯 Tumbang Preso'],
-      'emojis': ['🪀', '🏃', '🧩', '🎯'],
-      'description': 'Dagiti nailian nga laro! Maymaysa a naraig!'
-    },
-    {
-      'id': 'preference_animal',
-      'question': 'Ania ti paboritom nga HAYOP?',
-      'options': ['🐶 Aso', '🐱 Pusa', '🐓 Manok', '🐃 Nuang'],
-      'emojis': ['🐶', '🐱', '🐓', '🐃'],
-      'description': 'Pumili iti paboritom nga ayup!'
-    },
-  ];
+  List<Map<String, dynamic>> get _sariliLevel4Games =>
+      PamilyaContent.getSariliLevel4Games(_currentLang);
 
   // ── Pamilya Level 1: Family Members ────────────────────────────────────────
-  final List<Map<String, dynamic>> _pamilyaLevel1Games = const [
-    {
-      'id': 'family_nanay',
-      'question': 'Sino ti ag-alagad kenka no aggagar ken nagluto iti makan?',
-      'choices': ['👩 Nanang', '👨 Amang', '👧 Manang', '🧑 Manong'],
-      'correct': 0,
-      'member': 'Nanang',
-      'emoji': '👩',
-      'roles': 'nagluluto, ag-alagad, naglalambing',
-      'description':
-          'Si Nanang ti ag-alagad kadatayo ken nagluto iti nasayaat nga makan.',
-      'ilocano_note':
-          'Iti Ilocos, awagentayo ti ina iti "Nanang" wenno "Inang".',
-      'audioPath': 'audio/ni nanang.mp3'
-    },
-    {
-      'id': 'family_tatay',
-      'question': 'Sino ti nagtatrabaho para iti pamilya ken kalaro iti ruar?',
-      'choices': ['👩 Nanang', '👨 Amang', '👧 Manang', '🧑 Manong'],
-      'correct': 1,
-      'member': 'Amang',
-      'emoji': '👨',
-      'roles': 'nagtatrabaho, naglalaro, nagpoprotekta',
-      'description':
-          'Si Amang ti nagtatrabaho para iti pamilya ken naimus aglaro.',
-      'ilocano_note':
-          'Iti Ilocos, awagentayo ti ama iti "Amang" wenno "Tatang".',
-      'audioPath': 'audio/si amang.mp3'
-    },
-    {
-      'id': 'family_manong',
-      'question': 'Sino ti nataengan nga kabsatmo a lalaki?',
-      'choices': ['👩 Nanang', '👨 Amang', '👧 Manang', '🧑 Manong'],
-      'correct': 3,
-      'member': 'Manong',
-      'emoji': '🧑',
-      'roles': 'nataengan nga kabsat, mangikuyog, kalaro',
-      'description': 'Si Manong ti nataengan nga kabsatmo a lalaki.',
-      'ilocano_note':
-          'Iti Ilocos, awagentayo iti napateg nga kabsat iti "Manong".',
-      'audioPath': 'audio/ni manong.mp3'
-    },
-    {
-      'id': 'family_manang',
-      'question': 'Sino ti nataengan nga kabsatmo a babai?',
-      'choices': ['👩 Nanang', '👨 Amang', '👧 Manang', '🧑 Manong'],
-      'correct': 2,
-      'member': 'Manang',
-      'emoji': '👧',
-      'roles': 'nataengan nga kabsat, tumulong iti balay, kaobraobra',
-      'description': 'Si Manang ti nataengan nga kabsatmo a babai.',
-      'ilocano_note':
-          'Iti Ilocos, awagentayo iti napateg nga kabsat a babai iti "Manang".',
-      'audioPath': 'audio/ni manang.mp3'
-    },
-    {
-      'id': 'family_kaanakan',
-      'question': 'Sino ti kaungpusam nga miyembro ti pamilya?',
-      'choices': ['👶 Kaungpus', '👧 Manang', '🧑 Manong', '👴 Lelong'],
-      'correct': 0,
-      'member': 'Kaungpus',
-      'emoji': '👶',
-      'roles': 'kaungpus nga kabsat, inaalagaan',
-      'description': 'Ti kaungpus ti kaungpus nga miyembro ti pamilya.',
-      'ilocano_note':
-          'Iti Ilocos, awagentayo iti kaungpus nga kabsat iti "Kaungpus" wenno "Bunsoy".',
-      'audioPath': 'audio/ni bunsoy.mp3'
-    },
-    {
-      'id': 'family_lelong',
-      'question': 'Sino ti ama ti nanangmo wenno amangmo?',
-      'choices': ['👴 Lelong', '👵 Leling', '👨 Amang', '👩 Nanang'],
-      'correct': 0,
-      'member': 'Lelong',
-      'emoji': '👴',
-      'roles': 'Lelong dagiti annaknak, nagkukuwento iti tao',
-      'description': 'Si Lelong ti ama ti nanang wenno amang tayo.',
-      'ilocano_note': 'Iti Ilocos, awagentayo ti apo a lalaki iti "Lelong".',
-      'audioPath': 'audio/ni lelong.mp3'
-    },
-    {
-      'id': 'family_leling',
-      'question': 'Sino ti ina ti nanangmo wenno amangmo?',
-      'choices': ['👴 Lelong', '👵 Leling', '👨 Amang', '👩 Nanang'],
-      'correct': 1,
-      'member': 'Leling',
-      'emoji': '👵',
-      'roles': 'Leling dagiti annaknak, nagluluto iti naimas',
-      'description': 'Si Leling ti ina ti nanang wenno amang tayo.',
-      'ilocano_note': 'Iti Ilocos, awagentayo ti apo a babai iti "Leling".',
-      'audioPath': 'audio/ni leling.mp3'
-    },
-  ];
+  List<Map<String, dynamic>> get _pamilyaLevel1Games =>
+      PamilyaContent.getPamilyaLevel1Games(_currentLang);
 
   // ── Pamilya Level 2: Family Roles ──────────────────────────────────────────
-  final List<Map<String, dynamic>> _pamilyaLevel2Games = const [
-    {
-      'id': 'role_cook',
-      'question': 'Sino ti kaslakami nga nagluluto iti balaymi?',
-      'choices': [
-        'Nanang laeng',
-        'Amang laeng',
-        'Leling laeng',
-        'Mabalin ti aniaman'
-      ],
-      'correct': 3,
-      'explanation': 'Nalinteg! Mabalin ti aniaman iti pamilya ti magluto.'
-    },
-    {
-      'id': 'role_work',
-      'question': 'Sino ti nagtatrabaho para iti pamilya?',
-      'choices': [
-        'Amang laeng',
-        'Nanang laeng',
-        'Lelong laeng',
-        'Mabalin ti adu'
-      ],
-      'correct': 3,
-      'explanation': 'Nalinteg! Mabalin ti adu iti pamilya ti nagtatrabaho.'
-    },
-    {
-      'id': 'role_story',
-      'question': 'Sino ti nalablabes a nagkukuwento iti daan?',
-      'choices': ['Manong', 'Manang', 'Lelong ken Leling', 'Amang'],
-      'correct': 2,
-      'explanation':
-          'Nalinteg! Dagiti Lelong ken Leling ti kaslakami nga nagkukuwento.'
-    },
-    {
-      'id': 'role_care',
-      'question': 'Sino ti ag-alagad kenka no aggagarika?',
-      'choices': ['Nanang', 'Amang', 'Leling', 'Amin da'],
-      'correct': 3,
-      'explanation': 'Nalinteg! Amin nga miyembro ti pamilya ag-alagad.'
-    },
-    {
-      'id': 'role_play',
-      'question': 'Sino ti kalarom iti balay?',
-      'choices': ['Manong', 'Manang', 'Kaungpus', 'Amin dagiti kabsat'],
-      'correct': 3,
-      'explanation': 'Nalinteg! Mabalin ka aglaro kadagiti aniaman.'
-    },
-  ];
+  List<Map<String, dynamic>> get _pamilyaLevel2Games =>
+      PamilyaContent.getPamilyaLevel2Games(_currentLang);
 
   // ── Pamilya Level 3: Family Activities ─────────────────────────────────────
-  final List<Map<String, dynamic>> _pamilyaLevel3Games = const [
-    {
-      'id': 'activity_dinner',
-      'question':
-          'Ania ti nasayaat nga aramidem a sangsangkamaysa iti panagannak?',
-      'choices': [
-        'Kumanen ken agkukuwentuan',
-        'Mangar-ay iti TV',
-        'Matulog',
-        'Ag-cellphone'
-      ],
-      'correct': 0,
-      'explanation':
-          'Nalinteg! Naraig ti kumanen a sangsangkamaysa ken magkukuwentuan.'
-    },
-    {
-      'id': 'activity_weekend',
-      'question': 'Ania ti mabalin nga aramiden ti pamilya iti weekend?',
-      'choices': [
-        'Agmanmano iti parke',
-        'Agbilibilang iti grocery',
-        'Aglinlinis a sangsangkamaysa',
-        'Amin dagiti naibaga'
-      ],
-      'correct': 3,
-      'explanation': 'Nalinteg! Amin nga aramiden a sangsangkamaysa ket naraig.'
-    },
-    {
-      'id': 'activity_celebration',
-      'question': 'Ania ti aramidem ti pamilya no adda kasangay?',
-      'choices': [
-        'Kumanen ti kek',
-        'Mangited iti regalo',
-        'Selebrasyon a sangsangkamaysa',
-        'Amin dagiti naibaga'
-      ],
-      'correct': 3,
-      'explanation': 'Nalinteg! Ti kasangay ket selebrasyon a sangsangkamaysa!'
-    },
-    {
-      'id': 'activity_help',
-      'question': 'Kasano ka makatutulongen iti pamilyam?',
-      'choices': [
-        'Agurnos iti laruan',
-        'Agwaswas',
-        'Agurnos iti pinggan',
-        'Amin dagiti naibaga'
-      ],
-      'correct': 3,
-      'explanation':
-          'Nalinteg! Ti pangtulongen iti balay ket pannakaayat iti pamilya.'
-    },
-  ];
+  List<Map<String, dynamic>> get _pamilyaLevel3Games =>
+      PamilyaContent.getPamilyaLevel3Games(_currentLang);
 
   // ── Family Tree ────────────────────────────────────────────────────────────
-  final Map<String, dynamic> _familyTreeData = {
-    'generations': [
-      {
-        'title': 'Dagiti Apo (Lelong ken Leling)',
-        'color': const Color(0xFF9B59B6),
-        'members': [
-          {'relation': 'Lelong (ama ni Amang)', 'emoji': '👴'},
-          {'relation': 'Leling (ina ni Amang)', 'emoji': '👵'},
-          {'relation': 'Lelong (ama ni Nanang)', 'emoji': '👴'},
-          {'relation': 'Leling (ina ni Nanang)', 'emoji': '👵'},
-        ]
-      },
-      {
-        'title': 'Dagiti Nagannak',
-        'color': const Color(0xFF2980B9),
-        'members': [
-          {'relation': 'Amang', 'emoji': '👨'},
-          {'relation': 'Nanang', 'emoji': '👩'},
-        ]
-      },
-      {
-        'title': 'Dagiti Kabsat',
-        'color': const Color(0xFF27AE60),
-        'members': [
-          {'relation': 'Manong (panganay)', 'emoji': '🧑'},
-          {'relation': 'Manang (maikadua)', 'emoji': '👧'},
-          {'relation': 'Kaungpus', 'emoji': '👶'},
-        ]
-      },
-    ]
-  };
+  Map<String, dynamic> get _familyTreeData =>
+      PamilyaContent.getFamilyTreeData(_currentLang);
 
   // ── My Home ────────────────────────────────────────────────────────────────
-  final List<Map<String, dynamic>> _homeRooms = [
-    {
-      'name': 'Sala',
-      'emoji': '🛋️',
-      'activity': 'agmanmano ken mangar-ay iti TV ti pamilya',
-      'color': const Color(0xFFE74C3C)
-    },
-    {
-      'name': 'Kusina',
-      'emoji': '🍳',
-      'activity': 'nagluto ken kumanen ti pamilya',
-      'color': const Color(0xFFE67E22)
-    },
-    {
-      'name': 'Kuarto',
-      'emoji': '🛏️',
-      'activity': 'nagatiddog ken nagsarsarita ti pamilya',
-      'color': const Color(0xFF3498DB)
-    },
-    {
-      'name': 'Banio',
-      'emoji': '🚿',
-      'activity': 'naligo ken naglinabas ti pamilya',
-      'color': const Color(0xFF1ABC9C)
-    },
-    {
-      'name': 'Bakir',
-      'emoji': '🌿',
-      'activity': 'naglalaruan ken nagannak iti pamilya',
-      'color': const Color(0xFF2ECC71)
-    },
-  ];
+  List<Map<String, dynamic>> get _homeRooms =>
+      PamilyaContent.getHomeRooms(_currentLang);
 
   String _getMainCategoryTitle(int index) {
     if (index == 0) {
-      return Translations.getAngAkingSarili(context).replaceAll('\n', ' ');
+      return AppLocalizations.of(context)!.angAkingSarili.replaceAll('\n', ' ');
     }
     if (index == 1) {
-      return Translations.getAtAkingPamilya(context).replaceAll('\n', ' ');
+      return AppLocalizations.of(context)!.atAkingPamilya.replaceAll('\n', ' ');
     }
     return '';
   }
@@ -642,26 +181,26 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     if (catIndex == 0) {
       switch (lvlIndex) {
         case 0:
-          return Translations.getAllAboutMe(context);
+          return AppLocalizations.of(context)!.allAboutMe;
         case 1:
-          return Translations.getMyEmotions(context);
+          return AppLocalizations.of(context)!.myEmotions;
         case 2:
-          return Translations.getDailyRoutines(context);
+          return AppLocalizations.of(context)!.dailyRoutines;
         case 3:
-          return Translations.getMyPreferences(context);
+          return AppLocalizations.of(context)!.myPreferences;
       }
     } else {
       switch (lvlIndex) {
         case 0:
-          return Translations.getFamilyMembers(context);
+          return AppLocalizations.of(context)!.familyMembers;
         case 1:
-          return Translations.getFamilyRoles(context);
+          return AppLocalizations.of(context)!.familyRoles;
         case 2:
-          return Translations.getFamilyActivities(context);
+          return AppLocalizations.of(context)!.familyActivities;
         case 3:
-          return Translations.getFamilyTree(context);
+          return AppLocalizations.of(context)!.familyTree;
         case 4:
-          return Translations.getMyHome(context);
+          return AppLocalizations.of(context)!.myHome;
       }
     }
     return '';
@@ -671,26 +210,26 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     if (catIndex == 0) {
       switch (lvlIndex) {
         case 0:
-          return Translations.getAboutMeSubtitle(context);
+          return AppLocalizations.of(context)!.aboutMeSubtitle;
         case 1:
-          return Translations.getMyEmotionsSubtitle(context);
+          return AppLocalizations.of(context)!.myEmotionsSubtitle;
         case 2:
-          return Translations.getDailyRoutinesSubtitle(context);
+          return AppLocalizations.of(context)!.dailyRoutinesSubtitle;
         case 3:
-          return Translations.getMyPreferencesSubtitle(context);
+          return AppLocalizations.of(context)!.myPreferencesSubtitle;
       }
     } else {
       switch (lvlIndex) {
         case 0:
-          return Translations.getFamilyMembersSubtitle(context);
+          return AppLocalizations.of(context)!.familyMembersSubtitle;
         case 1:
-          return Translations.getFamilyRolesSubtitle(context);
+          return AppLocalizations.of(context)!.familyRolesSubtitle;
         case 2:
-          return Translations.getFamilyActivitiesSubtitle(context);
+          return AppLocalizations.of(context)!.familyActivitiesSubtitle;
         case 3:
-          return Translations.getFamilyTreeSubtitle(context);
+          return AppLocalizations.of(context)!.familyTreeSubtitle;
         case 4:
-          return Translations.getMyHomeSubtitle(context);
+          return AppLocalizations.of(context)!.myHomeSubtitle;
       }
     }
     return '';
@@ -701,27 +240,27 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     if (key == 'question') {
       switch (id) {
         case 'about_name':
-          return Translations.getWhatIsYourName(context);
+          return AppLocalizations.of(context)!.whatIsYourName;
         case 'about_age':
-          return Translations.getHowOldAreYou(context);
+          return AppLocalizations.of(context)!.howOldAreYou;
         case 'about_gender':
-          return Translations.getAreYouBoyOrGirl(context);
+          return AppLocalizations.of(context)!.areYouBoyOrGirl;
       }
     } else if (key == 'description') {
       switch (id) {
         case 'about_name':
-          return Translations.getWhatIsYourNameDescription(context);
+          return AppLocalizations.of(context)!.whatIsYourNameDescription;
         case 'about_age':
-          return Translations.getHowOldAreYouDescription(context);
+          return AppLocalizations.of(context)!.howOldAreYouDescription;
         case 'about_gender':
-          return Translations.getGenderDescription(context);
+          return AppLocalizations.of(context)!.genderDescription;
       }
     } else if (key == 'hint') {
       switch (id) {
         case 'about_name':
-          return Translations.getTypeNameHint(context);
+          return AppLocalizations.of(context)!.typeNameHint;
         case 'about_age':
-          return Translations.getAgeHint(context);
+          return AppLocalizations.of(context)!.ageHint;
       }
     }
     return game[key] ?? '';
@@ -855,6 +394,43 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     if (_timerEnabled) _startTimer();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateBadgeTitles();
+  }
+
+  void _updateBadgeTitles() {
+    if (_badges.isEmpty) return;
+    final loc = AppLocalizations.of(context)!;
+    final titles = [
+      loc.badgeKnowMyself,
+      loc.badgeEmotionExpert,
+      loc.badgeRoutineExpert,
+      loc.badgePreferenceExpert,
+      loc.badgeMemberExpert,
+      loc.badgeWorkExpert,
+      loc.badgeActivityExpert,
+      loc.badgeTreeExpert,
+      loc.badgeHouseExpert,
+    ];
+    final descriptions = [
+      loc.badgeKnowMyselfDesc,
+      loc.badgeEmotionExpertDesc,
+      loc.badgeRoutineExpertDesc,
+      loc.badgePreferenceExpertDesc,
+      loc.badgeMemberExpertDesc,
+      loc.badgeWorkExpertDesc,
+      loc.badgeActivityExpertDesc,
+      loc.badgeTreeExpertDesc,
+      loc.badgeHouseExpertDesc,
+    ];
+    for (int i = 0; i < _badges.length && i < titles.length; i++) {
+      _badges[i].title = titles[i];
+      _badges[i].description = descriptions[i];
+    }
+  }
+
   Future<void> _initSmartResume() async {
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -970,7 +546,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   }
 
   void _onTimeout() {
-    _showFeedback('⏰ Nabayagen ti oras! Subukanen manen.', Colors.orange);
+    _showFeedback('⏰ ${AppLocalizations.of(context)!.timeOut}', Colors.orange);
     _resetQuestionState();
     if (_timerEnabled) _startTimer();
   }
@@ -999,6 +575,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
 
     _currentGameIndex = firstUncompleted;
     _levelStars = 0;
+    _levelScore = 0;
     _wrongAttempts = 0;
     _resetQuestionState();
   }
@@ -1090,6 +667,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       _totalScore += 10 * earned;
       _totalStars += earned;
       _levelStars += earned;
+      _levelScore += 10 * earned;
       _showCorrectOverlay = true;
       _characterHappy = true;
     });
@@ -1100,11 +678,9 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         .forward(from: 0)
         .then((_) => _characterController.reverse());
 
-    final msg = earned == 3
-        ? '⭐ NALINTEG UNAY! ⭐ +${10 * earned} puntos'
-        : earned == 2
-            ? '⭐ NAIMBAG! ⭐ +${10 * earned} puntos'
-            : '⭐ MABUTI! ⭐ +${10 * earned} puntos';
+    final points = 10 * earned;
+    final msg =
+        '⭐ ${AppLocalizations.of(context)!.goodJob} ⭐ +$points ${AppLocalizations.of(context)!.pointsLabel}';
     _showFeedback(msg, const Color(0xFF2E7D32));
     _saveQuestionProgress(earned);
 
@@ -1142,7 +718,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       // I'll just show feedback.
     });
 
-    _showFeedback('❌ MALI TI SUNGBAT', Colors.red);
+    _showFeedback(AppLocalizations.of(context)!.incorrectAnswer, Colors.red);
     _saveQuestionProgress(0);
 
     Future.delayed(const Duration(milliseconds: 1600), () {
@@ -1161,7 +737,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
 
     // Smart Checker: Prevent random junk/single letters
     if (trimmed.length < 2) {
-      _showFeedback('❌ Subukanen ti naan-anay a sungbat', Colors.red);
+      _showFeedback('❌ ${AppLocalizations.of(context)!.tooShort}', Colors.red);
       HapticFeedback.heavyImpact();
       Future.delayed(const Duration(milliseconds: 800), _resumeTimer);
       return;
@@ -1170,17 +746,19 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     // Pattern check: Ensure it's not just random repeated characters (e.g., "aaaaa")
     final uniqueChars = trimmed.toLowerCase().split('').toSet();
     if (uniqueChars.length == 1 && trimmed.length > 2) {
-      _showFeedback('❌ Saan a valido a sungbat', Colors.red);
+      _showFeedback(
+          '❌ ${AppLocalizations.of(context)!.invalidInput}', Colors.red);
       HapticFeedback.vibrate();
       Future.delayed(const Duration(milliseconds: 800), _resumeTimer);
       return;
     }
 
     if (trimmed.isNotEmpty) {
-      _showFeedback('✓ Naidulin na!', Colors.green);
+      _showFeedback('✓ ${AppLocalizations.of(context)!.saved}', Colors.green);
       Future.delayed(const Duration(seconds: 1), _onCorrect);
     } else {
-      _showFeedback('✗ Pakitype ti sungbat', Colors.orange);
+      _showFeedback(
+          '✗ ${AppLocalizations.of(context)!.selectAnswer}', Colors.orange);
       Future.delayed(const Duration(milliseconds: 500), _resumeTimer);
     }
   }
@@ -1188,7 +766,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   void _handleGenderSelection(int index) {
     _pauseTimer();
     setState(() => _selectedGender = index);
-    _showFeedback('✓ Napili mo na!', Colors.green);
+    _showFeedback('✓ ${AppLocalizations.of(context)!.correct}', Colors.green);
     Future.delayed(const Duration(seconds: 1), _onCorrect);
   }
 
@@ -1205,7 +783,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
 
   void _showEmojiExplation(String explanation, String tip) {
     setState(() => _showEmotionExplanation = true);
-    _showFeedback('✓ Nalinteg!', Colors.green);
+    _showFeedback('✓ ${AppLocalizations.of(context)!.correct}', Colors.green);
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) _showFeedback('💡 $tip', Colors.blue);
     });
@@ -1222,7 +800,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     _pauseTimer();
     setState(() => _selectedRoutineAnswer = index);
     if (index == correct) {
-      _showFeedback('✓ Nalinteg! $explanation', Colors.green);
+      _showFeedback('✓ ${AppLocalizations.of(context)!.correct} $explanation',
+          Colors.green);
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) _showFeedback('💡 $tip', Colors.blue);
       });
@@ -1245,7 +824,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         _selectedAnimalIndex = index;
       }
     });
-    _showFeedback('✓ Napili mo na!', Colors.green);
+    _showFeedback('✓ ${AppLocalizations.of(context)!.correct}', Colors.green);
     Future.delayed(const Duration(seconds: 1), _onCorrect);
   }
 
@@ -1257,7 +836,9 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         _selectedFamilyMember = game['member'];
         _showingFamilyInfo = true;
       });
-      _showFeedback('✓ Nalinteg! Si ${game['member']}!', Colors.green);
+      _showFeedback(
+          '✓ ${AppLocalizations.of(context)!.correct} ${game['member']}!',
+          Colors.green);
 
       // Play audio if available
       if (game['audioPath'] != null) {
@@ -1274,7 +855,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     _pauseTimer();
     setState(() => _selectedRoleAnswer = index);
     if (index == correct) {
-      _showFeedback('✓ $explanation', Colors.green);
+      _showFeedback('✓ ${AppLocalizations.of(context)!.correct} $explanation',
+          Colors.green);
       Future.delayed(const Duration(seconds: 2), _onCorrect);
     } else {
       _onWrong();
@@ -1285,10 +867,11 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     _pauseTimer();
     setState(() => _selectedActivityAnswer = index);
     if (index == correct) {
-      _showFeedback('✓ $explanation', Colors.green);
+      _showFeedback('✓ ${AppLocalizations.of(context)!.correct} $explanation',
+          Colors.green);
       Future.delayed(const Duration(seconds: 2), _onCorrect);
     } else {
-      _showFeedback('✗ Subukanen ti sabali', Colors.red);
+      _showFeedback('✗ ${AppLocalizations.of(context)!.tryAgain}', Colors.red);
       Future.delayed(const Duration(milliseconds: 500), () {
         setState(() => _selectedActivityAnswer = null);
         _resumeTimer();
@@ -1298,7 +881,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
 
   void _handleFamilyTreeComplete() {
     _pauseTimer();
-    _showFeedback('✓ Naammuanmo ti Puno ti Pamilya!', Colors.green);
+    _showFeedback(
+        '✓ ${AppLocalizations.of(context)!.iLearnedFamilyTree}', Colors.green);
     Future.delayed(const Duration(seconds: 2), _onCorrect);
   }
 
@@ -1320,7 +904,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   void _handleMyHomeComplete() {
     _pauseTimer();
     setState(() => _myHomeCompleted = true);
-    _showFeedback('✓ Dayta ti balaymi!', Colors.green);
+    _showFeedback(
+        '✓ ${AppLocalizations.of(context)!.thatIsOurHome}', Colors.green);
     Future.delayed(const Duration(seconds: 2), _onCorrect);
   }
 
@@ -1348,19 +933,23 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     final total = _currentGames.length;
     final avgStars = total == 0 ? 1 : (_levelStars / total).ceil().clamp(1, 3);
 
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userProvider.awardPamilyaLevelCompletion(
+        _selectedMainCategory, _selectedLevel);
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: Translations.getLevelCompleted(context, _selectedLevel + 1),
+        title: AppLocalizations.of(context)!.levelCompleted(_selectedLevel + 1),
         subtitle: _getLevelTitle(_selectedMainCategory, _selectedLevel),
-        score: _totalScore,
+        score: _levelScore,
         stars: avgStars,
         badges: _newlyEarnedBadges.map((b) => '${b.emoji} ${b.title}').toList(),
         primaryLabel: _selectedLevel <
                 _categoryLevelTitles[_selectedMainCategory].length - 1
-            ? Translations.getNext(context)
-            : Translations.getFinished(context),
+            ? AppLocalizations.of(context)!.next
+            : AppLocalizations.of(context)!.finished,
         onPrimaryTap: () {
           Navigator.pop(context);
           _newlyEarnedBadges = [];
@@ -1371,7 +960,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             _showCategoryComplete();
           }
         },
-        secondaryLabel: 'Ulitennak',
+        secondaryLabel: AppLocalizations.of(context)!.ulitin,
         onSecondaryTap: () {
           Navigator.pop(context);
           _newlyEarnedBadges = [];
@@ -1387,20 +976,20 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: Translations.getProudOfYou(context),
-        subtitle: Translations.getCategoryCompleted(
-            context, _getMainCategoryTitle(_selectedMainCategory)),
+        title: AppLocalizations.of(context)!.proudOfYou,
+        subtitle: AppLocalizations.of(context)!
+            .categoryCompleted(_getMainCategoryTitle(_selectedMainCategory)),
         score: _totalScore,
         stars: 3,
         badges: _badges
             .where((b) => b.isEarned)
             .map((b) => '${b.emoji} ${b.title}')
             .toList(),
-        primaryLabel: Translations.getContinue(context),
+        primaryLabel: AppLocalizations.of(context)!.continueText,
         onPrimaryTap: () {
           Navigator.pop(context);
         },
-        secondaryLabel: Translations.getBack(context),
+        secondaryLabel: AppLocalizations.of(context)!.back,
         onSecondaryTap: () {
           Navigator.pop(context);
         },
@@ -1426,7 +1015,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                     color: Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 16),
-            const Text('🏅 Dagiti Badge',
+            Text(AppLocalizations.of(context)!.badgesWithIcon,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             GridView.builder(
@@ -1491,7 +1080,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                   color: AppColors.textDark,
                   fontSize: 16,
                   fontWeight: FontWeight.bold)),
-          Text(Translations.getLevel(context, _selectedLevel + 1),
+          Text(AppLocalizations.of(context)!.level(_selectedLevel + 1),
               style: TextStyle(
                   color: Colors.grey.shade500,
                   fontSize: 11,
@@ -1719,7 +1308,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               onTap: () {
                 if (earned && !active) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(Translations.getAlreadyDone(context)),
+                    content: Text(AppLocalizations.of(context)!.alreadyDone),
                     backgroundColor: _currentMainColor,
                     duration: const Duration(seconds: 1),
                   ));
@@ -1848,18 +1437,16 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                     spreadRadius: 10)
               ],
             ),
-            child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.check_circle_rounded,
-                      color: Colors.white, size: 60),
-                  SizedBox(height: 6),
-                  Text('Nalinteg!',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold)),
-                ]),
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(Icons.check_circle_rounded, color: Colors.white, size: 60),
+              SizedBox(height: 6),
+              Text(AppLocalizations.of(context)!.straightOrCorrect,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold)),
+            ]),
           ),
         ),
       ),
@@ -2045,7 +1632,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                 style: const TextStyle(fontSize: 52)),
             const SizedBox(width: 12),
             if (_characterHappy)
-              const Text('Nalinteg!',
+              Text(AppLocalizations.of(context)!.straightOrCorrect,
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -2088,7 +1675,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        child: Text(Translations.getSave(context),
+        child: Text(AppLocalizations.of(context)!.save,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ),
     ]);
@@ -2119,7 +1706,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        child: Text(Translations.getSave(context),
+        child: Text(AppLocalizations.of(context)!.save,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ),
     ]);
@@ -2156,8 +1743,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                 const SizedBox(height: 6),
                 Text(
                     i == 0
-                        ? Translations.getGirl(context)
-                        : Translations.getBoy(context),
+                        ? AppLocalizations.of(context)!.girl
+                        : AppLocalizations.of(context)!.boy,
                     style: TextStyle(
                         color: sel ? Colors.white : Colors.grey.shade800,
                         fontWeight: FontWeight.w600,
@@ -2191,7 +1778,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           style: ElevatedButton.styleFrom(
               backgroundColor: _currentMainColor,
               foregroundColor: Colors.white),
-          child: const Text('Naammuak!', style: TextStyle(fontSize: 15)),
+          child: Text(AppLocalizations.of(context)!.iKnowIt,
+              style: TextStyle(fontSize: 15)),
         ),
       ]),
     );
@@ -2423,7 +2011,9 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               child: Column(children: [
                 Text(game['emoji'], style: const TextStyle(fontSize: 52)),
                 const SizedBox(height: 8),
-                Text('Si ${game['member']} ay ${game['roles']}.',
+                Text(
+                    AppLocalizations.of(context)!
+                        .familyRoleSentence(game['member'], game['roles']),
                     style: const TextStyle(fontSize: 14),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 8),
@@ -2433,7 +2023,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                   decoration: BoxDecoration(
                       color: Colors.amber.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(10)),
-                  child: Text('📖 ${game['ilocano_note']}',
+                  child: Text('📖 ${game['note']}',
                       style: TextStyle(
                           fontSize: 12,
                           color: Colors.amber.shade900,
@@ -2542,7 +2132,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             Icon(Icons.account_tree_rounded,
                 color: _currentMainColor, size: 24),
             const SizedBox(width: 8),
-            Text('Puno ti Pamilya',
+            Text(AppLocalizations.of(context)!.familyTreeTitle,
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -2641,7 +2231,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             child: ElevatedButton.icon(
               onPressed: _handleFamilyTreeComplete,
               icon: const Icon(Icons.check_circle, color: Colors.white),
-              label: const Text('Naammuak ti Puno ti Pamilya!',
+              label: Text(AppLocalizations.of(context)!.iLearnedFamilyTree,
                   style: TextStyle(fontSize: 15, color: Colors.white)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _currentMainColor,
@@ -2669,14 +2259,14 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Icons.home_rounded, color: _currentMainColor, size: 26),
             const SizedBox(width: 8),
-            Text('Ti Balaymi',
+            Text(AppLocalizations.of(context)!.ourHomeTitle,
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: _currentMainColor)),
           ]),
           const SizedBox(height: 6),
-          Text('Tiknapen ti tunggal kuarto tapno maammuan ti aramidenyo ditoy!',
+          Text(AppLocalizations.of(context)!.tapEachRoomPrompt,
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               textAlign: TextAlign.center),
           const SizedBox(height: 20),
@@ -2765,7 +2355,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               child: ElevatedButton.icon(
                 onPressed: _handleMyHomeComplete,
                 icon: const Icon(Icons.home, color: Colors.white),
-                label: const Text('Dayta ti balaymi!',
+                label: Text(AppLocalizations.of(context)!.thatIsOurHome,
                     style: TextStyle(fontSize: 15, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _currentMainColor,

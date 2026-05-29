@@ -1,8 +1,8 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import 'teacher_dashboard_screen.dart';
 
 /// Hardcoded teacher credentials — persists across installs.
@@ -39,7 +39,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
     final password = _passwordController.text.trim();
 
     if (username.isEmpty || password.isEmpty) {
-      _showErrorDialog(Translations.getEnterUsernamePassword(context));
+      _showErrorDialog(AppLocalizations.of(context)!.enterUsernamePassword);
       return;
     }
 
@@ -62,7 +62,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
           MaterialPageRoute(builder: (_) => const TeacherDashboardScreen()),
         );
       } else {
-        _showErrorDialog(Translations.getInvalidTeacherCredentials(context));
+        _showErrorDialog(AppLocalizations.of(context)!.invalidTeacherCredentials);
       }
     });
   }
@@ -133,7 +133,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                     const SizedBox(height: 24),
 
                     Text(
-                      Translations.getTeacherLoginTitle(context),
+                      AppLocalizations.of(context)!.teacherLoginTitle,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -144,7 +144,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                     const SizedBox(height: 8),
 
                     Text(
-                      Translations.getTeacherLoginPrompt(context),
+                      AppLocalizations.of(context)!.teacherLoginPrompt,
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.textLight,
@@ -163,7 +163,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                         color: AppColors.textDark,
                       ),
                       decoration: InputDecoration(
-                        labelText: Translations.getUsername(context),
+                        labelText: AppLocalizations.of(context)!.username,
                         filled: true,
                         fillColor: Colors.grey.shade100,
                         prefixIcon: const Icon(
@@ -191,7 +191,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: Translations.getPassword(context),
+                        labelText: AppLocalizations.of(context)!.password,
                         prefixIcon: const Icon(
                           Icons.lock_outline,
                           color: AppColors.primary,
@@ -240,7 +240,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                           elevation: 2,
                         ),
                         child: Text(
-                          Translations.getTeacherLoginButtonLabel(context),
+                          AppLocalizations.of(context)!.teacherLoginButtonLabel,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,

@@ -1,12 +1,12 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 // ignore_for_file: deprecated_member_use
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/user_provider.dart';
-import '../providers/language_provider.dart';
+
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import '../widgets/success_modal.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -296,7 +296,6 @@ class _SundanScreenState extends State<SundanScreen>
   final Random _rng = Random();
 
   static const double _hitRadius = 18.0;
-
 
   SharedPreferences? _prefs;
 
@@ -1289,7 +1288,6 @@ class _SundanScreenState extends State<SundanScreen>
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      
       int retryCount = 0;
       while (!userProvider.isInitialized && retryCount < 10) {
         await Future.delayed(const Duration(milliseconds: 200));
@@ -1405,7 +1403,6 @@ class _SundanScreenState extends State<SundanScreen>
             ? 'lowercase'
             : 'numbers';
     userProvider.updateSundanProgress(modeKey, letterIndex, true);
-    userProvider.addStars(3); // Award stars for completion
   }
 
   Future<void> _saveLetterComplete(int modeIndex, int letterIndex) async {
@@ -1418,15 +1415,17 @@ class _SundanScreenState extends State<SundanScreen>
     } else {
       key = SundanProgressKeys.numKey(_numbers[letterIndex].letter);
     }
+    // Check completion BEFORE writing so replay doesn't inflate totals
+    final alreadyDone = _prefs!.getBool(key) == true;
     await _prefs!.setBool(key, true);
-
-    // Update totals
     final attempts =
         (_prefs!.getInt(SundanProgressKeys.totalAttempts) ?? 0) + 1;
-    final completed =
-        (_prefs!.getInt(SundanProgressKeys.totalCompleted) ?? 0) + 1;
     await _prefs!.setInt(SundanProgressKeys.totalAttempts, attempts);
-    await _prefs!.setInt(SundanProgressKeys.totalCompleted, completed);
+    if (!alreadyDone) {
+      final completed =
+          (_prefs!.getInt(SundanProgressKeys.totalCompleted) ?? 0) + 1;
+      await _prefs!.setInt(SundanProgressKeys.totalCompleted, completed);
+    }
 
     final modeName = modeIndex == 0
         ? 'Uppercase'
@@ -1503,20 +1502,14 @@ class _SundanScreenState extends State<SundanScreen>
   void _onPanStart(DragStartDetails d) {
     if (_canvasSize == Size.zero) return;
     if (_isCompleted) {
-      final lang = Provider.of<LanguageProvider>(context, listen: false);
-      _showFeedback(
-          lang.translate('You finished this already! 🌟',
-              'Nalpasem daytoyen! 🌟', 'Natapos mo na ito! 🌟'),
-          Colors.green);
+      _showFeedback(AppLocalizations.of(context)!.doneAlready, Colors.green);
       return;
     }
     final designPt = _toDesign(d.localPosition);
 
     // START ANYWHERE ON PATH: Child no longer forced into one starting dot
     if (!_isOnPath(designPt)) {
-      final lang = Provider.of<LanguageProvider>(context, listen: false);
-      _triggerWarning(lang.translate('Start on the line!',
-          'Mangrugika iti ayan ti linya!', 'Magsimula sa linya!'));
+      _triggerWarning(AppLocalizations.of(context)!.startOnLine);
       return;
     }
 
@@ -1540,9 +1533,7 @@ class _SundanScreenState extends State<SundanScreen>
     // STRICTER ADHERENCE: Check if moving away too fast or starting mid-segment wrongfully
     if (!_isOnPath(designPt)) {
       setState(() => _outOfBounds = true);
-      final lang = Provider.of<LanguageProvider>(context, listen: false);
-      _triggerWarning(lang.translate('Stay inside the line!',
-          'Agalwadka iti uneg ti linya!', 'Manatili sa loob ng linya!'));
+      _triggerWarning(AppLocalizations.of(context)!.stayInsideLine);
       return;
     }
 
@@ -1566,7 +1557,7 @@ class _SundanScreenState extends State<SundanScreen>
             _visitedPoints.add(i);
           }
         } else {
-          // Sequential progress only: can only visit i if it's already visited 
+          // Sequential progress only: can only visit i if it's already visited
           // or it's the next point after the current maximum visited point.
           int maxV = _visitedPoints.reduce(max);
           if (i <= maxV + 1) {
@@ -1631,7 +1622,8 @@ class _SundanScreenState extends State<SundanScreen>
 
     _successController.forward(from: 0);
     _spawnConfetti();
-    _showFeedback(Translations.getGoodJobPoints(context, 10), Colors.green);
+    _showFeedback(
+        AppLocalizations.of(context)!.goodJobPoints(10), Colors.green);
 
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
@@ -1656,7 +1648,7 @@ class _SundanScreenState extends State<SundanScreen>
     });
 
     if (_wrongAttempts >= 5) {
-      _showFeedback(Translations.getTooHardSwitch(context), Colors.blue);
+      _showFeedback(AppLocalizations.of(context)!.tooHardSwitch, Colors.blue);
       Future.delayed(const Duration(seconds: 2), () {
         if (!mounted) return;
         _pageController.nextPage(
@@ -1742,22 +1734,22 @@ class _SundanScreenState extends State<SundanScreen>
 
   void _showCompletionDialog() {
     final modeName = _selectedMode == 0
-        ? "Dakkel a Letra"
+        ? AppLocalizations.of(context)!.uppercase
         : _selectedMode == 1
-            ? "Bassit a Letra"
-            : "Dagiti Numero";
+            ? AppLocalizations.of(context)!.lowercase
+            : AppLocalizations.of(context)!.numbers;
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: 'Naammuammon!',
-        subtitle: 'Nalpasem amin dagiti $modeName!',
+        title: AppLocalizations.of(context)!.iKnowIt,
+        subtitle: AppLocalizations.of(context)!.categoryCompleted(modeName),
         score: _score,
         stars: 3,
-        primaryLabel: 'Agtuloy',
+        primaryLabel: AppLocalizations.of(context)!.continueText,
         onPrimaryTap: () => Navigator.pop(context),
-        secondaryLabel: 'Uliten',
+        secondaryLabel: AppLocalizations.of(context)!.ulitin,
         onSecondaryTap: () {
           Navigator.pop(context);
           _resetTracing();
@@ -1796,7 +1788,7 @@ class _SundanScreenState extends State<SundanScreen>
           color: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(Translations.getSurotemKabaelam(context),
+        title: Text(AppLocalizations.of(context)!.surotemKabaelam,
             style: const TextStyle(
                 color: AppColors.textDark,
                 fontSize: 20,
@@ -1825,9 +1817,10 @@ class _SundanScreenState extends State<SundanScreen>
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildModeTab(0, 'ABC', Translations.getUpper(context)),
-                  _buildModeTab(1, 'abc', Translations.getLower(context)),
-                  _buildModeTab(2, '123', Translations.getNumbers(context)),
+                  _buildModeTab(0, 'ABC', AppLocalizations.of(context)!.upper),
+                  _buildModeTab(1, 'abc', AppLocalizations.of(context)!.lower),
+                  _buildModeTab(
+                      2, '123', AppLocalizations.of(context)!.numbers),
                 ]),
           ),
         ),
@@ -1859,8 +1852,8 @@ class _SundanScreenState extends State<SundanScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                   Text(
-                      Translations.getLetterLabel(
-                          context, _currentLetter.letter),
+                      AppLocalizations.of(context)!
+                          .letterLabel(_currentLetter.letter),
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 3),
@@ -1885,7 +1878,7 @@ class _SundanScreenState extends State<SundanScreen>
             ),
             const SizedBox(width: 6),
             Column(children: [
-              Text(Translations.getPointsLabel(context),
+              Text(AppLocalizations.of(context)!.pointsLabel,
                   style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
               Text('$_score',
                   style: const TextStyle(
@@ -2040,7 +2033,8 @@ class _SundanScreenState extends State<SundanScreen>
                                         const SizedBox(width: 10),
                                         Flexible(
                                           child: Text(
-                                              Translations.getGoodJob(context),
+                                              AppLocalizations.of(context)!
+                                                  .goodJob,
                                               style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 18,
@@ -2110,7 +2104,7 @@ class _SundanScreenState extends State<SundanScreen>
           child: OutlinedButton.icon(
             onPressed: _resetTracing,
             icon: const Icon(Icons.refresh),
-            label: Text(Translations.getUlitin(context)),
+            label: Text(AppLocalizations.of(context)!.ulitin),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
               side: BorderSide(color: AppColors.primary.withOpacity(0.4)),

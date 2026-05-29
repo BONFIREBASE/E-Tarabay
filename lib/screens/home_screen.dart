@@ -1,10 +1,10 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:confetti/confetti.dart';
 import '../main.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import 'matematika_screen.dart';
 import 'pamilya_screen.dart';
 import 'kulay_screen.dart';
@@ -55,10 +55,10 @@ class _HomeScreenState extends State<HomeScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Icon(Icons.warning_amber_rounded,
               color: Colors.orange, size: 60),
-          content: const Text(
-            'Tapos na ang iyong access sa app na ito. I-consult ang iyong Teacher para sa susunod na hakbang',
+          content: Text(
+            AppLocalizations.of(context)!.accessExpired,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           actions: [
             Center(
@@ -75,11 +75,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   final userProvider =
                       Provider.of<UserProvider>(context, listen: false);
                   await userProvider.logout();
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   Navigator.of(context).pushNamedAndRemoveUntil(
                       '/', (Route<dynamic> route) => false);
                 },
-                child: const Text('OK'),
+                child: Text(AppLocalizations.of(context)!.okButton),
               ),
             ),
           ],
@@ -131,7 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Icon(Icons.cake, color: Colors.pink, size: 64),
                   const SizedBox(height: 16),
                   Text(
-                    Translations.getBirthdayGreeting(context, profile.name),
+                    AppLocalizations.of(context)!
+                        .birthdayGreeting(profile.name),
                     style: const TextStyle(
                         fontSize: 18, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
@@ -313,7 +314,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
-                                      Translations.getHomeAge(context, userAge),
+                                      AppLocalizations.of(context)!
+                                          .homeAge(userAge),
                                       style: const TextStyle(
                                         fontSize: 10,
                                         color: AppColors.textLight,
@@ -357,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         _buildStatItem(
                           '${stats['lessons']}',
-                          Translations.getLessons(context),
+                          AppLocalizations.of(context)!.lessons,
                           Icons.menu_book,
                           AppColors.primary,
                         ),
@@ -368,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         _buildStatItem(
                           '${stats['stars']}',
-                          Translations.getStars(context),
+                          AppLocalizations.of(context)!.stars,
                           Icons.star,
                           Colors.amber,
                         ),
@@ -379,7 +381,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         _buildStatItem(
                           '${stats['awards']}',
-                          Translations.getAwards(context),
+                          AppLocalizations.of(context)!.awards,
                           Icons.emoji_events,
                           AppColors.success,
                         ),
@@ -406,10 +408,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 Expanded(
                                   child: _buildImageCard(
-                                    title: Translations.getMatematika(context),
-                                    subtitle: Translations.getSundanMoKayaMo(
-                                      context,
-                                    ),
+                                    title: AppLocalizations.of(context)!
+                                        .matematika,
+                                    subtitle: AppLocalizations.of(context)!
+                                        .sundanMoKayaMo,
                                     imagePath: 'assets/images/card1.png',
                                     color: AppColors.numbers,
                                     onTap: () => Navigator.push(
@@ -424,12 +426,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: _buildImageCard(
-                                    title: Translations.getAngAkingSarili(
-                                      context,
-                                    ),
-                                    subtitle: Translations.getAtAkingPamilya(
-                                      context,
-                                    ),
+                                    title: AppLocalizations.of(context)!
+                                        .angAkingSarili,
+                                    subtitle: AppLocalizations.of(context)!
+                                        .atAkingPamilya,
                                     imagePath: 'assets/images/card2.png',
                                     color: AppColors.family,
                                     onTap: () => Navigator.push(
@@ -454,10 +454,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 Expanded(
                                   child: _buildImageCard(
-                                    title: Translations.getKulaySaya(context),
-                                    subtitle: Translations.getMagkulayTayo(
-                                      context,
-                                    ),
+                                    title:
+                                        AppLocalizations.of(context)!.kulaySaya,
+                                    subtitle: AppLocalizations.of(context)!
+                                        .magkulayTayo,
                                     imagePath: 'assets/images/card3.png',
                                     color: AppColors.colors,
                                     onTap: () => Navigator.push(
@@ -472,10 +472,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: _buildImageCard(
-                                    title: Translations.getSundanMo(context),
-                                    subtitle: Translations.getSundanMoKayaMo(
-                                      context,
-                                    ),
+                                    title:
+                                        AppLocalizations.of(context)!.sundanMo,
+                                    subtitle: AppLocalizations.of(context)!
+                                        .sundanMoKayaMo,
                                     imagePath: 'assets/images/card4.png',
                                     color: AppColors.success,
                                     onTap: () => Navigator.push(
@@ -497,10 +497,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           SizedBox(
                             height: cardHeight,
                             child: _buildWideImageCard(
-                              title: Translations.getMagbasaTitle(context),
-                              subtitle: Translations.getAlpabetoAtMgaSalita(
-                                context,
-                              ),
+                              title: AppLocalizations.of(context)!.magbasaTitle,
+                              subtitle: AppLocalizations.of(context)!
+                                  .alpabetoAtMgaSalita,
                               imagePath: 'assets/images/card5.png',
                               color: AppColors.alphabet,
                               onTap: () => Navigator.push(
@@ -546,22 +545,22 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 _buildNavItem(
                   Icons.home_rounded,
-                  Translations.getHome(context),
+                  AppLocalizations.of(context)!.home,
                   0,
                 ),
                 _buildNavItem(
                   Icons.auto_stories_rounded,
-                  Translations.getLessons(context),
+                  AppLocalizations.of(context)!.lessons,
                   1,
                 ),
                 _buildNavItem(
                   Icons.emoji_events_rounded,
-                  Translations.getAwards(context),
+                  AppLocalizations.of(context)!.awards,
                   2,
                 ),
                 _buildNavItem(
                   Icons.settings_rounded,
-                  Translations.getSettings(context),
+                  AppLocalizations.of(context)!.settings,
                   3,
                 ),
               ],

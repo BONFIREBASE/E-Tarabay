@@ -1,3 +1,4 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 
@@ -55,8 +56,8 @@ class _MagbasaKwentoScreenState extends State<MagbasaKwentoScreen> {
                   _isCompleted = true;
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Magaling! Natapos mo ang kwento!'),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.storyFinishedGreatJob),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -69,7 +70,7 @@ class _MagbasaKwentoScreenState extends State<MagbasaKwentoScreen> {
                 backgroundColor: AppColors.colors,
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               ),
-              child: const Text('Tapos na!'),
+              child: Text(AppLocalizations.of(context)!.finishedExclamation),
             ),
           ],
         ),

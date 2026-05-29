@@ -1,3 +1,4 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 // ignore_for_file: deprecated_member_use
 import 'dart:async';
 import 'dart:math';
@@ -10,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import '../widgets/success_modal.dart';
 
 // ─── CustomPainter: draws animated lines between matched nodes ───────────────
@@ -83,6 +83,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
   int _totalScore = 0;
   int _totalStars = 0;
   int _levelStars = 0;
+  int _levelScore = 0;
   int _wrongAttempts = 0;
 
   int _secondsLeft = 30;
@@ -543,7 +544,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
   void _stopTimer() => _timer?.cancel();
 
   void _onTimeout() {
-    _showFeedback('⏰ ${Translations.getTimeOut(context)}', Colors.orange);
+    _showFeedback('⏰ ${AppLocalizations.of(context)!.timeOut}', Colors.orange);
     _startTimer();
   }
 
@@ -570,6 +571,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
     _currentGameIndex = firstUncompleted;
     _levelStars = 0;
+    _levelScore = 0;
     _wrongAttempts = 0;
     _resetQuestionState();
   }
@@ -635,19 +637,19 @@ class _MatematikaScreenState extends State<MatematikaScreen>
   String _getLevelTitleLocalized(int index) {
     switch (index) {
       case 0:
-        return Translations.getCounting(context);
+        return AppLocalizations.of(context)!.counting;
       case 1:
-        return Translations.getDragNumber(context);
+        return AppLocalizations.of(context)!.dragNumber;
       case 2:
-        return Translations.getLineMatch(context);
+        return AppLocalizations.of(context)!.lineMatch;
       case 3:
-        return Translations.getPopBalloon(context);
+        return AppLocalizations.of(context)!.popBalloon;
       case 4:
-        return Translations.getMoreOrLess(context);
+        return AppLocalizations.of(context)!.moreOrLess;
       case 5:
-        return Translations.getNumberPuzzle(context);
+        return AppLocalizations.of(context)!.numberPuzzle;
       case 6:
-        return Translations.getNumberSequence(context);
+        return AppLocalizations.of(context)!.numberSequence;
       default:
         return '';
     }
@@ -658,7 +660,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     final key = lang.currentLanguage == 'il'
         ? 'item_name_il'
         : (lang.currentLanguage == 'tl' ? 'item_name_tl' : 'item_name_en');
-    return Translations.getHowMany(context, game[key] ?? 'items');
+    return AppLocalizations.of(context)!.howMany(game[key] ?? 'items');
   }
 
   String _getMatchFromMap(Map<String, dynamic> game) {
@@ -666,7 +668,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     final key = lang.currentLanguage == 'il'
         ? 'target_cat_il'
         : (lang.currentLanguage == 'tl' ? 'target_cat_tl' : 'target_cat_en');
-    return Translations.getMatchWithNumber(context, game[key] ?? 'items');
+    return AppLocalizations.of(context)!.matchWithNumber(game[key] ?? 'items');
   }
 
   void _advanceOrComplete() {
@@ -695,12 +697,13 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       _totalScore += 10 * earned;
       _totalStars += earned;
       _levelStars += earned;
+      _levelScore += 10 * earned;
       _showCorrectOverlay = true;
     });
 
     _starBurstController.forward(from: 0);
     _showFeedback(
-      '${List.filled(earned, '⭐').join()} ${Translations.getGoodJobPoints(context, 10 * earned)}',
+      '${List.filled(earned, '⭐').join()} ${AppLocalizations.of(context)!.goodJobPoints(10 * earned)}',
       const Color(0xFF2E7D32),
     );
 
@@ -723,7 +726,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       _showWrongOverlay = true;
     });
 
-    _showFeedback('❌ MALI TI SUNGBAT', Colors.red);
+    _showFeedback(AppLocalizations.of(context)!.incorrectAnswer, Colors.red);
     // Even if it's wrong, we call _saveQuestionProgress with 0 stars
     // so it counts as "completed" in the progress logic.
     _saveQuestionProgress(0);
@@ -743,11 +746,9 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   void _saveQuestionProgress(int earned) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    userProvider.updateMatematikaProgress(
-        _selectedLevel, earned, 10 * earned, _dailyStreak);
+    userProvider.updateMatematikaProgress(_dailyStreak);
     userProvider.updateMatematikaGameProgress(
         _selectedLevel, _currentGameIndex, true);
-    userProvider.addStars(earned);
 
     // ── Also persist directly so ForParentsScreen can read progress ──────
     _persistMatematikaProgress(earned);
@@ -755,14 +756,19 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   Future<void> _persistMatematikaProgress(int earned) async {
     final prefs = await SharedPreferences.getInstance();
+    final gameKey = 'mat_level_${_selectedLevel}_game_$_currentGameIndex';
+    final alreadyDone = prefs.getBool(gameKey) ?? false;
+
     // Mark this specific game as done
-    await prefs.setBool(
-        'mat_level_${_selectedLevel}_game_$_currentGameIndex', true);
-    // Accumulate total score and stars
-    final prevScore = prefs.getInt('mat_total_score') ?? 0;
-    final prevStars = prefs.getInt('mat_total_stars') ?? 0;
-    await prefs.setInt('mat_total_score', prevScore + (10 * earned));
-    await prefs.setInt('mat_total_stars', prevStars + earned);
+    await prefs.setBool(gameKey, true);
+
+    // Only accumulate total score and stars on first completion
+    if (!alreadyDone) {
+      final prevScore = prefs.getInt('mat_total_score') ?? 0;
+      final prevStars = prefs.getInt('mat_total_stars') ?? 0;
+      await prefs.setInt('mat_total_score', prevScore + (10 * earned));
+      await prefs.setInt('mat_total_stars', prevStars + earned);
+    }
   }
 
   // ─── Game handlers ───────────────────────────────────────────────────────────
@@ -973,18 +979,22 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     final total = _currentGames.length;
     final avgStars = total == 0 ? 1 : (_levelStars / total).ceil().clamp(1, 3);
 
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userProvider.awardMatematikaLevelCompletion(
+        _selectedLevel, avgStars, _levelScore);
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: 'Level ${_selectedLevel + 1} Tapos Na!',
+        title: AppLocalizations.of(context)!.levelComplete(_selectedLevel + 1),
         subtitle: _levelTitles[_selectedLevel],
         score: _totalScore,
         stars: avgStars,
         streak: _dailyStreak,
         primaryLabel: _selectedLevel < _levelTitles.length - 1
-            ? 'Sige Pa!'
-            : 'Nalpas! 🏆',
+            ? AppLocalizations.of(context)!.continueText
+            : AppLocalizations.of(context)!.completedAllLevels,
         onPrimaryTap: () {
           Navigator.pop(context);
           if (_selectedLevel < _levelTitles.length - 1) {
@@ -993,7 +1003,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
             _showAllDone();
           }
         },
-        secondaryLabel: 'Ulitennak',
+        secondaryLabel: AppLocalizations.of(context)!.repeat,
         onSecondaryTap: () {
           Navigator.pop(context);
           _switchLevel(_selectedLevel);
@@ -1008,15 +1018,15 @@ class _MatematikaScreenState extends State<MatematikaScreen>
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: 'Binalbalkat ka!',
-        subtitle: 'Nalpasem amin a levels iti Matematika!',
+        title: AppLocalizations.of(context)!.congratulations,
+        subtitle: AppLocalizations.of(context)!.completedAllLevels,
         score: _totalScore,
         stars: 3,
-        primaryLabel: 'Agtuloy (Continue)',
+        primaryLabel: AppLocalizations.of(context)!.continueText,
         onPrimaryTap: () {
           Navigator.pop(context);
         },
-        secondaryLabel: 'Dadduma pay (Back)',
+        secondaryLabel: AppLocalizations.of(context)!.back,
         onSecondaryTap: () {
           Navigator.pop(context);
         },
@@ -1157,8 +1167,8 @@ class _MatematikaScreenState extends State<MatematikaScreen>
             return GestureDetector(
               onTap: () {
                 if (completed && !active) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Nalpasem daytoyen! (Done already!)'),
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(AppLocalizations.of(context)!.doneAlready),
                     duration: Duration(seconds: 1),
                   ));
                   return;
@@ -1335,11 +1345,11 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                 )
               ],
             ),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.cancel_rounded, color: Colors.white, size: 64),
-                SizedBox(height: 8),
+                const Icon(Icons.cancel_rounded, color: Colors.white, size: 64),
+                const SizedBox(height: 8),
                 Text(
                   'Mali!',
                   style: TextStyle(
@@ -1348,7 +1358,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                       fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  'Subukan muli',
+                  AppLocalizations.of(context)!.tryAgain,
                   style: TextStyle(color: Colors.white70, fontSize: 13),
                 ),
               ],
@@ -1365,7 +1375,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     return ElevatedButton.icon(
       onPressed: onTap,
       icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
-      label: const Text('Suriin',
+      label: Text(AppLocalizations.of(context)!.checkAnswer,
           style: TextStyle(
               color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
       style: ElevatedButton.styleFrom(
@@ -1440,7 +1450,8 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   Widget _buildGameContent() {
     if (_currentGames.isEmpty) {
-      return const Center(child: Text('No games available'));
+      return Center(
+          child: Text(AppLocalizations.of(context)!.noGamesAvailable2));
     }
     switch (_selectedLevel) {
       case 0:
@@ -1494,7 +1505,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
             ),
           ),
           const SizedBox(height: 28),
-          Text(Translations.getSelectCorrectAnswer(context),
+          Text(AppLocalizations.of(context)!.selectCorrectAnswer,
               style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -1531,7 +1542,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           _gameCard(
             child: Column(
               children: [
-                const Text('Bilangem ken iyugot ti umiso a numero!',
+                Text(AppLocalizations.of(context)!.countAndDragCorrectNumber,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     textAlign: TextAlign.center),
                 const SizedBox(height: 16),
@@ -1614,8 +1625,8 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                                 const SizedBox(height: 4),
                                 Text(
                                   hovering
-                                      ? 'Baybay-an ditoy!'
-                                      : 'Iyugot ditoy',
+                                      ? '${AppLocalizations.of(context)!.dropHere}'
+                                      : AppLocalizations.of(context)!.dragHere,
                                   style: TextStyle(
                                     color: hovering
                                         ? AppColors.primary
@@ -1712,7 +1723,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           ),
           const SizedBox(height: 3),
           Text(
-            Translations.getTapLeftTapRight(context),
+            AppLocalizations.of(context)!.tapLeftTapRight,
             style: TextStyle(
                 fontSize: 11,
                 color: Colors.grey.shade500,
@@ -1862,12 +1873,12 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                             )
                           ],
                         ),
-                        child: const Column(
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.cancel_rounded,
+                            const Icon(Icons.cancel_rounded,
                                 color: Colors.white, size: 58),
-                            SizedBox(height: 6),
+                            const SizedBox(height: 6),
                             Text(
                               'Mali!',
                               style: TextStyle(
@@ -1877,7 +1888,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                               ),
                             ),
                             Text(
-                              'Subukan muli',
+                              AppLocalizations.of(context)!.tryAgain,
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 12,
@@ -2249,10 +2260,10 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           _gameCard(
             child: Text(
               game['type'] == 'more'
-                  ? Translations.getWhichIsMore(context)
+                  ? AppLocalizations.of(context)!.whichIsMore
                   : game['type'] == 'less'
-                      ? Translations.getWhichIsLess(context)
-                      : Translations.getIsSameNumber(context),
+                      ? AppLocalizations.of(context)!.whichIsLess
+                      : AppLocalizations.of(context)!.isSameNumber,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -2267,7 +2278,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                   objects:
                       (game['leftObjects'] as List<dynamic>).cast<String>(),
                   count: game['leftCount'] as int,
-                  label: 'Kanigid',
+                  label: AppLocalizations.of(context)!.left,
                   correct: correct,
                 ),
                 _game5Side(
@@ -2275,7 +2286,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                   objects:
                       (game['rightObjects'] as List<dynamic>).cast<String>(),
                   count: game['rightCount'] as int,
-                  label: 'Kanawan',
+                  label: AppLocalizations.of(context)!.right,
                   correct: correct,
                 ),
               ],
@@ -2288,7 +2299,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
               child: ElevatedButton.icon(
                 onPressed: _handleEqualButton,
                 icon: const Icon(Icons.balance_rounded, color: Colors.white),
-                label: const Text('Parehoda!  ✓',
+                label: Text(AppLocalizations.of(context)!.theyAreSame,
                     style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
@@ -2398,7 +2409,8 @@ class _MatematikaScreenState extends State<MatematikaScreen>
             child: Column(
               children: [
                 Text(
-                  Translations.getArrange(context, game['sequence'] as String),
+                  AppLocalizations.of(context)!
+                      .arrange(game['sequence'] as String),
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
@@ -2511,7 +2523,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           _gameCard(
             child: Column(
               children: [
-                const Text('Ania ti kurang a numero?',
+                Text(AppLocalizations.of(context)!.whatIsMissingNumber,
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
@@ -2567,7 +2579,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
             ),
           ),
           const SizedBox(height: 28),
-          Text(Translations.getSelectCorrectAnswer(context),
+          Text(AppLocalizations.of(context)!.selectCorrectAnswer,
               style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 13,

@@ -5,7 +5,7 @@ plugins {
     // START: FlutterFire Configuration
     id("com.google.gms.google-services")
     // END: FlutterFire Configuration
-    id("kotlin-android")
+    id("org.jetbrains.kotlin.android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -22,7 +22,6 @@ android {
 
     namespace = "com.defended.etarabay"
     compileSdk = 36
-    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -73,14 +72,3 @@ flutter {
     source = "../.."
 }
 
-tasks.whenTaskAdded {
-    if (name.startsWith("assemble")) {
-        doLast {
-            copy {
-                from("C:/flutter_builds/e_tarabay_v2/app/outputs/flutter-apk")
-                into("C:/e_tarabay_v2/build/app/outputs/flutter-apk")
-                include("*.apk", "*.json")
-            }
-        }
-    }
-}

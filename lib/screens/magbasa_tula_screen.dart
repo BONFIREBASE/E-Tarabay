@@ -1,3 +1,4 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 
@@ -58,12 +59,12 @@ class _MagbasaTulaScreenState extends State<MagbasaTulaScreen> {
                   context: context,
                   builder: (context) => AlertDialog(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    content: const Column(
+                    content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.check_circle, color: Colors.green, size: 48),
                         SizedBox(height: 16),
-                        Text('Magaling! Natapos mo ang tula!', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(AppLocalizations.of(context)!.poemFinishedGreatJob, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -78,7 +79,7 @@ class _MagbasaTulaScreenState extends State<MagbasaTulaScreen> {
                 backgroundColor: AppColors.alphabet,
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               ),
-              child: const Text('Tapos na!'),
+              child: Text(AppLocalizations.of(context)!.finishedExclamation),
             ),
           ],
         ),

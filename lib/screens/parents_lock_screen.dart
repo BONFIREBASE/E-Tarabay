@@ -1,10 +1,10 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'for_parents_screen.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import '../providers/user_provider.dart';
 
 class ParentsLockScreen extends StatefulWidget {
@@ -113,7 +113,7 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                Translations.getParents(context),
+                AppLocalizations.of(context)!.parents,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -122,7 +122,7 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                Translations.getEnterLRN(context),
+                AppLocalizations.of(context)!.enterLRN,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 16,
@@ -137,12 +137,13 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
                 style: const TextStyle(letterSpacing: 8, fontSize: 18),
                 textAlign: TextAlign.center,
                 decoration: InputDecoration(
-                  labelText: 'LRN',
+                  labelText: AppLocalizations.of(context)!.lRN,
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   hintText: '••••••••••••',
                   hintStyle: const TextStyle(letterSpacing: 2),
-                  errorText:
-                      _showError ? Translations.getInvalidLRN(context) : null,
+                  errorText: _showError
+                      ? AppLocalizations.of(context)!.invalidLRN
+                      : null,
                   prefixIcon: const Icon(Icons.key_rounded),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -170,7 +171,7 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
-                          Translations.getVerifyLRN(context),
+                          AppLocalizations.of(context)!.verifyLRN,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

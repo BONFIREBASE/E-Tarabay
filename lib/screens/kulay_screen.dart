@@ -1,10 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:e_tarabay/l10n/app_localizations.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import '../widgets/success_modal.dart';
 
 class ColoringCategory {
@@ -56,12 +64,33 @@ class ColoringStroke {
       isEraser: isEraser,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'points': points.map((p) => {'dx': p.dx, 'dy': p.dy}).toList(),
+      'color': color.value,
+      'size': size,
+      'isEraser': isEraser,
+    };
+  }
+
+  factory ColoringStroke.fromMap(Map<String, dynamic> map) {
+    return ColoringStroke(
+      points: (map['points'] as List)
+          .map((p) => Offset(p['dx'] as double, p['dy'] as double))
+          .toList(),
+      color: Color(map['color'] as int),
+      size: map['size'] as double,
+      isEraser: map['isEraser'] as bool,
+    );
+  }
 }
 
 class MyCreation {
   final String name;
   final DateTime date;
   final String thumbnailPath;
+  final String sourcePagePath;
   final List<ColoringStroke> strokes;
   bool isFavorite;
 
@@ -69,20 +98,21 @@ class MyCreation {
     required this.name,
     required this.date,
     required this.thumbnailPath,
+    this.sourcePagePath = '',
     required this.strokes,
     this.isFavorite = false,
   });
 
   String getTimeAgoLocalized(BuildContext context) {
     final diff = DateTime.now().difference(date);
-    if (diff.inMinutes < 1) return Translations.getJustNow(context);
+    if (diff.inMinutes < 1) return AppLocalizations.of(context)!.justNow;
     if (diff.inMinutes < 60) {
-      return Translations.getTimeAgo(context, diff.inMinutes, 'm');
+      return AppLocalizations.of(context)!.timeAgo(diff.inMinutes, 'm');
     }
     if (diff.inHours < 24) {
-      return Translations.getTimeAgo(context, diff.inHours, 'h');
+      return AppLocalizations.of(context)!.timeAgo(diff.inHours, 'h');
     }
-    return Translations.getTimeAgo(context, diff.inDays, 'd');
+    return AppLocalizations.of(context)!.timeAgo(diff.inDays, 'd');
   }
 }
 
@@ -108,9 +138,7 @@ class StrokePainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke.size
-      ..color = stroke.isEraser
-          ? Colors.white.withOpacity(0.95)
-          : stroke.color.withOpacity(0.85);
+      ..color = stroke.isEraser ? stroke.color : stroke.color.withOpacity(0.85);
 
     if (stroke.points.length == 1) {
       canvas.drawCircle(
@@ -118,9 +146,8 @@ class StrokePainter extends CustomPainter {
         stroke.size / 2,
         Paint()
           ..style = PaintingStyle.fill
-          ..color = stroke.isEraser
-              ? Colors.white.withOpacity(0.95)
-              : stroke.color.withOpacity(0.85),
+          ..color =
+              stroke.isEraser ? stroke.color : stroke.color.withOpacity(0.85),
       );
       return;
     }
@@ -175,14 +202,23 @@ class _KulayScreenState extends State<KulayScreen>
   bool _isEraser = false;
 
   // ── Zoom & pan ─────────────────────────────────────────────────────────────
-  double _scale = 1.0;
-  late TransformationController _transformationController;
+  // ── Bucket fill ────────────────────────────────────────────────────────────
+  img.Image? _baseImage;
+  img.Image? _coloredImage;
+  ui.Image? _displayImage;
+  int _filledPixelsCount = 0;
+  double _lastSide = 300;
+  bool _isLoadingAutoSave = false;
+  final GlobalKey _canvasKey = GlobalKey();
 
-  int _pointerCount = 0;
-  bool _isZoomMode = false;
+  // Bucket fill undo/redo
+  final List<img.Image> _bucketUndoImages = [];
+  final List<int> _bucketUndoPixelCounts = [];
+  final List<img.Image> _bucketRedoImages = [];
+  final List<int> _bucketRedoPixelCounts = [];
 
-  static const double _minScale = 1.0;
-  static const double _maxScale = 6.0;
+  // ── Audio ──────────────────────────────────────────────────────────────────
+  late AudioPlayer _audioPlayer;
 
   // ── Progress & animations ──────────────────────────────────────────────────
   double _coloringProgress = 0.0;
@@ -295,16 +331,10 @@ class _KulayScreenState extends State<KulayScreen>
   @override
   void initState() {
     super.initState();
-    _transformationController = TransformationController();
-    _transformationController.addListener(() {
-      if (mounted) {
-        setState(() {
-          _scale = _transformationController.value.getMaxScaleOnAxis();
-        });
-      }
-    });
-
     _loadCreations();
+
+    _audioPlayer = AudioPlayer();
+    _audioPlayer.setReleaseMode(ReleaseMode.stop);
 
     _rippleController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 600));
@@ -319,7 +349,7 @@ class _KulayScreenState extends State<KulayScreen>
 
   @override
   void dispose() {
-    _transformationController.dispose();
+    _audioPlayer.dispose();
     _rippleController.dispose();
     _doneController.dispose();
     super.dispose();
@@ -329,29 +359,16 @@ class _KulayScreenState extends State<KulayScreen>
   //  Gesture: separate drawing (1 pointer) from zoom/pan (2+ pointers)
   // ─────────────────────────────────────────────────────────────────────────
 
-  void _onDoubleTap() {
-    if (_scale > 1.5) {
-      _transformationController.value = Matrix4.identity();
-    } else {
-      final target = (_scale * 2.5).clamp(_minScale, _maxScale);
-      _transformationController.value = Matrix4.identity()..scale(target);
-    }
-    setState(() {
-      _scale = _transformationController.value.getMaxScaleOnAxis();
-    });
-  }
-
   // ─────────────────────────────────────────────────────────────────────────
   //  Drawing (single-finger pan gestures on the INNER canvas)
   // ─────────────────────────────────────────────────────────────────────────
 
   void _paintStart(DragStartDetails d) {
-    if (_isZoomMode) return;
     _redoStack.clear();
     setState(() {
       _activeStroke = ColoringStroke(
         points: [d.localPosition],
-        color: _selectedColor,
+        color: _isEraser ? _sampleBaseColor(d.localPosition) : _selectedColor,
         size: _brushSize,
         isEraser: _isEraser,
       );
@@ -360,7 +377,7 @@ class _KulayScreenState extends State<KulayScreen>
   }
 
   void _paintUpdate(DragUpdateDetails d) {
-    if (_isZoomMode || _activeStroke == null) return;
+    if (_activeStroke == null) return;
     setState(() {
       _activeStroke = _activeStroke!.copyWith(
         points: [..._activeStroke!.points, d.localPosition],
@@ -377,35 +394,47 @@ class _KulayScreenState extends State<KulayScreen>
     });
     _rippleController.forward(from: 0);
     _updateProgress();
+    _autoSave();
   }
 
-  void _paintTap(TapDownDetails d) {
-    if (_isZoomMode) return;
-    _redoStack.clear();
-    final dot = ColoringStroke(
-      points: [d.localPosition, d.localPosition],
-      color: _selectedColor,
-      size: _brushSize,
-      isEraser: _isEraser,
-    );
-    setState(() {
-      _strokes.add(dot);
-      _lastPos = d.localPosition;
-    });
-    _rippleController.forward(from: 0);
+  Future<void> _undo() async {
+    if (_strokes.isNotEmpty) {
+      setState(() => _redoStack.add(_strokes.removeLast()));
+      _updateProgress();
+      _autoSave();
+      return;
+    }
+    if (_bucketUndoImages.isEmpty) return;
+
+    _bucketRedoImages.add(_coloredImage!.clone());
+    _bucketRedoPixelCounts.add(_filledPixelsCount);
+    _coloredImage = _bucketUndoImages.removeLast();
+    _filledPixelsCount = _bucketUndoPixelCounts.removeLast();
+    final uiImg = await _imageToUi(_coloredImage!);
+    if (!mounted) return;
+    setState(() => _displayImage = uiImg);
     _updateProgress();
+    _autoSave();
   }
 
-  void _undo() {
-    if (_strokes.isEmpty) return;
-    setState(() => _redoStack.add(_strokes.removeLast()));
-    _updateProgress();
-  }
+  Future<void> _redo() async {
+    if (_redoStack.isNotEmpty) {
+      setState(() => _strokes.add(_redoStack.removeLast()));
+      _updateProgress();
+      _autoSave();
+      return;
+    }
+    if (_bucketRedoImages.isEmpty) return;
 
-  void _redo() {
-    if (_redoStack.isEmpty) return;
-    setState(() => _strokes.add(_redoStack.removeLast()));
+    _bucketUndoImages.add(_coloredImage!.clone());
+    _bucketUndoPixelCounts.add(_filledPixelsCount);
+    _coloredImage = _bucketRedoImages.removeLast();
+    _filledPixelsCount = _bucketRedoPixelCounts.removeLast();
+    final uiImg = await _imageToUi(_coloredImage!);
+    if (!mounted) return;
+    setState(() => _displayImage = uiImg);
     _updateProgress();
+    _autoSave();
   }
 
   void _clearAll() {
@@ -414,15 +443,360 @@ class _KulayScreenState extends State<KulayScreen>
       _redoStack.clear();
       _activeStroke = null;
       _coloringProgress = 0.0;
+      _filledPixelsCount = 0;
+      if (_baseImage != null) {
+        _coloredImage = _baseImage!.clone();
+      }
+      _displayImage = null;
     });
+    _bucketUndoImages.clear();
+    _bucketUndoPixelCounts.clear();
+    _bucketRedoImages.clear();
+    _bucketRedoPixelCounts.clear();
+    _autoSave();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  //  Bucket fill helpers
+  // ─────────────────────────────────────────────────────────────────────────
+
+  Future<void> _loadPageImage() async {
+    if (_selectedPage == null) return;
+    try {
+      final data = await rootBundle.load(_selectedPage!.imagePath);
+      final bytes = data.buffer.asUint8List();
+      _baseImage = img.decodeImage(bytes);
+      if (_baseImage == null) return;
+      _coloredImage = _baseImage!.clone();
+      _displayImage = await _imageToUi(_coloredImage!);
+    } catch (e) {
+      debugPrint('Error loading coloring image: $e');
+    }
+  }
+
+  Future<ui.Image> _imageToUi(img.Image image) async {
+    final pngBytes = img.encodePng(image);
+    final codec = await ui.instantiateImageCodec(pngBytes);
+    final frame = await codec.getNextFrame();
+    return frame.image;
+  }
+
+  String _autoSaveKey(String pageName) => 'kulay_autosave_$pageName';
+
+  Future<String> _autoSaveImagePath(String pageName) async {
+    final dir = await getApplicationDocumentsDirectory();
+    return '${dir.path}/kulay_autosave_$pageName.png';
+  }
+
+  Future<void> _autoSave() async {
+    if (_selectedPage == null) return;
+    final pageName = _selectedPage!.name;
+    final key = _autoSaveKey(pageName);
+    final prefs = await SharedPreferences.getInstance();
+
+    // Save strokes
+    final strokesJson = jsonEncode(_strokes.map((s) => s.toMap()).toList());
+    await prefs.setString('${key}_strokes', strokesJson);
+
+    // Save bucket-fill image
+    if (_coloredImage != null) {
+      final path = await _autoSaveImagePath(pageName);
+      final bytes = img.encodePng(_coloredImage!);
+      await File(path).writeAsBytes(bytes);
+      await prefs.setString('${key}_imagePath', path);
+    }
+
+    // Save metadata
+    await prefs.setInt('${key}_filledPixels', _filledPixelsCount);
+    await prefs.setDouble('${key}_progress', _coloringProgress);
+    await prefs.setInt('${key}_color', _selectedColor.value);
+    await prefs.setDouble('${key}_brushSize', _brushSize);
+    await prefs.setBool('${key}_isEraser', _isEraser);
+  }
+
+  Future<void> _loadAutoSave() async {
+    if (_selectedPage == null) return;
+    final pageName = _selectedPage!.name;
+    final key = _autoSaveKey(pageName);
+    final prefs = await SharedPreferences.getInstance();
+
+    final strokesJson = prefs.getString('${key}_strokes');
+    final imagePath = prefs.getString('${key}_imagePath');
+    final filledPixels = prefs.getInt('${key}_filledPixels');
+    final progress = prefs.getDouble('${key}_progress');
+    final colorVal = prefs.getInt('${key}_color');
+    final brushSize = prefs.getDouble('${key}_brushSize');
+    final isEraser = prefs.getBool('${key}_isEraser');
+
+    List<ColoringStroke>? loadedStrokes;
+    img.Image? loadedColoredImage;
+    ui.Image? loadedDisplayImage;
+
+    if (strokesJson != null && strokesJson.isNotEmpty) {
+      try {
+        final List<dynamic> decoded = jsonDecode(strokesJson);
+        loadedStrokes = decoded
+            .map((m) => ColoringStroke.fromMap(m as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        debugPrint('Error loading autosave strokes: $e');
+      }
+    }
+
+    if (imagePath != null && imagePath.isNotEmpty) {
+      try {
+        final file = File(imagePath);
+        if (await file.exists()) {
+          final bytes = await file.readAsBytes();
+          final image = img.decodeImage(bytes);
+          if (image != null && _baseImage != null) {
+            loadedColoredImage = image;
+            loadedDisplayImage = await _imageToUi(loadedColoredImage);
+          }
+        }
+      } catch (e) {
+        debugPrint('Error loading autosave image: $e');
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      if (loadedStrokes != null) {
+        _strokes.clear();
+        _strokes.addAll(loadedStrokes);
+      }
+      if (loadedColoredImage != null) _coloredImage = loadedColoredImage;
+      if (loadedDisplayImage != null) _displayImage = loadedDisplayImage;
+      if (filledPixels != null) _filledPixelsCount = filledPixels;
+      if (progress != null) _coloringProgress = progress;
+      if (colorVal != null) _selectedColor = Color(colorVal);
+      if (brushSize != null) _brushSize = brushSize;
+      if (isEraser != null) _isEraser = isEraser;
+      _isLoadingAutoSave = false;
+    });
+    _updateProgress();
+  }
+
+  Future<void> _clearAutoSave() async {
+    if (_selectedPage == null) return;
+    final pageName = _selectedPage!.name;
+    final key = _autoSaveKey(pageName);
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove('${key}_strokes');
+    await prefs.remove('${key}_imagePath');
+    await prefs.remove('${key}_filledPixels');
+    await prefs.remove('${key}_progress');
+    await prefs.remove('${key}_color');
+    await prefs.remove('${key}_brushSize');
+    await prefs.remove('${key}_isEraser');
+
+    final imagePath = await _autoSaveImagePath(pageName);
+    final file = File(imagePath);
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
+
+  Offset _localToImageCoords(Offset local, double side) {
+    if (_baseImage == null) return Offset.zero;
+    final imgW = _baseImage!.width.toDouble();
+    final imgH = _baseImage!.height.toDouble();
+    final imgRatio = imgW / imgH;
+
+    double drawW, drawH, offsetX, offsetY;
+    if (imgRatio > 1.0) {
+      drawW = side;
+      drawH = side / imgRatio;
+      offsetX = 0;
+      offsetY = (side - drawH) / 2;
+    } else {
+      drawH = side;
+      drawW = side * imgRatio;
+      offsetX = (side - drawW) / 2;
+      offsetY = 0;
+    }
+
+    final x = ((local.dx - offsetX) / drawW * imgW)
+        .toInt()
+        .clamp(0, _baseImage!.width - 1);
+    final y = ((local.dy - offsetY) / drawH * imgH)
+        .toInt()
+        .clamp(0, _baseImage!.height - 1);
+    return Offset(x.toDouble(), y.toDouble());
+  }
+
+  Color _sampleBaseColor(Offset local) {
+    if (_baseImage == null) return Colors.white;
+    final coords = _localToImageCoords(local, _lastSide);
+    final ix = coords.dx.toInt().clamp(0, _baseImage!.width - 1);
+    final iy = coords.dy.toInt().clamp(0, _baseImage!.height - 1);
+    final p = _baseImage!.getPixel(ix, iy);
+    return Color.fromARGB(255, p.r.toInt(), p.g.toInt(), p.b.toInt());
+  }
+
+  int _floodFillBfs(
+    img.Image image,
+    int startX,
+    int startY,
+    int fillR,
+    int fillG,
+    int fillB, {
+    int threshold = 20,
+    int maxPixels = 15000,
+  }) {
+    final w = image.width;
+    final h = image.height;
+    if (startX < 0 || startX >= w || startY < 0 || startY >= h) return 0;
+
+    final startPixel = image.getPixel(startX, startY);
+    final startR = startPixel.r.toInt();
+    final startG = startPixel.g.toInt();
+    final startB = startPixel.b.toInt();
+    final startA = startPixel.a.toInt();
+
+    // Already filled with same color? Skip.
+    if (startR == fillR && startG == fillG && startB == fillB) return 0;
+
+    // Use Set for visited when image is huge, List<bool> for small/medium
+    final int pixelCount = w * h;
+    final bool useSet = pixelCount > 250000;
+    final Set<int>? visitedSet = useSet ? <int>{} : null;
+    final List<bool>? visitedList =
+        useSet ? null : List<bool>.filled(pixelCount, false);
+
+    final qx = <int>[startX];
+    final qy = <int>[startY];
+    int head = 0;
+
+    if (useSet) {
+      visitedSet!.add(startY * w + startX);
+    } else {
+      visitedList![startY * w + startX] = true;
+    }
+
+    int filled = 0;
+
+    while (head < qx.length) {
+      final x = qx[head];
+      final y = qy[head];
+      head++;
+
+      final pixel = image.getPixel(x, y);
+      final r = pixel.r.toInt();
+      final g = pixel.g.toInt();
+      final b = pixel.b.toInt();
+      final a = pixel.a.toInt();
+
+      // Skip transparent line-art pixels (alpha < 50)
+      if (a < 50) continue;
+
+      // Skip pixels that differ too much from the starting color
+      if ((r - startR).abs() > threshold ||
+          (g - startG).abs() > threshold ||
+          (b - startB).abs() > threshold ||
+          (a - startA).abs() > threshold) {
+        continue;
+      }
+
+      pixel.r = fillR;
+      pixel.g = fillG;
+      pixel.b = fillB;
+      pixel.a = 255;
+      filled++;
+
+      if (filled >= maxPixels) break;
+
+      void tryAdd(int nx, int ny) {
+        if (nx < 0 || nx >= w || ny < 0 || ny >= h) return;
+        final idx = ny * w + nx;
+        if (useSet) {
+          if (visitedSet!.contains(idx)) return;
+          visitedSet.add(idx);
+        } else {
+          if (visitedList![idx]) return;
+          visitedList[idx] = true;
+        }
+        qx.add(nx);
+        qy.add(ny);
+      }
+
+      tryAdd(x + 1, y);
+      tryAdd(x - 1, y);
+      tryAdd(x, y + 1);
+      tryAdd(x, y - 1);
+    }
+    return filled;
+  }
+
+  void _onBucketTap(Offset localPosition) {
+    if (_coloredImage == null || _baseImage == null) return;
+
+    final coords = _localToImageCoords(localPosition, _lastSide);
+    final imgX = coords.dx.toInt();
+    final imgY = coords.dy.toInt();
+
+    final fillR = _selectedColor.red;
+    final fillG = _selectedColor.green;
+    final fillB = _selectedColor.blue;
+
+    // Save snapshot for undo before modifying (cap at 10)
+    if (_bucketUndoImages.length >= 10) {
+      _bucketUndoImages.removeAt(0);
+      _bucketUndoPixelCounts.removeAt(0);
+    }
+    _bucketUndoImages.add(_coloredImage!.clone());
+    _bucketUndoPixelCounts.add(_filledPixelsCount);
+    _bucketRedoImages.clear();
+    _bucketRedoPixelCounts.clear();
+
+    final filledCount = _floodFillBfs(
+      _coloredImage!,
+      imgX,
+      imgY,
+      fillR,
+      fillG,
+      fillB,
+      threshold: 40,
+    );
+
+    if (filledCount == 0) return;
+
+    _filledPixelsCount += filledCount;
+
+    _imageToUi(_coloredImage!).then((uiImg) {
+      if (!mounted) return;
+      setState(() {
+        _displayImage = uiImg;
+        _lastPos = localPosition;
+      });
+      _rippleController.forward(from: 0);
+      _updateProgress();
+    });
+    _autoSave();
+
+    HapticFeedback.lightImpact();
   }
 
   void _updateProgress() {
     if (_selectedPage == null) return;
-    final expected = ((_selectedPage!.colors) * 50).toDouble();
-    setState(() {
-      _coloringProgress = (_strokes.length / expected).clamp(0.0, 1.0);
-    });
+
+    if (_baseImage != null && _coloredImage != null && _filledPixelsCount > 0) {
+      // Pixel-based progress: assume the subject is ~30% of the image
+      final totalPixels = _baseImage!.width * _baseImage!.height;
+      final estimatedSubject =
+          (totalPixels * 0.3).toInt().clamp(1, totalPixels);
+      setState(() {
+        _coloringProgress =
+            (_filledPixelsCount / estimatedSubject).clamp(0.0, 1.0);
+      });
+    } else {
+      // Fallback stroke-based progress
+      final expected = ((_selectedPage!.colors) * 50).toDouble();
+      setState(() {
+        _coloringProgress = (_strokes.length / expected).clamp(0.0, 1.0);
+      });
+    }
 
     if (_coloringProgress >= 1.0) {
       _doneController.forward(from: 0);
@@ -432,22 +806,29 @@ class _KulayScreenState extends State<KulayScreen>
 
   void _showCompletionModal() {
     if (_selectedPage == null) return;
+    final alreadySaved = _isCurrentPageSaved();
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => SuccessModal(
-        title: Translations.getBeautifulArtwork(context),
-        subtitle:
-            Translations.getFinishedColoring(context, _selectedPage!.name),
+        title: AppLocalizations.of(context)!.beautifulArtwork,
+        subtitle: AppLocalizations.of(context)!
+            .finishedColoring(_localizedPageName(_selectedPage!.name)),
         score: _strokes.length,
         stars: 3,
-        primaryLabel: '${Translations.getSave(context)} (Save)',
+        primaryLabel: alreadySaved
+            ? 'View'
+            : '${AppLocalizations.of(context)!.save} (Save)',
         onPrimaryTap: () {
           Navigator.pop(context);
-          _saveCreation();
+          if (alreadySaved) {
+            setState(() => _selectedTab = 1);
+          } else {
+            _saveCreation();
+          }
         },
-        secondaryLabel: Translations.getOthers(context),
+        secondaryLabel: AppLocalizations.of(context)!.others,
         onSecondaryTap: () {
           Navigator.pop(context);
           setState(() {
@@ -463,9 +844,65 @@ class _KulayScreenState extends State<KulayScreen>
   //  Save
   // ─────────────────────────────────────────────────────────────────────────
 
+  Future<String> _captureThumbnail() async {
+    try {
+      final boundary = _canvasKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+      if (boundary == null) return _selectedPage!.imagePath;
+
+      final image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return _selectedPage!.imagePath;
+
+      final pngBytes = byteData.buffer.asUint8List();
+      final dir = await getApplicationDocumentsDirectory();
+      final path =
+          '${dir.path}/creation_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = File(path);
+      await file.writeAsBytes(pngBytes);
+      return path;
+    } catch (e) {
+      debugPrint('Error capturing thumbnail: $e');
+      return _selectedPage!.imagePath;
+    }
+  }
+
+  bool _isCurrentPageSaved() {
+    if (_selectedPage == null) return false;
+    return _myCreations.any((c) =>
+        c.sourcePagePath == _selectedPage!.imagePath ||
+        c.thumbnailPath == _selectedPage!.imagePath);
+  }
+
+  String _localizedPageName(String name) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (name) {
+      case 'Puppy':
+        return l10n.pagePuppy;
+      case 'Kuting':
+        return l10n.pageKuting;
+      case 'Elepante':
+        return l10n.pageElepante;
+      case 'Flower Basket':
+        return l10n.pageFlowerBasket;
+      case 'Rose':
+        return l10n.pageRose;
+      case 'Mansanas':
+        return l10n.pageMansanas;
+      case 'Saging':
+        return l10n.pageSaging;
+      case 'Teddy Bear':
+        return l10n.pageTeddyBear;
+      case 'Soda Pop':
+        return l10n.pageSodaPop;
+      default:
+        return name;
+    }
+  }
+
   void _saveCreation() {
     if (_strokes.isEmpty) {
-      _snack('Color something first!');
+      _snack(AppLocalizations.of(context)!.colorSomethingFirst);
       return;
     }
     final ctrl = TextEditingController();
@@ -473,13 +910,13 @@ class _KulayScreenState extends State<KulayScreen>
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('💾 ${Translations.getSaveYourArtwork(context)}',
+        title: Text(AppLocalizations.of(context)!.saveYourArtwork,
             style: const TextStyle(fontWeight: FontWeight.bold)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: Translations.getGiveArtworkName(context),
+            hintText: AppLocalizations.of(context)!.giveArtworkName,
             filled: true,
             fillColor: Colors.grey.shade100,
             border: OutlineInputBorder(
@@ -490,19 +927,21 @@ class _KulayScreenState extends State<KulayScreen>
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(Translations.getCancel(context))),
+              child: Text(AppLocalizations.of(context)!.cancel)),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12))),
             onPressed: () async {
+              final thumbnailPath = await _captureThumbnail();
               final creation = MyCreation(
                 name: ctrl.text.trim().isEmpty
-                    ? 'My Art ${_myCreations.length + 1}'
+                    ? '${AppLocalizations.of(context)!.myArtworkDefault} ${_myCreations.length + 1}'
                     : ctrl.text.trim(),
                 date: DateTime.now(),
-                thumbnailPath: _selectedPage!.imagePath,
+                thumbnailPath: thumbnailPath,
+                sourcePagePath: _selectedPage!.imagePath,
                 strokes: List.from(_strokes),
               );
               setState(() {
@@ -535,12 +974,13 @@ class _KulayScreenState extends State<KulayScreen>
               }
 
               _saveCreationsToHive();
+              _clearAutoSave();
               if (mounted) {
                 Navigator.pop(context);
-                _snack('✓ ${Translations.getSaved(context)}');
+                _snack(AppLocalizations.of(context)!.saved);
               }
             },
-            child: Text(Translations.getSave(context),
+            child: Text(AppLocalizations.of(context)!.save,
                 style: const TextStyle(color: Colors.white)),
           ),
         ],
@@ -580,6 +1020,7 @@ class _KulayScreenState extends State<KulayScreen>
                 name: item['name'],
                 date: DateTime.fromMillisecondsSinceEpoch(item['date']),
                 thumbnailPath: item['thumbnailPath'],
+                sourcePagePath: item['sourcePagePath'] ?? '',
                 strokes: strokes,
                 isFavorite: item['isFavorite'] ?? false,
               ));
@@ -600,6 +1041,7 @@ class _KulayScreenState extends State<KulayScreen>
           'name': c.name,
           'date': c.date.millisecondsSinceEpoch,
           'thumbnailPath': c.thumbnailPath,
+          'sourcePagePath': c.sourcePagePath,
           'isFavorite': c.isFavorite,
           'strokes': c.strokes.map((s) {
             return {
@@ -614,7 +1056,7 @@ class _KulayScreenState extends State<KulayScreen>
       await box.put('coloring_creations', data);
     } catch (e) {
       debugPrint('Error saving creations: $e');
-      _snack('Error: Could not save artwork locally.');
+      _snack(AppLocalizations.of(context)!.errorSaveLocal, isError: true);
     }
   }
 
@@ -703,7 +1145,7 @@ class _KulayScreenState extends State<KulayScreen>
         color: AppColors.textDark,
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text(Translations.getColoringBook(context),
+      title: Text(AppLocalizations.of(context)!.coloringBook,
           style: const TextStyle(
               color: AppColors.textDark,
               fontSize: 20,
@@ -713,9 +1155,10 @@ class _KulayScreenState extends State<KulayScreen>
         child: Container(
           color: Colors.white,
           child: Row(children: [
-            _tabBtn(0, Icons.brush_rounded, Translations.getColor(context)),
+            _tabBtn(
+                0, Icons.brush_rounded, AppLocalizations.of(context)!.color),
             _tabBtn(1, Icons.folder_open_rounded,
-                Translations.getMyCreations(context)),
+                AppLocalizations.of(context)!.myCreations),
           ]),
         ),
       ),
@@ -781,7 +1224,7 @@ class _KulayScreenState extends State<KulayScreen>
           child: TextField(
             onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
             decoration: InputDecoration(
-              hintText: Translations.getSearchColoringPages(context),
+              hintText: AppLocalizations.of(context)!.searchColoringPages,
               prefixIcon: const Icon(Icons.search, color: Colors.grey),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 13),
@@ -835,7 +1278,7 @@ class _KulayScreenState extends State<KulayScreen>
       Expanded(
         child: pages.isEmpty
             ? Center(
-                child: Text('No results',
+                child: Text(AppLocalizations.of(context)!.noResults,
                     style: TextStyle(color: Colors.grey.shade400)))
             : GridView.builder(
                 padding: const EdgeInsets.all(16),
@@ -852,14 +1295,19 @@ class _KulayScreenState extends State<KulayScreen>
   }
 
   Widget _pageCard(ColoringPage page, ColoringCategory cat) {
-    // Check if this page is already completed
-    final bool isCompleted =
-        _myCreations.any((c) => c.thumbnailPath == page.imagePath);
+    // Check if this page is already completed (local creations + provider)
+    final pageIndex = cat.pages.indexOf(page);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final bool isCompleted = _myCreations.any((c) =>
+            c.sourcePagePath == page.imagePath ||
+            c.thumbnailPath == page.imagePath) ||
+        (pageIndex >= 0 &&
+            userProvider.isKulayPageCompleted(cat.name, pageIndex));
 
     return GestureDetector(
       onTap: () {
         if (isCompleted) {
-          _snack('Natapos mo na daytoyen! 🎨 (Finished already!)');
+          _snack(AppLocalizations.of(context)!.finishedAlready);
           return;
         }
         setState(() {
@@ -868,9 +1316,13 @@ class _KulayScreenState extends State<KulayScreen>
           _redoStack.clear();
           _activeStroke = null;
           _coloringProgress = 0.0;
-          _scale = 1.0;
-          _transformationController.value = Matrix4.identity();
+          _baseImage = null;
+          _coloredImage = null;
+          _displayImage = null;
+          _filledPixelsCount = 0;
+          _isLoadingAutoSave = true;
         });
+        _loadPageImage().then((_) => _loadAutoSave());
       },
       child: Container(
         decoration: BoxDecoration(
@@ -925,7 +1377,7 @@ class _KulayScreenState extends State<KulayScreen>
             padding: const EdgeInsets.all(12),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(page.name,
+              Text(_localizedPageName(page.name),
                   style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.bold)),
               const SizedBox(height: 5),
@@ -970,7 +1422,34 @@ class _KulayScreenState extends State<KulayScreen>
     return Column(children: [
       _canvasHeader(),
       _progressBar(),
-      Expanded(child: _drawingArea()),
+      Expanded(
+        child: Stack(
+          children: [
+            _drawingArea(),
+            if (_isLoadingAutoSave)
+              Container(
+                color: Colors.white.withOpacity(0.9),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Loading your artwork...',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
       _toolPanel(),
     ]);
   }
@@ -988,67 +1467,26 @@ class _KulayScreenState extends State<KulayScreen>
         Expanded(
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(_selectedPage!.name,
+          Text(_localizedPageName(_selectedPage!.name),
               style:
                   const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           Text(
-              '${_selectedPage!.colors} colors • ${_selectedPage!.timeEstimate}',
+              '${_selectedPage!.colors} ${AppLocalizations.of(context)!.colorsLabel} • ${_selectedPage!.timeEstimate}',
               style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
         ])),
-        GestureDetector(
-          onTap: () {
-            setState(() => _isZoomMode = !_isZoomMode);
-            _snack(_isZoomMode
-                ? 'Zoom mode: Multi-touch allowed'
-                : 'Brush mode: Click to color');
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-                color: _isZoomMode
-                    ? Colors.orange.withOpacity(0.15)
-                    : AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                    color: _isZoomMode ? Colors.orange : AppColors.primary,
-                    width: 1)),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(_isZoomMode ? Icons.zoom_in_rounded : Icons.brush_rounded,
-                    size: 14,
-                    color: _isZoomMode ? Colors.orange : AppColors.primary),
-                const SizedBox(width: 4),
-                Text(_isZoomMode ? 'Zoom' : 'Brush',
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color:
-                            _isZoomMode ? Colors.orange : AppColors.primary)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        GestureDetector(
-          onTap: _onDoubleTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12)),
-            child: Text('${(_scale * 100).toInt()}%',
-                style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey)),
-          ),
-        ),
-        const SizedBox(width: 6),
         IconButton(
-            icon: const Icon(Icons.save_rounded),
+          icon: const Icon(Icons.undo_rounded),
+          color: AppColors.primary,
+          onPressed: _undo,
+        ),
+        IconButton(
+            icon: Icon(_isCurrentPageSaved()
+                ? Icons.visibility_rounded
+                : Icons.save_rounded),
             color: AppColors.primary,
-            onPressed: _saveCreation),
+            onPressed: _isCurrentPageSaved()
+                ? () => setState(() => _selectedTab = 1)
+                : _saveCreation),
       ]),
     );
   }
@@ -1088,60 +1526,14 @@ class _KulayScreenState extends State<KulayScreen>
       color: const Color(0xFFDDE0EA),
       child: Stack(children: [
         Positioned.fill(
-          child: Listener(
-            onPointerDown: (_) => setState(() => _pointerCount++),
-            onPointerUp: (_) => setState(
-                () => _pointerCount = (_pointerCount - 1).clamp(0, 10)),
-            onPointerCancel: (_) => setState(
-                () => _pointerCount = (_pointerCount - 1).clamp(0, 10)),
-            child: InteractiveViewer(
-              transformationController: _transformationController,
-              minScale: _minScale,
-              maxScale: _maxScale,
-              panEnabled: _isZoomMode,
-              scaleEnabled: _isZoomMode,
-              onInteractionUpdate: (details) {
-                if (_isZoomMode) {
-                  setState(() => _scale =
-                      _transformationController.value.getMaxScaleOnAxis());
-                }
-              },
-              child: Center(
-                child: LayoutBuilder(builder: (ctx, cst) {
-                  final side = cst.biggest.shortestSide.clamp(200.0, 500.0);
-                  return SizedBox(
-                      width: side, height: side, child: _drawingSurface(side));
-                }),
-              ),
-            ),
+          child: Center(
+            child: LayoutBuilder(builder: (ctx, cst) {
+              final side = cst.biggest.shortestSide.clamp(200.0, 500.0);
+              return SizedBox(
+                  width: side, height: side, child: _drawingSurface(side));
+            }),
           ),
         ),
-
-        // ── Mini-map ────────────────────────────────────────────────
-        if (_scale > 1.5)
-          Positioned(
-            bottom: 12,
-            right: 12,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                width: 90,
-                height: 90,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withOpacity(0.35), blurRadius: 8)
-                    ]),
-                child: Image.asset(
-                  _selectedPage!.imagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      Container(color: Colors.grey.shade200),
-                ),
-              ),
-            ),
-          ),
 
         // ── Ripple ──────────────────────────────────────────────────
         if (_lastPos != null)
@@ -1189,17 +1581,15 @@ class _KulayScreenState extends State<KulayScreen>
                               spreadRadius: 5)
                         ],
                       ),
-                      child: const Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('🎨', style: TextStyle(fontSize: 44)),
-                            SizedBox(height: 8),
-                            Text('Nalpas! Great Work! 🌟',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold)),
-                          ]),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        const Text('🎨', style: TextStyle(fontSize: 44)),
+                        const SizedBox(height: 8),
+                        Text(AppLocalizations.of(context)!.greatWorkKulay,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold)),
+                      ]),
                     ),
                   ),
                 ),
@@ -1221,40 +1611,48 @@ class _KulayScreenState extends State<KulayScreen>
   // ─────────────────────────────────────────────────────────────────────────
 
   Widget _drawingSurface(double side) {
-    return ClipRect(
-      child: Stack(fit: StackFit.expand, children: [
-        // 1. White background
-        Container(color: Colors.white),
+    _lastSide = side;
+    return RepaintBoundary(
+      key: _canvasKey,
+      child: ClipRect(
+        child: Stack(fit: StackFit.expand, children: [
+          // 1. White background
+          Container(color: Colors.white),
 
-        // 2. PNG line art — visible through the transparent parts of strokes
-        IgnorePointer(
-          child: Image.asset(
-            _selectedPage!.imagePath,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
-            errorBuilder: (_, __, ___) => Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.broken_image,
-                        size: 64, color: Colors.grey.shade300),
-                    const SizedBox(height: 10),
-                    Text('Image not found',
-                        style: TextStyle(
-                            color: Colors.grey.shade400, fontSize: 13)),
-                  ]),
-            ),
+          // 2. Image — bucket-filled display or original PNG
+          IgnorePointer(
+            child: _displayImage != null
+                ? RawImage(
+                    image: _displayImage,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                  )
+                : Image.asset(
+                    _selectedPage!.imagePath,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                    errorBuilder: (_, __, ___) => Center(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image,
+                                size: 64, color: Colors.grey.shade300),
+                            const SizedBox(height: 10),
+                            Text(AppLocalizations.of(context)!.imageNotFound,
+                                style: TextStyle(
+                                    color: Colors.grey.shade400, fontSize: 13)),
+                          ]),
+                    ),
+                  ),
           ),
-        ),
 
-        // 3. Color strokes drawn ON TOP of the PNG
-        //    GestureDetector here captures single-finger drawing
-        GestureDetector(
-          onPanStart: _paintStart,
-          onPanUpdate: _paintUpdate,
-          onPanEnd: _paintEnd,
-          onTapDown: _paintTap,
-          child: RepaintBoundary(
+          // 3. Color strokes drawn ON TOP
+          //    Tap = bucket fill, Drag = brush stroke
+          GestureDetector(
+            onPanStart: _paintStart,
+            onPanUpdate: _paintUpdate,
+            onPanEnd: _paintEnd,
+            onTapUp: (d) => _onBucketTap(d.localPosition),
             child: CustomPaint(
               painter:
                   StrokePainter(strokes: _strokes, activeStroke: _activeStroke),
@@ -1263,8 +1661,8 @@ class _KulayScreenState extends State<KulayScreen>
               child: Container(color: Colors.transparent),
             ),
           ),
-        ),
-      ]),
+        ]),
+      ),
     );
   }
 
@@ -1374,37 +1772,40 @@ class _KulayScreenState extends State<KulayScreen>
           _tBtn(
             icon:
                 _isEraser ? Icons.brush_rounded : Icons.auto_fix_normal_rounded,
-            label: _isEraser ? 'Brush' : 'Eraser',
+            label: _isEraser
+                ? AppLocalizations.of(context)!.brush
+                : AppLocalizations.of(context)!.eraser,
             active: _isEraser,
             onTap: () => setState(() => _isEraser = !_isEraser),
           ),
           _tBtn(
               icon: Icons.undo_rounded,
-              label: 'Undo',
+              label: AppLocalizations.of(context)!.undo,
               active: false,
-              disabled: _strokes.isEmpty,
+              disabled: _strokes.isEmpty && _bucketUndoImages.isEmpty,
               onTap: _undo),
           _tBtn(
               icon: Icons.redo_rounded,
-              label: 'Redo',
+              label: AppLocalizations.of(context)!.redo,
               active: false,
-              disabled: _redoStack.isEmpty,
+              disabled: _redoStack.isEmpty && _bucketRedoImages.isEmpty,
               onTap: _redo),
           _tBtn(
             icon: Icons.delete_sweep_rounded,
-            label: 'Clear',
+            label: AppLocalizations.of(context)!.clear,
             active: false,
             onTap: () => showDialog(
               context: context,
               builder: (_) => AlertDialog(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)),
-                title: const Text('Clear Canvas?'),
-                content: const Text('This will erase all your coloring.'),
+                title: Text(AppLocalizations.of(context)!.clearCanvasQuestion),
+                content:
+                    Text(AppLocalizations.of(context)!.eraseColoringWarning),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel')),
+                      child: Text(AppLocalizations.of(context)!.cancel)),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -1414,7 +1815,7 @@ class _KulayScreenState extends State<KulayScreen>
                       _clearAll();
                       Navigator.pop(context);
                     },
-                    child: const Text('Clear',
+                    child: Text(AppLocalizations.of(context)!.clear,
                         style: TextStyle(color: Colors.white)),
                   ),
                 ],
@@ -1422,10 +1823,16 @@ class _KulayScreenState extends State<KulayScreen>
             ),
           ),
           _tBtn(
-              icon: Icons.save_rounded,
-              label: 'Save',
+              icon: _isCurrentPageSaved()
+                  ? Icons.visibility_rounded
+                  : Icons.save_rounded,
+              label: _isCurrentPageSaved()
+                  ? 'View'
+                  : AppLocalizations.of(context)!.save,
               active: false,
-              onTap: _saveCreation),
+              onTap: _isCurrentPageSaved()
+                  ? () => setState(() => _selectedTab = 1)
+                  : _saveCreation),
         ]),
       ]),
     );
@@ -1546,10 +1953,10 @@ class _KulayScreenState extends State<KulayScreen>
               const Icon(Icons.color_lens, size: 44, color: AppColors.primary),
         ),
         const SizedBox(height: 18),
-        const Text('Awan pay dagiti pinarsua.',
+        Text(AppLocalizations.of(context)!.noArtworksYet,
             style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Text('Kulayan ti maysa a pahina\nket idulin ti artwork mo!',
+        Text(AppLocalizations.of(context)!.colorPagePrompt,
             style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
             textAlign: TextAlign.center),
         const SizedBox(height: 24),
@@ -1562,7 +1969,7 @@ class _KulayScreenState extends State<KulayScreen>
                   const EdgeInsets.symmetric(horizontal: 28, vertical: 13)),
           onPressed: () => setState(() => _selectedTab = 0),
           icon: const Icon(Icons.brush_rounded, color: Colors.white, size: 18),
-          label: const Text('Start Coloring',
+          label: Text(AppLocalizations.of(context)!.startColoring,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
@@ -1592,11 +1999,17 @@ class _KulayScreenState extends State<KulayScreen>
                 child: Center(
                     child: Padding(
                   padding: const EdgeInsets.all(12),
-                  child: Image.asset(creation.thumbnailPath,
-                      fit: BoxFit.contain,
-                      filterQuality: FilterQuality.high,
-                      errorBuilder: (_, __, ___) => Icon(Icons.image,
-                          size: 40, color: Colors.grey.shade300)),
+                  child: creation.thumbnailPath.startsWith('assets/')
+                      ? Image.asset(creation.thumbnailPath,
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                          errorBuilder: (_, __, ___) => Icon(Icons.image,
+                              size: 40, color: Colors.grey.shade300))
+                      : Image.file(File(creation.thumbnailPath),
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
+                          errorBuilder: (_, __, ___) => Icon(Icons.image,
+                              size: 40, color: Colors.grey.shade300)),
                 )),
               ),
             ),
@@ -1655,7 +2068,6 @@ class _KulayScreenState extends State<KulayScreen>
                           _redoStack.clear();
                           _activeStroke = null;
                           _selectedTab = 0;
-                          _scale = 1.0;
                           _coloringProgress =
                               (_strokes.length / (page.colors * 50))
                                   .clamp(0.0, 1.0);
@@ -1671,7 +2083,7 @@ class _KulayScreenState extends State<KulayScreen>
                   decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8)),
-                  child: const Text('I-edit',
+                  child: Text(AppLocalizations.of(context)!.edit,
                       style: TextStyle(
                           fontSize: 9,
                           color: AppColors.primary,

@@ -1,3 +1,4 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,7 +6,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import '../providers/language_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import '../login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -47,20 +47,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               _buildWelcomeStep(),
               _buildIntroStep(
-                title: Translations.getNextLevelLearningTitle(context),
-                description: Translations.getNextLevelLearningDesc(context),
+                title: AppLocalizations.of(context)!.nextLevelLearningTitle,
+                description: AppLocalizations.of(context)!.nextLevelLearningDesc,
                 imagePath: 'assets/images/intro1.png',
                 color: AppColors.primary,
               ),
               _buildIntroStep(
-                title: Translations.getLearnAnywhereTitle(context),
-                description: Translations.getLearnAnywhereDesc(context),
+                title: AppLocalizations.of(context)!.learnAnywhereTitle,
+                description: AppLocalizations.of(context)!.learnAnywhereDesc,
                 imagePath: 'assets/images/intro2.png',
                 color: AppColors.secondary,
               ),
               _buildIntroStep(
-                title: Translations.getTrackProgressTitle(context),
-                description: Translations.getTrackProgressDesc(context),
+                title: AppLocalizations.of(context)!.trackProgressTitle,
+                description: AppLocalizations.of(context)!.trackProgressDesc,
                 imagePath: 'assets/images/intro3.png',
                 color: AppColors.success,
               ),
@@ -119,7 +119,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 32, vertical: 16),
                     ),
-                    child: Text(Translations.getGetStarted(context)),
+                    child: Text(AppLocalizations.of(context)!.getStarted),
                   ).animate().fadeIn().scale(),
               ],
             ),
@@ -142,7 +142,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ).animate(onPlay: (c) => c.repeat()).shake(delay: 2.seconds),
           const SizedBox(height: 32),
           Text(
-            Translations.getChooseLanguage(context),
+            AppLocalizations.of(context)!.chooseLanguage,
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -152,9 +152,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 40),
           _buildLanguageOption('English', 'en', '🇺🇸'),
           const SizedBox(height: 16),
-          _buildLanguageOption('Ilocano', 'il', '🇵🇭'),
+          _buildLanguageOption('Ilokano', 'ilo', '🇵🇭'),
           const SizedBox(height: 16),
-          _buildLanguageOption('Filipino', 'tl', '🇵🇭'),
+          _buildLanguageOption('Filipino', 'fil', '🇵🇭'),
         ],
       ),
     );

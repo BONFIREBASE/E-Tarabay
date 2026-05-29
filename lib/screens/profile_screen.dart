@@ -1,8 +1,8 @@
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../utils/translations.dart';
 import '../login_screen.dart';
 import 'package:confetti/confetti.dart';
 
@@ -10,11 +10,11 @@ class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   String _getMonthName(BuildContext context, int month) {
-    return Translations.getMonthName(context, month);
+    return AppLocalizations.of(context)!.monthName(month);
   }
 
   String _formatBirthday(BuildContext context, DateTime? birthday) {
-    if (birthday == null) return Translations.getNotSet(context);
+    if (birthday == null) return AppLocalizations.of(context)!.notSet;
     return '${_getMonthName(context, birthday.month)} ${birthday.day}, ${birthday.year}';
   }
 
@@ -37,7 +37,7 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          Translations.getMyProfile(context),
+          AppLocalizations.of(context)!.myProfile,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -50,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       body: userProfile == null
-          ? Center(child: Text(Translations.getNoProfileData(context)))
+          ? Center(child: Text(AppLocalizations.of(context)!.noProfileData))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -83,7 +83,7 @@ class ProfileScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Text(
-                      '${Translations.getYearsOld(context, userProfile.age)} • ${userProfile.gender.toLowerCase() == 'male' ? '👦 ${Translations.getMale(context)}' : '👧 ${Translations.getFemale(context)}'}',
+                      '${AppLocalizations.of(context)!.yearsOld(userProfile.age)} • ${userProfile.gender.toLowerCase() == 'male' ? '👦 ${AppLocalizations.of(context)!.male}' : '👧 ${AppLocalizations.of(context)!.female}'}',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade700,
@@ -111,41 +111,48 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         _buildProfileField(
-                          Translations.getFullName(context),
+                          AppLocalizations.of(context)!.fullName,
                           userProfile.name,
                           Icons.person_outline,
                         ),
                         const Divider(height: 20),
                         _buildProfileField(
-                          Translations.getBirthday(context),
+                          AppLocalizations.of(context)!.birthday,
                           _formatBirthday(context, userProfile.birthday),
                           Icons.cake_outlined,
                         ),
                         const Divider(height: 20),
                         _buildProfileField(
-                          Translations.getProfileAge(context),
-                          Translations.getYearsOld(context, userProfile.age),
+                          AppLocalizations.of(context)!.profileAge,
+                          AppLocalizations.of(context)!
+                              .yearsOld(userProfile.age),
                           Icons.calendar_today_outlined,
                         ),
                         const Divider(height: 20),
                         _buildProfileField(
-                          Translations.getGender(context),
-                          userProfile.gender.toLowerCase() == 'male' ? Translations.getMale(context) : Translations.getFemale(context),
+                          AppLocalizations.of(context)!.gender,
+                          userProfile.gender.toLowerCase() == 'male'
+                              ? AppLocalizations.of(context)!.male
+                              : AppLocalizations.of(context)!.female,
                           Icons.wc_outlined,
                         ),
                         const Divider(height: 20),
-                        
+
                         // Parents Info (if student)
                         if (userProvider.currentStudentId != null) ...[
                           _buildProfileField(
-                            Translations.getParentNameLabel(context),
-                            userProfile.parentName.isNotEmpty ? userProfile.parentName : Translations.getNotSet(context),
+                            AppLocalizations.of(context)!.parentNameLabel,
+                            userProfile.parentName.isNotEmpty
+                                ? userProfile.parentName
+                                : AppLocalizations.of(context)!.notSet,
                             Icons.family_restroom_outlined,
                           ),
                           const Divider(height: 20),
                           _buildProfileField(
-                            Translations.getParentContactLabel(context),
-                            userProfile.parentContact.isNotEmpty ? userProfile.parentContact : Translations.getNotSet(context),
+                            AppLocalizations.of(context)!.parentContactLabel,
+                            userProfile.parentContact.isNotEmpty
+                                ? userProfile.parentContact
+                                : AppLocalizations.of(context)!.notSet,
                             Icons.phone_outlined,
                           ),
                           const Divider(height: 20),
@@ -153,8 +160,8 @@ class ProfileScreen extends StatelessWidget {
 
                         // Member Since
                         _buildProfileField(
-                          Translations.getMemberSince(context),
-                          'March 2025', // This is still hardcoded, consider localizing if needed
+                          AppLocalizations.of(context)!.memberSince,
+                          AppLocalizations.of(context)!.notSet,
                           Icons.calendar_today,
                         ),
                       ],
@@ -184,17 +191,17 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         _buildStatItem(
                           '${userProfile.stars}',
-                          Translations.getStars(context),
+                          AppLocalizations.of(context)!.stars,
                           Icons.star,
                         ),
                         _buildStatItem(
                           '${userProfile.lessonsCompleted}',
-                          Translations.getLessons(context),
+                          AppLocalizations.of(context)!.lessons,
                           Icons.menu_book,
                         ),
                         _buildStatItem(
                           '${userProfile.achievements.length}',
-                          Translations.getBadges(context),
+                          AppLocalizations.of(context)!.badges,
                           Icons.emoji_events,
                         ),
                       ],
@@ -206,13 +213,14 @@ class ProfileScreen extends StatelessWidget {
                   // Edit Profile Button (Only if NOT student)
                   if (userProvider.currentStudentId == null)
                     OutlinedButton.icon(
-                      onPressed: () => _showEditProfileDialog(context, userProvider),
+                      onPressed: () =>
+                          _showEditProfileDialog(context, userProvider),
                       icon: const Icon(Icons.edit),
-                      label: Text(Translations.getEditProfile(context)),
+                      label: Text(AppLocalizations.of(context)!.editProfile),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
-                        side:
-                            BorderSide(color: AppColors.primary.withOpacity(0.5)),
+                        side: BorderSide(
+                            color: AppColors.primary.withOpacity(0.5)),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 30,
                           vertical: 12,
@@ -229,7 +237,7 @@ class ProfileScreen extends StatelessWidget {
                   TextButton.icon(
                     onPressed: () => _logout(context),
                     icon: const Icon(Icons.logout, color: Colors.red),
-                    label: Text(Translations.getLogout(context),
+                    label: Text(AppLocalizations.of(context)!.logout,
                         style: const TextStyle(
                             color: Colors.red,
                             fontWeight: FontWeight.bold,
@@ -285,12 +293,13 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showEditProfileDialog(BuildContext context, UserProvider provider) {
-    final nameController = TextEditingController(text: provider.userProfile?.name);
+    final nameController =
+        TextEditingController(text: provider.userProfile?.name);
     DateTime? selectedDate = provider.userProfile?.birthday;
     String selectedGender =
         provider.userProfile?.gender.toLowerCase() == 'female'
-            ? Translations.getFemale(context)
-            : Translations.getMale(context);
+            ? AppLocalizations.of(context)!.female
+            : AppLocalizations.of(context)!.male;
 
     showModalBottomSheet(
       context: context,
@@ -313,7 +322,7 @@ class ProfileScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                Translations.getEditProfile(context),
+                AppLocalizations.of(context)!.editProfile,
                 style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -323,9 +332,10 @@ class ProfileScreen extends StatelessWidget {
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
-                  labelText: Translations.getFullName(context),
-                  hintText: Translations.getEnterName(context),
-                  prefixIcon: const Icon(Icons.person, color: AppColors.primary),
+                  labelText: AppLocalizations.of(context)!.fullName,
+                  hintText: AppLocalizations.of(context)!.enterName,
+                  prefixIcon:
+                      const Icon(Icons.person, color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -342,7 +352,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: const Icon(Icons.cake, color: AppColors.primary),
                 ),
-                title: Text(Translations.getBirthday(context),
+                title: Text(AppLocalizations.of(context)!.birthday,
                     style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 subtitle: Text(_formatBirthday(context, selectedDate),
                     style: const TextStyle(
@@ -363,23 +373,27 @@ class ProfileScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 16),
-              Text(Translations.getGender(context),
+              Text(AppLocalizations.of(context)!.gender,
                   style: const TextStyle(fontSize: 12, color: Colors.grey)),
               const SizedBox(height: 8),
               Row(
                 children: [
                   _GenderOption(
-                    label: Translations.getMale(context),
+                    label: AppLocalizations.of(context)!.male,
                     icon: Icons.male,
-                    isSelected: selectedGender == Translations.getMale(context),
-                    onTap: () => setModalState(() => selectedGender = Translations.getMale(context)),
+                    isSelected:
+                        selectedGender == AppLocalizations.of(context)!.male,
+                    onTap: () => setModalState(() =>
+                        selectedGender = AppLocalizations.of(context)!.male),
                   ),
                   const SizedBox(width: 12),
                   _GenderOption(
-                    label: Translations.getFemale(context),
+                    label: AppLocalizations.of(context)!.female,
                     icon: Icons.female,
-                    isSelected: selectedGender == Translations.getFemale(context),
-                    onTap: () => setModalState(() => selectedGender = Translations.getFemale(context)),
+                    isSelected:
+                        selectedGender == AppLocalizations.of(context)!.female,
+                    onTap: () => setModalState(() =>
+                        selectedGender = AppLocalizations.of(context)!.female),
                   ),
                 ],
               ),
@@ -402,8 +416,8 @@ class ProfileScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15)),
                   ),
-                  child:
-                      Text(Translations.getSaveChanges(context), style: const TextStyle(color: Colors.white)),
+                  child: Text(AppLocalizations.of(context)!.saveChanges,
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
               const SizedBox(height: 20),
@@ -469,7 +483,8 @@ class _GenderOption extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: isSelected ? Colors.white : Colors.grey, size: 20),
+              Icon(icon,
+                  color: isSelected ? Colors.white : Colors.grey, size: 20),
               const SizedBox(width: 8),
               Text(
                 label,
@@ -563,7 +578,8 @@ class _BirthdayAvatarState extends State<_BirthdayAvatar> {
           ),
           child: Center(
             child: Text(
-              (widget.userProfile?.name != null && widget.userProfile.name.isNotEmpty)
+              (widget.userProfile?.name != null &&
+                      widget.userProfile.name.isNotEmpty)
                   ? widget.userProfile.name[0].toUpperCase()
                   : '?',
               style: const TextStyle(

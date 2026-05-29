@@ -5,8 +5,8 @@ class LanguageProvider extends ChangeNotifier {
   String _currentLanguage;
   
   // Available languages
-  static const List<String> languages = ['English', 'Ilocano', 'Filipino'];
-  static const List<String> languageCodes = ['en', 'il', 'tl'];
+  static const List<String> languages = ['English', 'Ilokano', 'Filipino'];
+  static const List<String> languageCodes = ['en', 'ilo', 'fil'];
   
   LanguageProvider(this._currentLanguage) {
     if (_currentLanguage.isEmpty) {
@@ -25,28 +25,4 @@ class LanguageProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // Get translated text
-  String translate(String en, String il, String tl) {
-    switch (_currentLanguage) {
-      case 'il':
-        return il.isNotEmpty ? il : en;
-      case 'tl':
-        return tl.isNotEmpty ? tl : en;
-      default:
-        return en.isNotEmpty ? en : '';
-    }
-  }
-
-  // Get translated list
-  List<String> translateList(List<String> en, List<String> il, List<String> tl) {
-    switch (_currentLanguage) {
-      case 'il':
-        return il;
-      case 'tl':
-        return tl;
-      default:
-        return en;
-    }
-  }
-}
+}
