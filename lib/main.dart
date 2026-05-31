@@ -28,11 +28,20 @@ class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
   bool _isMusicEnabled = true;
   String? _currentAssetPath;
   bool _wasPlayingBeforePause = false;
+  int _retryCount = 0;
+  static const int _maxRetries = 3;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     _player = AudioPlayer();
+
+    // Listen for unexpected completion and restart if needed
+    _player.onPlayerComplete.listen((_) {
+      if (_isMusicEnabled && _currentAssetPath != null && _isPlaying) {
+        _restartMusic();
+      }
+    });
 
     // Load saved preference
     final prefs = await SharedPreferences.getInstance();
@@ -68,6 +77,11 @@ class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
     // Smart Check: Don't restart if already playing the same song
     if (_isPlaying && _currentAssetPath == assetPath) return;
 
+    _retryCount = 0;
+    await _playWithRetry(assetPath);
+  }
+
+  Future<void> _playWithRetry(String assetPath) async {
     try {
       _currentAssetPath = assetPath;
       await _player.setReleaseMode(ReleaseMode.loop);
@@ -75,29 +89,61 @@ class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
       await _player.play(AssetSource(assetPath));
       _isPlaying = true;
       _wasPlayingBeforePause = false;
+      _retryCount = 0;
       notifyListeners();
     } catch (e) {
       debugPrint('Error playing music: $e');
+      if (_retryCount < _maxRetries) {
+        _retryCount++;
+        debugPrint('Retrying music playback ($_retryCount/$_maxRetries)...');
+        await Future.delayed(const Duration(seconds: 1));
+        await _playWithRetry(assetPath);
+      } else {
+        debugPrint('Music playback failed after $_maxRetries retries.');
+        _isPlaying = false;
+      }
     }
   }
 
+  Future<void> _restartMusic() async {
+    if (_currentAssetPath == null || !_isMusicEnabled) return;
+    debugPrint('Music stopped unexpectedly, restarting...');
+    _isPlaying = false;
+    await _playWithRetry(_currentAssetPath!);
+  }
+
   Future<void> pauseMusic() async {
-    await _player.pause();
+    try {
+      await _player.pause();
+    } catch (e) {
+      debugPrint('Error pausing music: $e');
+    }
     _isPlaying = false;
     _wasPlayingBeforePause = false;
     notifyListeners();
   }
 
   Future<void> resumeMusic() async {
-    if (!_isMusicEnabled) return;
-    await _player.resume();
-    _isPlaying = true;
-    _wasPlayingBeforePause = false;
-    notifyListeners();
+    if (!_isMusicEnabled || !_isInitialized) return;
+    try {
+      await _player.resume();
+      _isPlaying = true;
+      _wasPlayingBeforePause = false;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error resuming music: $e');
+      if (_currentAssetPath != null) {
+        await _playWithRetry(_currentAssetPath!);
+      }
+    }
   }
 
   Future<void> stopMusic() async {
-    await _player.stop();
+    try {
+      await _player.stop();
+    } catch (e) {
+      debugPrint('Error stopping music: $e');
+    }
     _isPlaying = false;
     _wasPlayingBeforePause = false;
     notifyListeners();

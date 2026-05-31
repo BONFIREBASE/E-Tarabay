@@ -241,18 +241,18 @@ class UserProvider extends ChangeNotifier {
       _progressBox.put('kulay_total', 0);
     }
 
-    // Sundan Mo progress
-    if (!_progressBox.containsKey('sundan_uppercase')) {
-      _progressBox.put('sundan_uppercase', List.filled(26, false));
+    // Trace It progress
+    if (!_progressBox.containsKey('traceit_uppercase')) {
+      _progressBox.put('traceit_uppercase', List.filled(26, false));
     }
-    if (!_progressBox.containsKey('sundan_lowercase')) {
-      _progressBox.put('sundan_lowercase', List.filled(26, false));
+    if (!_progressBox.containsKey('traceit_lowercase')) {
+      _progressBox.put('traceit_lowercase', List.filled(26, false));
     }
-    if (!_progressBox.containsKey('sundan_numbers')) {
-      _progressBox.put('sundan_numbers', List.filled(10, false));
+    if (!_progressBox.containsKey('traceit_numbers')) {
+      _progressBox.put('traceit_numbers', List.filled(10, false));
     }
-    if (!_progressBox.containsKey('sundan_total')) {
-      _progressBox.put('sundan_total', 0);
+    if (!_progressBox.containsKey('traceit_total')) {
+      _progressBox.put('traceit_total', 0);
     }
   }
 
@@ -274,6 +274,7 @@ class UserProvider extends ChangeNotifier {
     DateTime? birthday,
     String? parentName,
     String? parentContact,
+    String? lrn,
   }) async {
     await _ensureInitialized();
     _userProfile = UserProfile(
@@ -282,6 +283,7 @@ class UserProvider extends ChangeNotifier {
       birthday: birthday,
       parentName: parentName ?? '',
       parentContact: parentContact ?? '',
+      lrn: lrn ?? '',
     );
     if (_pb != null) {
       await _pb!.put('currentUser', _userProfile!.toJson());
@@ -296,6 +298,7 @@ class UserProvider extends ChangeNotifier {
     DateTime? birthday,
     String? parentName,
     String? parentContact,
+    String? lrn,
   }) async {
     await _ensureInitialized();
     if (_userProfile == null) return;
@@ -306,9 +309,12 @@ class UserProvider extends ChangeNotifier {
       birthday: birthday ?? _userProfile!.birthday,
       parentName: parentName ?? _userProfile!.parentName,
       parentContact: parentContact ?? _userProfile!.parentContact,
+      lrn: lrn ?? _userProfile!.lrn,
       stars: _userProfile!.stars,
       lessonsCompleted: _userProfile!.lessonsCompleted,
       achievements: Map<String, int>.from(_userProfile!.achievements),
+      certificates: List<String>.from(_userProfile!.certificates),
+      claimedBadges: List<String>.from(_userProfile!.claimedBadges),
     );
 
     await _profileBox.put('currentUser', _userProfile!.toJson());
@@ -335,12 +341,25 @@ class UserProvider extends ChangeNotifier {
         }
 
         // Restore Profile
+        Map<String, dynamic> mergedProfileData = {};
+
+        // Merge with the actual 'profile' map FIRST
         if (data.containsKey('profile') && data['profile'] is Map) {
           final profileData = Map<String, dynamic>.from(data['profile'] as Map);
-          if (profileData.isNotEmpty) {
-            _userProfile = UserProfile.fromJson(profileData);
-            await _profileBox.put('currentUser', _userProfile!.toJson());
-          }
+          mergedProfileData.addAll(profileData);
+        }
+
+        // THEN extract root fields and overwrite the nested ones (if root is not empty),
+        // because previous versions of the app might have saved empty strings inside the nested profile map.
+        if (data['name'] != null && data['name'].toString().isNotEmpty) mergedProfileData['name'] = data['name'];
+        if (data['gender'] != null && data['gender'].toString().isNotEmpty) mergedProfileData['gender'] = data['gender'];
+        if (data['lrn'] != null && data['lrn'].toString().isNotEmpty) mergedProfileData['lrn'] = data['lrn'];
+        if (data['parentName'] != null && data['parentName'].toString().isNotEmpty) mergedProfileData['parentName'] = data['parentName'];
+        if (data['parentContact'] != null && data['parentContact'].toString().isNotEmpty) mergedProfileData['parentContact'] = data['parentContact'];
+
+        if (mergedProfileData.isNotEmpty) {
+          _userProfile = UserProfile.fromJson(mergedProfileData);
+          await _profileBox.put('currentUser', _userProfile!.toJson());
         }
 
         // Restore Raw Progress
@@ -367,6 +386,8 @@ class UserProvider extends ChangeNotifier {
               }
             }
           }
+          await checkAndAwardCertificates();
+          await checkAndAwardBadges();
           _syncToFirebase();
         }
 
@@ -397,7 +418,6 @@ class UserProvider extends ChangeNotifier {
     final keys = prefs
         .getKeys()
         .where((k) =>
-            k.startsWith('sundan_') ||
             k.startsWith('kulay_') ||
             k.startsWith('magbasa_') ||
             k.startsWith('mat_') ||
@@ -450,10 +470,13 @@ class UserProvider extends ChangeNotifier {
     if (_prefs != null) {
       await _prefs!.setInt('matematika_total', (currentScore + score));
       await _prefs!.setInt('matematika_stars', (currentStars + stars));
+      await _prefs!.setBool('mat_level_complete_$level', true);
     }
 
     // AWARD TO MAIN USER PROFILE
     await addStars(stars);
+    await checkAndAwardCertificates();
+    await checkAndAwardBadges();
 
     await _syncToFirebase();
     notifyListeners();
@@ -486,6 +509,8 @@ class UserProvider extends ChangeNotifier {
     }
 
     await _syncToFirebase();
+    await checkAndAwardCertificates();
+    await checkAndAwardBadges();
     notifyListeners();
   }
 
@@ -600,6 +625,8 @@ class UserProvider extends ChangeNotifier {
     }
 
     await _syncToFirebase();
+    await checkAndAwardCertificates();
+    await checkAndAwardBadges();
     notifyListeners();
   }
 
@@ -623,6 +650,8 @@ class UserProvider extends ChangeNotifier {
     }
 
     await _syncToFirebase();
+    await checkAndAwardCertificates();
+    await checkAndAwardBadges();
     notifyListeners();
   }
 
@@ -714,6 +743,8 @@ class UserProvider extends ChangeNotifier {
 
     await _updateMagbasaTotalProgress();
     await _syncToFirebase();
+    await checkAndAwardCertificates();
+    await checkAndAwardBadges();
     notifyListeners();
   }
 
@@ -792,6 +823,8 @@ class UserProvider extends ChangeNotifier {
 
     await _updateKulayTotalProgress();
     await _syncToFirebase();
+    await checkAndAwardCertificates();
+    await checkAndAwardBadges();
     notifyListeners();
   }
 
@@ -872,26 +905,24 @@ class UserProvider extends ChangeNotifier {
     };
   }
 
-  // SUNDAN MO PROGRESS
-  Future<void> updateSundanProgress(
+  // TRACE IT PROGRESS
+  Future<void> updateTraceItProgress(
       String mode, int index, bool completed) async {
     await _ensureInitialized();
     if (!_isInitialized) return;
-    final key = 'sundan_${mode}_$index';
+    final key = 'traceit_${mode}_$index';
 
-    // Check if already completed to prevent double-rewarding
     bool wasAlreadyCompleted = _progressBox.get(key) == true;
 
     await _progressBox.put(key, completed);
 
-    List<dynamic> modeList = _progressBox.get('sundan_$mode') ??
+    List<dynamic> modeList = _progressBox.get('traceit_$mode') ??
         List.filled(mode == 'numbers' ? 10 : 26, false);
     if (index < modeList.length) {
       modeList[index] = completed;
-      await _progressBox.put('sundan_$mode', modeList);
+      await _progressBox.put('traceit_$mode', modeList);
     }
 
-    // Update SharedPreferences for dashboard
     if (_prefs != null) {
       String prefKey = '';
       if (mode == 'uppercase') {
@@ -924,7 +955,7 @@ class UserProvider extends ChangeNotifier {
           'Z'
         ];
         if (index < allUpper.length) {
-          prefKey = 'sundan_upper_${allUpper[index]}';
+          prefKey = 'traceit_upper_${allUpper[index]}';
         }
       } else if (mode == 'lowercase') {
         const allLower = [
@@ -956,12 +987,12 @@ class UserProvider extends ChangeNotifier {
           'z'
         ];
         if (index < allLower.length) {
-          prefKey = 'sundan_lower_${allLower[index]}';
+          prefKey = 'traceit_lower_${allLower[index]}';
         }
       } else if (mode == 'numbers') {
         const allNums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
         if (index < allNums.length) {
-          prefKey = 'sundan_num_${allNums[index]}';
+          prefKey = 'traceit_num_${allNums[index]}';
         }
       }
 
@@ -974,22 +1005,24 @@ class UserProvider extends ChangeNotifier {
     }
 
     if (!wasAlreadyCompleted && completed) {
-      await addStars(2); // Tracing is easier, so reward per first completion
+      await addStars(3);
     }
 
-    await _updateSundanTotalProgress();
+    await _updateTraceItTotalProgress();
     await _syncToFirebase();
+    await checkAndAwardCertificates();
+    await checkAndAwardBadges();
     notifyListeners();
   }
 
-  Future<void> _updateSundanTotalProgress() async {
+  Future<void> _updateTraceItTotalProgress() async {
     if (!_isInitialized) return;
     List<dynamic> uppercase =
-        _progressBox.get('sundan_uppercase') ?? List.filled(26, false);
+        _progressBox.get('traceit_uppercase') ?? List.filled(26, false);
     List<dynamic> lowercase =
-        _progressBox.get('sundan_lowercase') ?? List.filled(26, false);
+        _progressBox.get('traceit_lowercase') ?? List.filled(26, false);
     List<dynamic> numbers =
-        _progressBox.get('sundan_numbers') ?? List.filled(10, false);
+        _progressBox.get('traceit_numbers') ?? List.filled(10, false);
 
     int uppercaseCompleted = uppercase.where((v) => v == true).length;
     int lowercaseCompleted = lowercase.where((v) => v == true).length;
@@ -997,16 +1030,37 @@ class UserProvider extends ChangeNotifier {
 
     int overallTotal =
         uppercaseCompleted + lowercaseCompleted + numbersCompleted;
-    await _progressBox.put('sundan_total', overallTotal);
+    await _progressBox.put('traceit_total', overallTotal);
   }
 
-  Map<String, dynamic> getSundanProgress() {
+  bool isTraceItActivityCompleted(String mode, int index) {
+    if (!_isInitialized) return false;
+    
+    if (_prefs != null) {
+      String prefKey = '';
+      if (mode == 'uppercase') {
+        const allUpper = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+        if (index >= 0 && index < allUpper.length) prefKey = 'traceit_upper_${allUpper[index]}';
+      } else if (mode == 'lowercase') {
+        const allLower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+        if (index >= 0 && index < allLower.length) prefKey = 'traceit_lower_${allLower[index]}';
+      } else if (mode == 'numbers') {
+        const allNums = ['1','2','3','4','5','6','7','8','9','10'];
+        if (index >= 0 && index < allNums.length) prefKey = 'traceit_num_${allNums[index]}';
+      }
+      if (prefKey.isNotEmpty && _prefs!.getBool(prefKey) == true) return true;
+    }
+
+    return _progressBox.get('traceit_${mode}_$index') ?? false;
+  }
+
+  Map<String, dynamic> getTraceItProgress() {
     int uppercaseCompleted = 0;
     int lowercaseCompleted = 0;
     int numbersCompleted = 0;
 
     if (_prefs != null) {
-      final allUpper = [
+      const allUpper = [
         'A',
         'B',
         'C',
@@ -1034,7 +1088,7 @@ class UserProvider extends ChangeNotifier {
         'Y',
         'Z'
       ];
-      final allLower = [
+      const allLower = [
         'a',
         'b',
         'c',
@@ -1062,51 +1116,26 @@ class UserProvider extends ChangeNotifier {
         'y',
         'z'
       ];
-      final allNums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+      const allNums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 
       for (var l in allUpper) {
-        if (_prefs!.getBool('sundan_upper_$l') == true) {
-          uppercaseCompleted++;
-        }
+        if (_prefs!.getBool('traceit_upper_$l') == true) uppercaseCompleted++;
       }
       for (var l in allLower) {
-        if (_prefs!.getBool('sundan_lower_$l') == true) {
-          lowercaseCompleted++;
-        }
+        if (_prefs!.getBool('traceit_lower_$l') == true) lowercaseCompleted++;
       }
       for (var n in allNums) {
-        if (_prefs!.getBool('sundan_num_$n') == true) {
-          numbersCompleted++;
-        }
+        if (_prefs!.getBool('traceit_num_$n') == true) numbersCompleted++;
       }
     }
 
     int totalCompleted =
         uppercaseCompleted + lowercaseCompleted + numbersCompleted;
 
-    if (!_isInitialized) {
-      return {
-        'uppercase': {'completed': uppercaseCompleted, 'total': 26},
-        'lowercase': {'completed': lowercaseCompleted, 'total': 26},
-        'numbers': {'completed': numbersCompleted, 'total': 10},
-        'totalCompleted': totalCompleted,
-        'totalActivities': 62,
-      };
-    }
-
     return {
-      'uppercase': {
-        'completed': uppercaseCompleted,
-        'total': 26,
-      },
-      'lowercase': {
-        'completed': lowercaseCompleted,
-        'total': 26,
-      },
-      'numbers': {
-        'completed': numbersCompleted,
-        'total': 10,
-      },
+      'uppercase': {'completed': uppercaseCompleted, 'total': 26},
+      'lowercase': {'completed': lowercaseCompleted, 'total': 26},
+      'numbers': {'completed': numbersCompleted, 'total': 10},
       'totalCompleted': totalCompleted,
       'totalActivities': 62,
     };
@@ -1131,7 +1160,7 @@ class UserProvider extends ChangeNotifier {
           'totalCompleted': 0,
           'totalActivities': 9,
         },
-        'sundan': {
+        'traceit': {
           'uppercase': {'completed': 0, 'total': 26},
           'lowercase': {'completed': 0, 'total': 26},
           'numbers': {'completed': 0, 'total': 10},
@@ -1166,19 +1195,19 @@ class UserProvider extends ChangeNotifier {
 
     final magbasa = getMagbasaProgress();
     final kulay = getKulayProgress();
-    final sundan = getSundanProgress();
+    final traceit = getTraceItProgress();
     final matematika = getMatematikaProgress();
     final pamilya = getPamilyaProgress();
 
     final totalCompleted = (magbasa['totalCompleted'] as int) +
         (kulay['totalCompleted'] as int) +
-        (sundan['totalCompleted'] as int) +
+        (traceit['totalCompleted'] as int) +
         (matematika['gamesCompleted'] as int) +
         (pamilya['gamesCompleted'] as int);
 
     final totalActivities = (magbasa['totalActivities'] as int) +
         (kulay['totalActivities'] as int) +
-        (sundan['totalActivities'] as int) +
+        (traceit['totalActivities'] as int) +
         (matematika['totalGames'] as int) +
         (pamilya['totalGames'] as int);
 
@@ -1188,7 +1217,7 @@ class UserProvider extends ChangeNotifier {
     return {
       'magbasa': magbasa,
       'kulay': kulay,
-      'sundan': sundan,
+      'traceit': traceit,
       'matematika': matematika,
       'pamilya': pamilya,
       'totalCompleted': totalCompleted,
@@ -1237,7 +1266,7 @@ class UserProvider extends ChangeNotifier {
       final keys = prefs.getKeys().where((k) =>
               k.startsWith('matematika_') ||
               k.startsWith('pamilya_') ||
-              k.startsWith('sundan_') ||
+              k.startsWith('traceit_') ||
               k.startsWith('kulay_') ||
               k.startsWith('magbasa_') ||
               k.startsWith(
@@ -1255,7 +1284,7 @@ class UserProvider extends ChangeNotifier {
         'matematika_levels',
         'pamilya_games',
         'matematika_games',
-        'sundan_total',
+        'traceit_total',
         'kulay_total',
         'magbasa_total'
       ];
@@ -1302,6 +1331,210 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  // ─── CERTIFICATES ───────────────────────────────────────────────
+
+  bool hasCertificate(String certificateId) {
+    if (_userProfile == null) return false;
+    return _userProfile!.certificates.contains(certificateId);
+  }
+
+  List<String> get earnedCertificates => _userProfile?.certificates ?? [];
+
+  Future<List<String>> checkAndAwardCertificates() async {
+    await _ensureInitialized();
+    if (_userProfile == null) return [];
+
+    final newlyEarned = <String>[];
+
+    // E-Tarabay Graduate — all 12 badges earned
+    if (!hasCertificate('e_tarabay_graduate')) {
+      final badgeIds = [
+        'firstSteps',
+        'alphabet',
+        'numbers',
+        'colors',
+        'shapes',
+        'animals',
+        'bookworm',
+        'starStudent',
+        'mathWhiz',
+        'familyHero',
+        'writingStar',
+        'songbird',
+      ];
+      final allEarned = badgeIds.every(
+        (id) => (_userProfile!.achievements[id] ?? 0) >= 1,
+      );
+      if (allEarned) {
+        newlyEarned.add('e_tarabay_graduate');
+      }
+    }
+
+    // Save new certificates
+    for (final id in newlyEarned) {
+      _userProfile!.certificates.add(id);
+    }
+    if (newlyEarned.isNotEmpty) {
+      await _profileBox.put('currentUser', _userProfile!.toJson());
+      await _syncToFirebase();
+      notifyListeners();
+    }
+
+    return newlyEarned;
+  }
+
+  // ─── BADGE CLAIMING ─────────────────────────────────────────────
+
+  bool isBadgeClaimed(String badgeId) {
+    if (_userProfile == null) return false;
+    return _userProfile!.claimedBadges.contains(badgeId);
+  }
+
+  Future<void> claimBadge(String badgeId) async {
+    await _ensureInitialized();
+    if (_userProfile == null) return;
+    if ((_userProfile!.achievements[badgeId] ?? 0) < 1) return;
+    if (_userProfile!.claimedBadges.contains(badgeId)) return;
+
+    _userProfile!.claimedBadges.add(badgeId);
+    await _profileBox.put('currentUser', _userProfile!.toJson());
+    await _syncToFirebase();
+    notifyListeners();
+  }
+
+  // ─── BADGES (ACHIEVEMENTS) ─────────────────────────────────────
+
+  Future<List<Map<String, dynamic>>> checkAndAwardBadges() async {
+    await _ensureInitialized();
+    if (_userProfile == null) return [];
+
+    final newlyEarned = <Map<String, dynamic>>[];
+    final progress = getAllProgress();
+    final magbasa = progress['magbasa'] as Map? ?? {};
+    final kulay = progress['kulay'] as Map? ?? {};
+    final traceit = progress['traceit'] as Map? ?? {};
+    final matematika = progress['matematika'] as Map? ?? {};
+    final pamilya = progress['pamilya'] as Map? ?? {};
+
+    final badges = [
+      {
+        'id': 'firstSteps',
+        'title': 'First Steps',
+        'emoji': '👣',
+        'color': 0xFF6C63FF,
+        'check': (progress['totalCompleted'] ?? 0) >= 1,
+        'stars': 5,
+      },
+      {
+        'id': 'alphabet',
+        'title': 'Alphabet Master',
+        'emoji': '🔤',
+        'color': 0xFF6C63FF,
+        'check': (magbasa['totalCompleted'] ?? 0) >= 12,
+        'stars': 15,
+      },
+      {
+        'id': 'numbers',
+        'title': 'Number Wizard',
+        'emoji': '🔢',
+        'color': 0xFFFF6B6B,
+        'check': (matematika['gamesCompleted'] ?? 0) >= 20,
+        'stars': 15,
+      },
+      {
+        'id': 'colors',
+        'title': 'Color Artist',
+        'emoji': '🎨',
+        'color': 0xFFFF9F43,
+        'check': (kulay['totalCompleted'] ?? 0) >= 4,
+        'stars': 15,
+      },
+      {
+        'id': 'shapes',
+        'title': 'Shape Creator',
+        'emoji': '⬛',
+        'color': 0xFF4ECDC4,
+        'check': (traceit['uppercase']?['completed'] ?? 0) >= 26,
+        'stars': 15,
+      },
+      {
+        'id': 'animals',
+        'title': 'Animal Friend',
+        'emoji': '🐶',
+        'color': 0xFF5F27CD,
+        'check': (traceit['lowercase']?['completed'] ?? 0) >= 26,
+        'stars': 15,
+      },
+      {
+        'id': 'bookworm',
+        'title': 'Bookworm',
+        'emoji': '📚',
+        'color': 0xFF4ECDC4,
+        'check': (magbasa['kwento']?['completed'] ?? 0) >= 4,
+        'stars': 15,
+      },
+      {
+        'id': 'starStudent',
+        'title': 'Star Student',
+        'emoji': '⭐',
+        'color': 0xFFFFB800,
+        'check': (pamilya['gamesCompleted'] ?? 0) >= 20,
+        'stars': 15,
+      },
+      {
+        'id': 'mathWhiz',
+        'title': 'Math Whiz',
+        'emoji': '🧮',
+        'color': 0xFFFF6B6B,
+        'check': (matematika['completedLevels'] ?? 0) >= 7,
+        'stars': 20,
+      },
+      {
+        'id': 'familyHero',
+        'title': 'Family Hero',
+        'emoji': '👨\u200d👩\u200d👧',
+        'color': 0xFF5F27CD,
+        'check': (pamilya['completedLevels'] ?? 0) >= 5,
+        'stars': 20,
+      },
+      {
+        'id': 'writingStar',
+        'title': 'Writing Star',
+        'emoji': '✏️',
+        'color': 0xFFFF9F43,
+        'check': (traceit['numbers']?['completed'] ?? 0) >= 10,
+        'stars': 15,
+      },
+      {
+        'id': 'songbird',
+        'title': 'Songbird',
+        'emoji': '🎵',
+        'color': 0xFFFF9F43,
+        'check': (magbasa['kanta']?['completed'] ?? 0) >= 10,
+        'stars': 15,
+      },
+    ];
+
+    for (final badge in badges) {
+      final id = badge['id'] as String;
+      final wasEarned = (_userProfile!.achievements[id] ?? 0) >= 1;
+      final shouldEarn = badge['check'] as bool;
+      if (!wasEarned && shouldEarn) {
+        _userProfile!.achievements[id] = 1;
+        await addStars(badge['stars'] as int);
+        newlyEarned.add(badge);
+      }
+    }
+
+    if (newlyEarned.isNotEmpty) {
+      await _profileBox.put('currentUser', _userProfile!.toJson());
+      await _syncToFirebase();
+      notifyListeners();
+    }
+
+    return newlyEarned;
+  }
+
   // RESET PROGRESS
   Future<void> resetAllProgress() async {
     await _ensureInitialized();
@@ -1314,28 +1547,29 @@ class UserProvider extends ChangeNotifier {
   // GET SPECIFIC PROGRESS
   bool isMagbasaActivityCompleted(String category, int index) {
     if (!_isInitialized) return false;
+    if (_prefs != null && _prefs!.getBool('${category}_activity_$index') == true) return true;
     return _progressBox.get('magbasa_${category}_$index') ?? false;
   }
 
   bool isKulayActivityCompleted(String activity) {
     if (!_isInitialized) return false;
+    if (_prefs != null && _prefs!.getBool('kulay_$activity') == true) return true;
     return _progressBox.get('kulay_$activity') ?? false;
   }
 
   bool isKulayPageCompleted(String category, int index) {
     if (!_isInitialized) return false;
+    if (_prefs != null && _prefs!.getBool('kulay_page_${category}_$index') == true) return true;
     return _progressBox.get('kulay_page_${category}_$index') ?? false;
-  }
-
-  bool isSundanActivityCompleted(String mode, int index) {
-    if (!_isInitialized) return false;
-    return _progressBox.get('sundan_${mode}_$index') ?? false;
   }
 
   bool isMatematikaLevelCompleted(int level) {
     if (!_isInitialized) return false;
     List<dynamic> completedLevels = _progressBox.get('matematika_levels') ??
         [false, false, false, false, false, false, false];
+    
+    if (_prefs != null && _prefs!.getBool('mat_level_complete_$level') == true) return true;
+
     return level < completedLevels.length ? completedLevels[level] : false;
   }
 
@@ -1343,6 +1577,12 @@ class UserProvider extends ChangeNotifier {
     if (!_isInitialized) return false;
     Map<String, dynamic> games =
         Map<String, dynamic>.from(_progressBox.get('matematika_games') ?? {});
+    
+    if (_prefs != null) {
+      if (_prefs!.getBool('mat_level_${level}_game_$gameIndex') == true) return true;
+      if (_prefs!.getBool('matematika_game_${level}_$gameIndex') == true) return true;
+    }
+
     return games['level${level}_game$gameIndex'] ?? false;
   }
 

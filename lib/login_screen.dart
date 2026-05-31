@@ -78,6 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
           birthday: bday,
           parentName: profile?['parentName'],
           parentContact: profile?['parentContact'],
+          lrn: profile?['lrn'] ?? studentData['lrn'],
         );
       }
 

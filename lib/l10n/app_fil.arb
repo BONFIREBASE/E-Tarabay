@@ -126,7 +126,7 @@
   "tapAnotherToSwap": "pindutin ang isa pa para magpalit",
   "whatsMissing": "Ano ang kulang?",
   "noGames": "Walang laro",
-  "howMany": "tl",
+  "howMany": "Ilang {item}?",
   "@howMany": {
     "placeholders": {
       "item": {
@@ -134,7 +134,7 @@
       }
     }
   },
-  "matchWithNumber": "tl",
+  "matchWithNumber": "Itugma ang mga {category} sa tamang numero",
   "@matchWithNumber": {
     "placeholders": {
       "category": {
@@ -521,13 +521,14 @@
   "straightOrCorrect": "Tama!",
   "iKnowIt": "Nalaman ko!",
   "familyTreeTitle": "Family Tree",
+  "familyTreeDesc": "Ang puno ng pamilya ay nagpapakita ng mga miyembro ng iyong pamilya mula sa pinakamatanda hanggang sa pinakabata.",
+  "familyTreeTapHint": "\ud83d\udca1 Pindutin ang mga miyembro upang malaman ang kanilang relasyon!",
   "iLearnedFamilyTree": "Nalaman ko ang Family Tree!",
   "ourHomeTitle": "Aming Tahanan",
   "tapEachRoomPrompt": "Pindutin ang bawat kwarto para malaman ang ginagawa ninyo dito!",
   "thatIsOurHome": "Iyan ang aming tahanan!",
   "startOnLine": "Magsimula sa linya!",
   "stayInsideLine": "Manatili sa loob ng linya!",
-  "saved": "Na-save!",
   "invalidInput": "Di-wastong input",
   "tooShort": "Masyadong maikli ang sagot",
   "selectAnswer": "Pumili ng sagot",
@@ -624,5 +625,22 @@
       "member": {"type": "String"},
       "roles": {"type": "String"}
     }
-  }
+  },
+  "resetAllStudents": "I-reset Lahat ng Mag-aaral",
+  "confirmResetAllStudents": "Sigurado ka bang gusto mong burahin ang lahat ng naka-enroll na mag-aaral? Hindi ito maa-undo.",
+  "confirm": "Kumpirmahin",
+  "rateYourArtwork": "Rate Artwork",
+  "howManyStars": "Ilang bituin ang ibibigay mo?",
+  "tapToView": "Pindutin para tingnan",
+  "delete": "Burahin",
+  "deleteArtwork": "Burahin ang Artwork",
+  "confirmDeleteArtwork": "Sigurado ka bang gusto mong burahin ang artwork na ito? Hindi ito maa-undo.",
+  "artworkDeleted": "Na-delete ang artwork.",
+  "zoomOn": "Zoom",
+  "zoomOff": "Tapos",
+  "traceItTitle": "Sundan Ito - Kaya Mo!",
+  "traceItSubtitle": "Idrowing mula sa memorya",
+  "checkTracing": "Tingnan",
+  "showHint": "Tulong",
+  "almostThere": "Malapit na! Subukan muli!"
 }

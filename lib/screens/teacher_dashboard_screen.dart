@@ -81,6 +81,59 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     }
   }
 
+  void _confirmResetAllStudents() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.warning, color: Colors.red),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                AppLocalizations.of(context)!.resetAllStudents,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(AppLocalizations.of(context)!.confirmResetAllStudents),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context)!.cancel,
+                style: const TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(AppLocalizations.of(context)!.confirm,
+                style: const TextStyle(
+                    color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final result = await _authService.deleteAllStudents();
+      if (!mounted) return;
+      if (result['status'] == 'Success') {
+        _showStatusDialog(
+          result['message'] as String,
+          Icons.check_circle,
+          AppColors.success,
+        );
+      } else {
+        _showStatusDialog(
+          result['message'] as String,
+          Icons.error,
+          Colors.red,
+        );
+      }
+    }
+  }
+
   void _showEnrollSheet() {
     final firstNameController = TextEditingController();
     final lastNameController = TextEditingController();
@@ -836,10 +889,38 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         backgroundColor: AppColors.primary,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: _logout,
-          )
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (value) {
+              if (value == 'reset') {
+                _confirmResetAllStudents();
+              } else if (value == 'logout') {
+                _logout();
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'reset',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_forever, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text(AppLocalizations.of(context)!.resetAllStudents),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    const Icon(Icons.logout, color: AppColors.primary),
+                    const SizedBox(width: 8),
+                    Text(AppLocalizations.of(context)!.logout),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(

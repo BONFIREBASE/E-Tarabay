@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import '../widgets/custom_back_button.dart';
 import 'teacher_dashboard_screen.dart';
 
 /// Hardcoded teacher credentials — persists across installs.
@@ -94,8 +95,8 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+        leading: CustomBackButton(
+          iconColor: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
       ),

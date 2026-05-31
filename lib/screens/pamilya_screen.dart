@@ -6,6 +6,9 @@ import '../data/pamilya_content.dart';
 import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import '../widgets/badge_earned_modal.dart';
+import '../widgets/custom_back_button.dart';
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import '../widgets/success_modal.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../main.dart';
@@ -515,6 +518,14 @@ class _PamilyaScreenState extends State<PamilyaScreen>
 
   void _startTimer() {
     _timer?.cancel();
+    
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (userProvider.isPamilyaGameCompleted(_selectedMainCategory, _selectedLevel, _currentGameIndex)) {
+        return;
+      }
+    } catch (_) {}
+
     _secondsLeft = 60;
     _timerPulseController.repeat(reverse: true);
     _timer = Timer.periodic(const Duration(seconds: 1), (t) {
@@ -945,7 +956,6 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         subtitle: _getLevelTitle(_selectedMainCategory, _selectedLevel),
         score: _levelScore,
         stars: avgStars,
-        badges: _newlyEarnedBadges.map((b) => '${b.emoji} ${b.title}').toList(),
         primaryLabel: _selectedLevel <
                 _categoryLevelTitles[_selectedMainCategory].length - 1
             ? AppLocalizations.of(context)!.next
@@ -981,10 +991,6 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             .categoryCompleted(_getMainCategoryTitle(_selectedMainCategory)),
         score: _totalScore,
         stars: 3,
-        badges: _badges
-            .where((b) => b.isEarned)
-            .map((b) => '${b.emoji} ${b.title}')
-            .toList(),
         primaryLabel: AppLocalizations.of(context)!.continueText,
         onPrimaryTap: () {
           Navigator.pop(context);
@@ -1067,9 +1073,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: false,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-        color: AppColors.textDark,
+      leading: CustomBackButton(
+        iconColor: AppColors.textDark,
         onPressed: () => Navigator.pop(context),
       ),
       title: Column(
@@ -1089,12 +1094,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         ],
       ),
       actions: [
-        _buildAppBarPill(
-          icon: '🏅',
-          label: '${_badges.where((b) => b.isEarned).length}',
-          color: Colors.amber,
-          onTap: _showBadgesModal,
-        ),
+
         _buildTimerPill(),
         _buildAppBarPill(
           icon: '⭐',
@@ -1322,29 +1322,43 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: active ? _currentMainColor : Colors.grey.shade100,
+                  color: active
+                      ? _currentMainColor
+                      : (earned
+                          ? Colors.green.withOpacity(0.08)
+                          : Colors.grey.shade100),
                   borderRadius: BorderRadius.circular(20),
+                  border: earned && !active
+                      ? Border.all(color: Colors.green.withOpacity(0.3))
+                      : null,
                 ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(icons[i],
-                      size: 16,
-                      color: active ? Colors.white : Colors.grey.shade600),
-                  const SizedBox(width: 6),
-                  Text('L${i + 1}',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                        earned && !active
+                            ? Icons.check_circle_rounded
+                            : icons[i],
+                        size: 14,
+                        color: active
+                            ? Colors.white
+                            : (earned
+                                ? Colors.green
+                                : Colors.grey.shade500)),
+                    const SizedBox(width: 6),
+                    Text(
+                      _getLevelTitle(_selectedMainCategory, i),
                       style: TextStyle(
-                          color: active ? Colors.white : Colors.grey.shade600,
-                          fontWeight:
-                              active ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 13)),
-                  if (earned) ...[
-                    const SizedBox(width: 4),
-                    const Text('✓',
-                        style: TextStyle(
-                            color: Colors.amber,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold))
+                        color: active
+                            ? Colors.white
+                            : (earned ? Colors.green : Colors.grey.shade600),
+                        fontWeight:
+                            active ? FontWeight.bold : FontWeight.normal,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
-                ]),
+                ),
               ),
             );
           }),
@@ -1458,35 +1472,91 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   // ─────────────────────────────────────────────────────────────────────────
 
   Widget _buildGameContent() {
+    Widget gameWidget;
     if (_selectedMainCategory == 0) {
       switch (_selectedLevel) {
         case 0:
-          return _buildSariliGame1();
+          gameWidget = _buildSariliGame1();
+          break;
         case 1:
-          return _buildSariliGame2();
+          gameWidget = _buildSariliGame2();
+          break;
         case 2:
-          return _buildSariliGame3();
+          gameWidget = _buildSariliGame3();
+          break;
         case 3:
-          return _buildSariliGame4();
+          gameWidget = _buildSariliGame4();
+          break;
         default:
-          return _buildSariliGame1();
+          gameWidget = _buildSariliGame1();
       }
     } else {
       switch (_selectedLevel) {
         case 0:
-          return _buildFamilyMembersGame();
+          gameWidget = _buildFamilyMembersGame();
+          break;
         case 1:
-          return _buildFamilyRolesGame();
+          gameWidget = _buildFamilyRolesGame();
+          break;
         case 2:
-          return _buildFamilyActivitiesGame();
+          gameWidget = _buildFamilyActivitiesGame();
+          break;
         case 3:
-          return _buildFamilyTreeGame();
+          gameWidget = _buildFamilyTreeGame();
+          break;
         case 4:
-          return _buildMyHomeGame();
+          gameWidget = _buildMyHomeGame();
+          break;
         default:
-          return _buildFamilyMembersGame();
+          gameWidget = _buildFamilyMembersGame();
       }
     }
+
+    final userProvider = Provider.of<UserProvider>(context);
+    final isCompleted = userProvider.isPamilyaGameCompleted(_selectedMainCategory, _selectedLevel, _currentGameIndex);
+
+    if (isCompleted && !_showCorrectOverlay) {
+      return Stack(
+        children: [
+          Opacity(
+            opacity: 0.5,
+            child: IgnorePointer(child: gameWidget),
+          ),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.green, width: 3),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2)
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.check_circle_rounded, color: Colors.green, size: 50),
+                  const SizedBox(height: 10),
+                  Text(
+                    AppLocalizations.of(context)!.finishedAlready,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return gameWidget;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -2140,7 +2210,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           ]),
           const SizedBox(height: 6),
           Text(
-              'Ti puno ti pamilya ket nagpapakita dagiti miyembro ti pamilyam manipud iti nataengan agingga iti kaungpus.',
+              AppLocalizations.of(context)!.familyTreeDesc,
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               textAlign: TextAlign.center),
           const SizedBox(height: 20),
@@ -2220,9 +2290,9 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             decoration: BoxDecoration(
                 color: Colors.amber.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(14)),
-            child: const Text(
-                '💡 Tiknapen dagiti miyembro tapno maammuan ti relasyon da!',
-                style: TextStyle(fontSize: 13),
+            child: Text(
+                AppLocalizations.of(context)!.familyTreeTapHint,
+                style: const TextStyle(fontSize: 13),
                 textAlign: TextAlign.center),
           ),
           const SizedBox(height: 20),

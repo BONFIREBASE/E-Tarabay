@@ -1,11 +1,12 @@
-import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'for_parents_screen.dart';
 import '../utils/constants.dart';
 import '../providers/user_provider.dart';
+import '../widgets/custom_back_button.dart';
 
 class ParentsLockScreen extends StatefulWidget {
   const ParentsLockScreen({super.key});
@@ -87,8 +88,8 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+        leading: CustomBackButton(
+          iconColor: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
       ),

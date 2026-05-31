@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui' as ui;
+import '../widgets/custom_back_button.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +15,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../widgets/success_modal.dart';
 
 class ColoringCategory {
   final String name;
@@ -93,6 +94,8 @@ class MyCreation {
   final String sourcePagePath;
   final List<ColoringStroke> strokes;
   bool isFavorite;
+  int? stars;
+  int durationSeconds; // time spent coloring
 
   MyCreation({
     required this.name,
@@ -101,7 +104,19 @@ class MyCreation {
     this.sourcePagePath = '',
     required this.strokes,
     this.isFavorite = false,
+    this.stars,
+    this.durationSeconds = 0,
   });
+
+  String get formattedDuration {
+    final d = Duration(seconds: durationSeconds);
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60);
+    if (h > 0) return '${h}h ${m}m';
+    if (m > 0) return '${m}m ${s}s';
+    return '${s}s';
+  }
 
   String getTimeAgoLocalized(BuildContext context) {
     final diff = DateTime.now().difference(date);
@@ -138,7 +153,7 @@ class StrokePainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke.size
-      ..color = stroke.isEraser ? stroke.color : stroke.color.withOpacity(0.85);
+      ..color = stroke.isEraser ? stroke.color : stroke.color.withOpacity(1.0);
 
     if (stroke.points.length == 1) {
       canvas.drawCircle(
@@ -147,7 +162,7 @@ class StrokePainter extends CustomPainter {
         Paint()
           ..style = PaintingStyle.fill
           ..color =
-              stroke.isEraser ? stroke.color : stroke.color.withOpacity(0.85),
+              stroke.isEraser ? stroke.color : stroke.color.withOpacity(1.0),
       );
       return;
     }
@@ -198,10 +213,16 @@ class _KulayScreenState extends State<KulayScreen>
   ColoringStroke? _activeStroke;
 
   Color _selectedColor = const Color(0xFFFF3B30);
-  double _brushSize = 22.0;
+  double _brushSize = 30.0;
   bool _isEraser = false;
+  MyCreation? _editingCreation;
 
   // ── Zoom & pan ─────────────────────────────────────────────────────────────
+  bool _isZoomMode = false;
+  DateTime? _coloringStartTime;
+  final TransformationController _transformationController =
+      TransformationController();
+
   // ── Bucket fill ────────────────────────────────────────────────────────────
   img.Image? _baseImage;
   img.Image? _coloredImage;
@@ -221,14 +242,11 @@ class _KulayScreenState extends State<KulayScreen>
   late AudioPlayer _audioPlayer;
 
   // ── Progress & animations ──────────────────────────────────────────────────
-  double _coloringProgress = 0.0;
-
   late AnimationController _rippleController;
   late Animation<double> _rippleAnim;
   Offset? _lastPos;
-
-  late AnimationController _doneController;
-  late Animation<double> _doneAnim;
+  Offset? _tapDownPos;
+  DateTime? _tapDownTime;
 
   // ── My Creations ───────────────────────────────────────────────────────────
   final List<MyCreation> _myCreations = [];
@@ -268,13 +286,13 @@ class _KulayScreenState extends State<KulayScreen>
           timeEstimate: '5 min',
           colors: 4),
       ColoringPage(
-          name: 'Kuting',
+          name: 'Cat',
           imagePath: 'assets/images/paint2.png',
           difficulty: 'Easy',
           timeEstimate: '5 min',
           colors: 3),
       ColoringPage(
-          name: 'Elepante',
+          name: 'Elephant',
           imagePath: 'assets/images/paint3.png',
           difficulty: 'Medium',
           timeEstimate: '8 min',
@@ -296,13 +314,13 @@ class _KulayScreenState extends State<KulayScreen>
     ]),
     ColoringCategory(name: 'Fruits', icon: '🍎', color: Colors.red, pages: [
       ColoringPage(
-          name: 'Mansanas',
+          name: 'Apple',
           imagePath: 'assets/images/paint6.png',
           difficulty: 'Easy',
           timeEstimate: '3 min',
           colors: 2),
       ColoringPage(
-          name: 'Saging',
+          name: 'Banana',
           imagePath: 'assets/images/paint7.png',
           difficulty: 'Easy',
           timeEstimate: '4 min',
@@ -340,18 +358,13 @@ class _KulayScreenState extends State<KulayScreen>
         vsync: this, duration: const Duration(milliseconds: 600));
     _rippleAnim = Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(parent: _rippleController, curve: Curves.easeOut));
-
-    _doneController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 900));
-    _doneAnim =
-        CurvedAnimation(parent: _doneController, curve: Curves.elasticOut);
   }
 
   @override
   void dispose() {
     _audioPlayer.dispose();
     _rippleController.dispose();
-    _doneController.dispose();
+    _transformationController.dispose();
     super.dispose();
   }
 
@@ -363,44 +376,9 @@ class _KulayScreenState extends State<KulayScreen>
   //  Drawing (single-finger pan gestures on the INNER canvas)
   // ─────────────────────────────────────────────────────────────────────────
 
-  void _paintStart(DragStartDetails d) {
-    _redoStack.clear();
-    setState(() {
-      _activeStroke = ColoringStroke(
-        points: [d.localPosition],
-        color: _isEraser ? _sampleBaseColor(d.localPosition) : _selectedColor,
-        size: _brushSize,
-        isEraser: _isEraser,
-      );
-      _lastPos = d.localPosition;
-    });
-  }
-
-  void _paintUpdate(DragUpdateDetails d) {
-    if (_activeStroke == null) return;
-    setState(() {
-      _activeStroke = _activeStroke!.copyWith(
-        points: [..._activeStroke!.points, d.localPosition],
-      );
-      _lastPos = d.localPosition;
-    });
-  }
-
-  void _paintEnd(DragEndDetails d) {
-    if (_activeStroke == null) return;
-    setState(() {
-      _strokes.add(_activeStroke!);
-      _activeStroke = null;
-    });
-    _rippleController.forward(from: 0);
-    _updateProgress();
-    _autoSave();
-  }
-
   Future<void> _undo() async {
     if (_strokes.isNotEmpty) {
       setState(() => _redoStack.add(_strokes.removeLast()));
-      _updateProgress();
       _autoSave();
       return;
     }
@@ -413,14 +391,12 @@ class _KulayScreenState extends State<KulayScreen>
     final uiImg = await _imageToUi(_coloredImage!);
     if (!mounted) return;
     setState(() => _displayImage = uiImg);
-    _updateProgress();
     _autoSave();
   }
 
   Future<void> _redo() async {
     if (_redoStack.isNotEmpty) {
       setState(() => _strokes.add(_redoStack.removeLast()));
-      _updateProgress();
       _autoSave();
       return;
     }
@@ -433,7 +409,6 @@ class _KulayScreenState extends State<KulayScreen>
     final uiImg = await _imageToUi(_coloredImage!);
     if (!mounted) return;
     setState(() => _displayImage = uiImg);
-    _updateProgress();
     _autoSave();
   }
 
@@ -442,7 +417,6 @@ class _KulayScreenState extends State<KulayScreen>
       _strokes.clear();
       _redoStack.clear();
       _activeStroke = null;
-      _coloringProgress = 0.0;
       _filledPixelsCount = 0;
       if (_baseImage != null) {
         _coloredImage = _baseImage!.clone();
@@ -508,7 +482,6 @@ class _KulayScreenState extends State<KulayScreen>
 
     // Save metadata
     await prefs.setInt('${key}_filledPixels', _filledPixelsCount);
-    await prefs.setDouble('${key}_progress', _coloringProgress);
     await prefs.setInt('${key}_color', _selectedColor.value);
     await prefs.setDouble('${key}_brushSize', _brushSize);
     await prefs.setBool('${key}_isEraser', _isEraser);
@@ -523,7 +496,6 @@ class _KulayScreenState extends State<KulayScreen>
     final strokesJson = prefs.getString('${key}_strokes');
     final imagePath = prefs.getString('${key}_imagePath');
     final filledPixels = prefs.getInt('${key}_filledPixels');
-    final progress = prefs.getDouble('${key}_progress');
     final colorVal = prefs.getInt('${key}_color');
     final brushSize = prefs.getDouble('${key}_brushSize');
     final isEraser = prefs.getBool('${key}_isEraser');
@@ -568,25 +540,20 @@ class _KulayScreenState extends State<KulayScreen>
       if (loadedColoredImage != null) _coloredImage = loadedColoredImage;
       if (loadedDisplayImage != null) _displayImage = loadedDisplayImage;
       if (filledPixels != null) _filledPixelsCount = filledPixels;
-      if (progress != null) _coloringProgress = progress;
       if (colorVal != null) _selectedColor = Color(colorVal);
       if (brushSize != null) _brushSize = brushSize;
       if (isEraser != null) _isEraser = isEraser;
       _isLoadingAutoSave = false;
     });
-    _updateProgress();
   }
 
-  Future<void> _clearAutoSave() async {
-    if (_selectedPage == null) return;
-    final pageName = _selectedPage!.name;
+  Future<void> _clearAutoSaveForPage(String pageName) async {
     final key = _autoSaveKey(pageName);
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.remove('${key}_strokes');
     await prefs.remove('${key}_imagePath');
     await prefs.remove('${key}_filledPixels');
-    await prefs.remove('${key}_progress');
     await prefs.remove('${key}_color');
     await prefs.remove('${key}_brushSize');
     await prefs.remove('${key}_isEraser');
@@ -596,6 +563,11 @@ class _KulayScreenState extends State<KulayScreen>
     if (await file.exists()) {
       await file.delete();
     }
+  }
+
+  Future<void> _clearAutoSave() async {
+    if (_selectedPage == null) return;
+    await _clearAutoSaveForPage(_selectedPage!.name);
   }
 
   Offset _localToImageCoords(Offset local, double side) {
@@ -771,78 +743,82 @@ class _KulayScreenState extends State<KulayScreen>
         _lastPos = localPosition;
       });
       _rippleController.forward(from: 0);
-      _updateProgress();
     });
     _autoSave();
 
     HapticFeedback.lightImpact();
   }
 
-  void _updateProgress() {
-    if (_selectedPage == null) return;
-
-    if (_baseImage != null && _coloredImage != null && _filledPixelsCount > 0) {
-      // Pixel-based progress: assume the subject is ~30% of the image
-      final totalPixels = _baseImage!.width * _baseImage!.height;
-      final estimatedSubject =
-          (totalPixels * 0.3).toInt().clamp(1, totalPixels);
-      setState(() {
-        _coloringProgress =
-            (_filledPixelsCount / estimatedSubject).clamp(0.0, 1.0);
-      });
-    } else {
-      // Fallback stroke-based progress
-      final expected = ((_selectedPage!.colors) * 50).toDouble();
-      setState(() {
-        _coloringProgress = (_strokes.length / expected).clamp(0.0, 1.0);
-      });
-    }
-
-    if (_coloringProgress >= 1.0) {
-      _doneController.forward(from: 0);
-      Future.delayed(const Duration(milliseconds: 1500), _showCompletionModal);
-    }
-  }
-
-  void _showCompletionModal() {
-    if (_selectedPage == null) return;
-    final alreadySaved = _isCurrentPageSaved();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => SuccessModal(
-        title: AppLocalizations.of(context)!.beautifulArtwork,
-        subtitle: AppLocalizations.of(context)!
-            .finishedColoring(_localizedPageName(_selectedPage!.name)),
-        score: _strokes.length,
-        stars: 3,
-        primaryLabel: alreadySaved
-            ? 'View'
-            : '${AppLocalizations.of(context)!.save} (Save)',
-        onPrimaryTap: () {
-          Navigator.pop(context);
-          if (alreadySaved) {
-            setState(() => _selectedTab = 1);
-          } else {
-            _saveCreation();
-          }
-        },
-        secondaryLabel: AppLocalizations.of(context)!.others,
-        onSecondaryTap: () {
-          Navigator.pop(context);
-          setState(() {
-            _selectedPage = null;
-          });
-        },
-        mainColor: const Color(0xFF34C759),
-      ),
-    );
-  }
-
   // ─────────────────────────────────────────────────────────────────────────
   //  Save
   // ─────────────────────────────────────────────────────────────────────────
+
+  void _showStarRatingDialog(MyCreation creation) {
+    int selectedStars = 0;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => StatefulBuilder(
+        builder: (dialogCtx, setDialogState) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Text(AppLocalizations.of(context)!.rateYourArtwork,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(AppLocalizations.of(context)!.howManyStars,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (i) {
+                  final idx = i + 1;
+                  return GestureDetector(
+                    onTap: () => setDialogState(() => selectedStars = idx),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Icon(
+                        idx <= selectedStars
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        size: 40,
+                        color: idx <= selectedStars
+                            ? const Color(0xFFFFB800)
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12)),
+              onPressed: () {
+                creation.stars = selectedStars > 0 ? selectedStars : null;
+                _saveCreationsToHive();
+                Navigator.pop(context);
+                _snack(AppLocalizations.of(context)!.saved);
+              },
+              child: Text(AppLocalizations.of(context)!.done,
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<String> _captureThumbnail() async {
     try {
@@ -869,6 +845,7 @@ class _KulayScreenState extends State<KulayScreen>
 
   bool _isCurrentPageSaved() {
     if (_selectedPage == null) return false;
+    if (_editingCreation != null) return true;
     return _myCreations.any((c) =>
         c.sourcePagePath == _selectedPage!.imagePath ||
         c.thumbnailPath == _selectedPage!.imagePath);
@@ -879,17 +856,17 @@ class _KulayScreenState extends State<KulayScreen>
     switch (name) {
       case 'Puppy':
         return l10n.pagePuppy;
-      case 'Kuting':
+      case 'Cat':
         return l10n.pageKuting;
-      case 'Elepante':
+      case 'Elephant':
         return l10n.pageElepante;
       case 'Flower Basket':
         return l10n.pageFlowerBasket;
       case 'Rose':
         return l10n.pageRose;
-      case 'Mansanas':
+      case 'Apple':
         return l10n.pageMansanas;
-      case 'Saging':
+      case 'Banana':
         return l10n.pageSaging;
       case 'Teddy Bear':
         return l10n.pageTeddyBear;
@@ -935,27 +912,44 @@ class _KulayScreenState extends State<KulayScreen>
                     borderRadius: BorderRadius.circular(12))),
             onPressed: () async {
               final thumbnailPath = await _captureThumbnail();
-              final creation = MyCreation(
-                name: ctrl.text.trim().isEmpty
-                    ? '${AppLocalizations.of(context)!.myArtworkDefault} ${_myCreations.length + 1}'
-                    : ctrl.text.trim(),
-                date: DateTime.now(),
-                thumbnailPath: thumbnailPath,
-                sourcePagePath: _selectedPage!.imagePath,
-                strokes: List.from(_strokes),
-              );
-              setState(() {
-                _myCreations.add(creation);
-              });
-
-              // Sync to UserProvider
-              if (mounted) {
-                final userProvider =
-                    Provider.of<UserProvider>(context, listen: false);
-                final cat = _categories[_selectedCategory];
-                final pageIndex = cat.pages.indexOf(_selectedPage!);
-                userProvider.updateKulayProgress('coloring', true,
-                    category: cat.name, index: pageIndex);
+              final elapsed = _coloringStartTime != null
+                  ? DateTime.now().difference(_coloringStartTime!).inSeconds
+                  : 0;
+              late MyCreation creation;
+              if (_editingCreation != null) {
+                // Update existing creation in-place
+                final idx = _myCreations.indexOf(_editingCreation!);
+                if (idx >= 0) {
+                  creation = MyCreation(
+                    name: ctrl.text.trim().isEmpty
+                        ? _editingCreation!.name
+                        : ctrl.text.trim(),
+                    date: DateTime.now(),
+                    thumbnailPath: thumbnailPath,
+                    sourcePagePath: _selectedPage!.imagePath,
+                    strokes: List.from(_strokes),
+                    isFavorite: _editingCreation!.isFavorite,
+                    stars: _editingCreation!.stars,
+                    durationSeconds:
+                        _editingCreation!.durationSeconds + elapsed,
+                  );
+                  _myCreations[idx] = creation;
+                } else {
+                  creation = _editingCreation!;
+                }
+                setState(() => _editingCreation = null);
+              } else {
+                creation = MyCreation(
+                  name: ctrl.text.trim().isEmpty
+                      ? '${AppLocalizations.of(context)!.myArtworkDefault} ${_myCreations.length + 1}'
+                      : ctrl.text.trim(),
+                  date: DateTime.now(),
+                  thumbnailPath: thumbnailPath,
+                  sourcePagePath: _selectedPage!.imagePath,
+                  strokes: List.from(_strokes),
+                  durationSeconds: elapsed,
+                );
+                setState(() => _myCreations.add(creation));
 
                 // Update specific keys for Parents Screen
                 try {
@@ -973,11 +967,25 @@ class _KulayScreenState extends State<KulayScreen>
                 }
               }
 
+              // Sync to UserProvider
+              if (mounted) {
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
+                final cat = _categories[_selectedCategory];
+                final pageIndex = cat.pages.indexOf(_selectedPage!);
+                userProvider.updateKulayProgress('coloring', true,
+                    category: cat.name, index: pageIndex);
+              }
+
               _saveCreationsToHive();
               _clearAutoSave();
               if (mounted) {
                 Navigator.pop(context);
-                _snack(AppLocalizations.of(context)!.saved);
+                if (creation.stars == null) {
+                  _showStarRatingDialog(creation);
+                } else {
+                  _snack(AppLocalizations.of(context)!.saved);
+                }
               }
             },
             child: Text(AppLocalizations.of(context)!.save,
@@ -1023,6 +1031,8 @@ class _KulayScreenState extends State<KulayScreen>
                 sourcePagePath: item['sourcePagePath'] ?? '',
                 strokes: strokes,
                 isFavorite: item['isFavorite'] ?? false,
+                stars: item['stars'],
+                durationSeconds: item['durationSeconds'] ?? 0,
               ));
             }
           }
@@ -1030,6 +1040,23 @@ class _KulayScreenState extends State<KulayScreen>
       }
     } catch (e) {
       debugPrint('Error loading creations: $e');
+    }
+    await _syncKulayProgressWithCreations();
+  }
+
+  Future<void> _syncKulayProgressWithCreations() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    for (final cat in _categories) {
+      for (int i = 0; i < cat.pages.length; i++) {
+        final page = cat.pages[i];
+        final hasCreation = _myCreations.any((c) =>
+            c.sourcePagePath == page.imagePath ||
+            c.thumbnailPath == page.imagePath);
+        if (!hasCreation && userProvider.isKulayPageCompleted(cat.name, i)) {
+          await userProvider.updateKulayProgress('coloring', false,
+              category: cat.name, index: i);
+        }
+      }
     }
   }
 
@@ -1043,6 +1070,8 @@ class _KulayScreenState extends State<KulayScreen>
           'thumbnailPath': c.thumbnailPath,
           'sourcePagePath': c.sourcePagePath,
           'isFavorite': c.isFavorite,
+          'stars': c.stars,
+          'durationSeconds': c.durationSeconds,
           'strokes': c.strokes.map((s) {
             return {
               'points': s.points.map((p) => {'dx': p.dx, 'dy': p.dy}).toList(),
@@ -1114,17 +1143,6 @@ class _KulayScreenState extends State<KulayScreen>
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
-    // Real-time account deletion check
-    if (userProvider.isAccountDeleted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
-      });
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xFFF2F3F8),
       appBar: _appBar(),
@@ -1140,9 +1158,8 @@ class _KulayScreenState extends State<KulayScreen>
       backgroundColor: Colors.white,
       elevation: 1,
       shadowColor: Colors.black12,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-        color: AppColors.textDark,
+      leading: CustomBackButton(
+        iconColor: AppColors.textDark,
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(AppLocalizations.of(context)!.coloringBook,
@@ -1315,12 +1332,12 @@ class _KulayScreenState extends State<KulayScreen>
           _strokes.clear();
           _redoStack.clear();
           _activeStroke = null;
-          _coloringProgress = 0.0;
           _baseImage = null;
           _coloredImage = null;
           _displayImage = null;
           _filledPixelsCount = 0;
           _isLoadingAutoSave = true;
+          _coloringStartTime = DateTime.now();
         });
         _loadPageImage().then((_) => _loadAutoSave());
       },
@@ -1421,7 +1438,6 @@ class _KulayScreenState extends State<KulayScreen>
   Widget _canvas() {
     return Column(children: [
       _canvasHeader(),
-      _progressBar(),
       Expanded(
         child: Stack(
           children: [
@@ -1462,7 +1478,10 @@ class _KulayScreenState extends State<KulayScreen>
         IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           color: AppColors.textDark,
-          onPressed: () => setState(() => _selectedPage = null),
+          onPressed: () => setState(() {
+            _selectedPage = null;
+            _editingCreation = null;
+          }),
         ),
         Expanded(
             child:
@@ -1474,49 +1493,6 @@ class _KulayScreenState extends State<KulayScreen>
               '${_selectedPage!.colors} ${AppLocalizations.of(context)!.colorsLabel} • ${_selectedPage!.timeEstimate}',
               style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
         ])),
-        IconButton(
-          icon: const Icon(Icons.undo_rounded),
-          color: AppColors.primary,
-          onPressed: _undo,
-        ),
-        IconButton(
-            icon: Icon(_isCurrentPageSaved()
-                ? Icons.visibility_rounded
-                : Icons.save_rounded),
-            color: AppColors.primary,
-            onPressed: _isCurrentPageSaved()
-                ? () => setState(() => _selectedTab = 1)
-                : _saveCreation),
-      ]),
-    );
-  }
-
-  Widget _progressBar() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-      child: Row(children: [
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: _coloringProgress,
-              backgroundColor: Colors.grey.shade200,
-              color: _coloringProgress >= 1.0
-                  ? const Color(0xFF34C759)
-                  : AppColors.primary,
-              minHeight: 7,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text('${(_coloringProgress * 100).toInt()}%',
-            style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: _coloringProgress >= 1.0
-                    ? const Color(0xFF34C759)
-                    : AppColors.primary)),
       ]),
     );
   }
@@ -1529,8 +1505,16 @@ class _KulayScreenState extends State<KulayScreen>
           child: Center(
             child: LayoutBuilder(builder: (ctx, cst) {
               final side = cst.biggest.shortestSide.clamp(200.0, 500.0);
-              return SizedBox(
-                  width: side, height: side, child: _drawingSurface(side));
+              return InteractiveViewer(
+                transformationController: _transformationController,
+                panEnabled: _isZoomMode,
+                scaleEnabled: _isZoomMode,
+                minScale: 1.0,
+                maxScale: 5.0,
+                clipBehavior: Clip.none,
+                child: SizedBox(
+                    width: side, height: side, child: _drawingSurface(side)),
+              );
             }),
           ),
         ),
@@ -1557,44 +1541,6 @@ class _KulayScreenState extends State<KulayScreen>
                 ),
               );
             },
-          ),
-
-        // ── Completion banner ────────────────────────────────────────
-        if (_coloringProgress >= 1.0)
-          AnimatedBuilder(
-            animation: _doneAnim,
-            builder: (_, __) => Positioned.fill(
-              child: IgnorePointer(
-                child: Center(
-                  child: Transform.scale(
-                    scale: _doneAnim.value,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 22),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.93),
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.green.withOpacity(0.4),
-                              blurRadius: 30,
-                              spreadRadius: 5)
-                        ],
-                      ),
-                      child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        const Text('🎨', style: TextStyle(fontSize: 44)),
-                        const SizedBox(height: 8),
-                        Text(AppLocalizations.of(context)!.greatWorkKulay,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold)),
-                      ]),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ),
       ]),
     );
@@ -1647,18 +1593,69 @@ class _KulayScreenState extends State<KulayScreen>
           ),
 
           // 3. Color strokes drawn ON TOP
-          //    Tap = bucket fill, Drag = brush stroke
-          GestureDetector(
-            onPanStart: _paintStart,
-            onPanUpdate: _paintUpdate,
-            onPanEnd: _paintEnd,
-            onTapUp: (d) => _onBucketTap(d.localPosition),
-            child: CustomPaint(
-              painter:
-                  StrokePainter(strokes: _strokes, activeStroke: _activeStroke),
-              size: Size(side, side),
-              // Transparent child so gestures pass through unpainted areas
-              child: Container(color: Colors.transparent),
+          //    Tap = bucket fill, Drag = brush stroke.
+          //    Blocked in Zoom mode so pan gestures pass through.
+          IgnorePointer(
+            ignoring: _isZoomMode,
+            child: Listener(
+              onPointerDown: (e) {
+                _tapDownPos = e.localPosition;
+                _tapDownTime = DateTime.now();
+                _redoStack.clear();
+                setState(() {
+                  _activeStroke = ColoringStroke(
+                    points: [e.localPosition],
+                    color: _isEraser
+                        ? _sampleBaseColor(e.localPosition)
+                        : _selectedColor,
+                    size: _brushSize,
+                    isEraser: _isEraser,
+                  );
+                  _lastPos = e.localPosition;
+                });
+              },
+              onPointerMove: (e) {
+                if (_activeStroke == null) return;
+                setState(() {
+                  _activeStroke = _activeStroke!.copyWith(
+                    points: [..._activeStroke!.points, e.localPosition],
+                  );
+                  _lastPos = e.localPosition;
+                });
+              },
+              onPointerUp: (e) {
+                if (_activeStroke != null) {
+                  final wasTap = _tapDownPos != null &&
+                      (e.localPosition - _tapDownPos!).distance < 10 &&
+                      _tapDownTime != null &&
+                      DateTime.now().difference(_tapDownTime!).inMilliseconds <
+                          300;
+                  if (wasTap) {
+                    setState(() => _activeStroke = null);
+                    _onBucketTap(e.localPosition);
+                  } else {
+                    setState(() {
+                      _strokes.add(_activeStroke!);
+                      _activeStroke = null;
+                    });
+                    _rippleController.forward(from: 0);
+                    _autoSave();
+                  }
+                }
+                _tapDownPos = null;
+                _tapDownTime = null;
+              },
+              onPointerCancel: (e) {
+                if (_activeStroke != null) setState(() => _activeStroke = null);
+                _tapDownPos = null;
+                _tapDownTime = null;
+              },
+              child: CustomPaint(
+                painter: StrokePainter(
+                    strokes: _strokes, activeStroke: _activeStroke),
+                size: Size(side, side),
+                child: Container(color: Colors.transparent),
+              ),
             ),
           ),
         ]),
@@ -1770,6 +1767,16 @@ class _KulayScreenState extends State<KulayScreen>
         // Tool buttons
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           _tBtn(
+            icon: _isZoomMode
+                ? Icons.zoom_out_map_rounded
+                : Icons.zoom_in_map_rounded,
+            label: _isZoomMode
+                ? AppLocalizations.of(context)!.zoomOff
+                : AppLocalizations.of(context)!.zoomOn,
+            active: _isZoomMode,
+            onTap: () => setState(() => _isZoomMode = !_isZoomMode),
+          ),
+          _tBtn(
             icon:
                 _isEraser ? Icons.brush_rounded : Icons.auto_fix_normal_rounded,
             label: _isEraser
@@ -1823,16 +1830,22 @@ class _KulayScreenState extends State<KulayScreen>
             ),
           ),
           _tBtn(
-              icon: _isCurrentPageSaved()
-                  ? Icons.visibility_rounded
-                  : Icons.save_rounded,
-              label: _isCurrentPageSaved()
-                  ? 'View'
-                  : AppLocalizations.of(context)!.save,
+              icon: _editingCreation != null
+                  ? Icons.save_rounded
+                  : (_isCurrentPageSaved()
+                      ? Icons.visibility_rounded
+                      : Icons.save_rounded),
+              label: _editingCreation != null
+                  ? AppLocalizations.of(context)!.update
+                  : (_isCurrentPageSaved()
+                      ? 'View'
+                      : AppLocalizations.of(context)!.save),
               active: false,
-              onTap: _isCurrentPageSaved()
-                  ? () => setState(() => _selectedTab = 1)
-                  : _saveCreation),
+              onTap: _editingCreation != null
+                  ? _saveCreation
+                  : (_isCurrentPageSaved()
+                      ? () => setState(() => _selectedTab = 1)
+                      : _saveCreation)),
         ]),
       ]),
     );
@@ -1880,8 +1893,6 @@ class _KulayScreenState extends State<KulayScreen>
     List<MyCreation> list = List.from(_myCreations);
     if (_sortMode == 1) {
       list.sort((a, b) => a.name.compareTo(b.name));
-    } else if (_sortMode == 2) {
-      list = list.where((c) => c.isFavorite).toList();
     } else {
       list.sort((a, b) => b.date.compareTo(a.date));
     }
@@ -1902,8 +1913,6 @@ class _KulayScreenState extends State<KulayScreen>
           _sc(0, 'Recent'),
           const SizedBox(width: 6),
           _sc(1, 'A–Z'),
-          const SizedBox(width: 6),
-          _sc(2, '❤️'),
         ]),
       ),
       Expanded(
@@ -1978,122 +1987,318 @@ class _KulayScreenState extends State<KulayScreen>
   }
 
   Widget _creationCard(MyCreation creation) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 10,
-                offset: const Offset(0, 4))
-          ]),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Expanded(
-          child: Stack(fit: StackFit.expand, children: [
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Container(
-                color: const Color(0xFFF0F1FF),
-                child: Center(
-                    child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: creation.thumbnailPath.startsWith('assets/')
-                      ? Image.asset(creation.thumbnailPath,
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
-                          errorBuilder: (_, __, ___) => Icon(Icons.image,
-                              size: 40, color: Colors.grey.shade300))
-                      : Image.file(File(creation.thumbnailPath),
-                          fit: BoxFit.contain,
-                          filterQuality: FilterQuality.high,
-                          errorBuilder: (_, __, ___) => Icon(Icons.image,
-                              size: 40, color: Colors.grey.shade300)),
-                )),
-              ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() => creation.isFavorite = !creation.isFavorite);
-                  _saveCreationsToHive();
-                },
+    return GestureDetector(
+      onTap: () => _showCreationDetail(creation),
+      child: Container(
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4))
+            ]),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+            child: Stack(fit: StackFit.expand, children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
                 child: Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: const BoxDecoration(
-                      color: Colors.white, shape: BoxShape.circle),
-                  child: Icon(
-                      creation.isFavorite
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      color: creation.isFavorite
-                          ? Colors.red
-                          : Colors.grey.shade400,
-                      size: 15),
+                  color: const Color(0xFFF0F1FF),
+                  child: Center(
+                      child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: creation.thumbnailPath.startsWith('assets/')
+                        ? Image.asset(creation.thumbnailPath,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                            errorBuilder: (_, __, ___) => Icon(Icons.image,
+                                size: 40, color: Colors.grey.shade300))
+                        : Image.file(File(creation.thumbnailPath),
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                            errorBuilder: (_, __, ___) => Icon(Icons.image,
+                                size: 40, color: Colors.grey.shade300)),
+                  )),
                 ),
               ),
-            ),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(11, 8, 11, 11),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(creation.name,
-                style:
-                    const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 4),
-            Row(children: [
-              Icon(Icons.schedule_rounded,
-                  size: 10, color: Colors.grey.shade400),
-              const SizedBox(width: 3),
-              Text(creation.getTimeAgoLocalized(context),
-                  style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
-              const Spacer(),
-              GestureDetector(
-                onTap: () {
-                  for (final cat in _categories) {
-                    for (final page in cat.pages) {
-                      if (page.imagePath == creation.thumbnailPath) {
-                        setState(() {
-                          _selectedPage = page;
-                          _strokes
-                            ..clear()
-                            ..addAll(creation.strokes);
-                          _redoStack.clear();
-                          _activeStroke = null;
-                          _selectedTab = 0;
-                          _coloringProgress =
-                              (_strokes.length / (page.colors * 50))
-                                  .clamp(0.0, 1.0);
-                        });
-                        return;
-                      }
-                    }
-                  }
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Text(AppLocalizations.of(context)!.edit,
-                      style: TextStyle(
-                          fontSize: 9,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold)),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() => creation.isFavorite = !creation.isFavorite);
+                    _saveCreationsToHive();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: const BoxDecoration(
+                        color: Colors.white, shape: BoxShape.circle),
+                    child: Icon(
+                        creation.isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        color: creation.isFavorite
+                            ? Colors.red
+                            : Colors.grey.shade400,
+                        size: 15),
+                  ),
                 ),
               ),
             ]),
-          ]),
-        ),
-      ]),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(11, 8, 11, 11),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(creation.name,
+                  style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
+              if (creation.stars != null)
+                Row(
+                  children: [
+                    ...List.generate(
+                        5,
+                        (i) => Icon(
+                              i < creation.stars!
+                                  ? Icons.star_rounded
+                                  : Icons.star_border_rounded,
+                              size: 14,
+                              color: i < creation.stars!
+                                  ? const Color(0xFFFFB800)
+                                  : Colors.grey.shade300,
+                            )),
+                  ],
+                )
+              else
+                const SizedBox.shrink(),
+              const SizedBox(height: 4),
+              Row(children: [
+                Icon(Icons.schedule_rounded,
+                    size: 10, color: Colors.grey.shade400),
+                const SizedBox(width: 3),
+                Text(creation.formattedDuration,
+                    style:
+                        TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+                const Spacer(),
+                Text(AppLocalizations.of(context)!.tapToView,
+                    style: TextStyle(
+                        fontSize: 9,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500)),
+              ]),
+            ]),
+          ),
+        ]),
+      ),
     );
+  }
+
+  void _showCreationDetail(MyCreation creation) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(creation.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 17, fontWeight: FontWeight.bold)),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            if (creation.stars != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                      5,
+                      (i) => Icon(
+                            i < creation.stars!
+                                ? Icons.star_rounded
+                                : Icons.star_border_rounded,
+                            size: 28,
+                            color: i < creation.stars!
+                                ? const Color(0xFFFFB800)
+                                : Colors.grey.shade300,
+                          )),
+                ),
+              ),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    color: const Color(0xFFF0F1FF),
+                    child: creation.thumbnailPath.startsWith('assets/')
+                        ? Image.asset(creation.thumbnailPath,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high)
+                        : Image.file(File(creation.thumbnailPath),
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              child: Text(
+                '${creation.date.day}/${creation.date.month}/${creation.date.year}',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: Text(AppLocalizations.of(context)!.edit),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        for (final cat in _categories) {
+                          for (final page in cat.pages) {
+                            if (page.imagePath == creation.thumbnailPath ||
+                                creation.sourcePagePath == page.imagePath) {
+                              setState(() {
+                                _selectedPage = page;
+                                _strokes
+                                  ..clear()
+                                  ..addAll(creation.strokes);
+                                _redoStack.clear();
+                                _activeStroke = null;
+                                _editingCreation = creation;
+                                _selectedTab = 0;
+                                _coloringStartTime = DateTime.now();
+                              });
+                              return;
+                            }
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon:
+                          const Icon(Icons.delete, size: 18, color: Colors.red),
+                      label: Text(AppLocalizations.of(context)!.delete,
+                          style: const TextStyle(color: Colors.red)),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _confirmDeleteCreation(creation);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteCreation(MyCreation creation) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning, color: Colors.red),
+            const SizedBox(width: 8),
+            Expanded(child: Text(AppLocalizations.of(context)!.deleteArtwork)),
+          ],
+        ),
+        content: Text(AppLocalizations.of(context)!.confirmDeleteArtwork),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel,
+                style: const TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteCreation(creation);
+            },
+            child: Text(AppLocalizations.of(context)!.delete,
+                style: const TextStyle(
+                    color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteCreation(MyCreation creation) async {
+    setState(() => _myCreations.remove(creation));
+    _saveCreationsToHive();
+    if (!creation.thumbnailPath.startsWith('assets/')) {
+      try {
+        File(creation.thumbnailPath).deleteSync();
+      } catch (e) {
+        debugPrint('Error deleting thumbnail: $e');
+      }
+    }
+
+    // Reset the original coloring page so it can be colored again
+    if (creation.sourcePagePath.isNotEmpty) {
+      for (final cat in _categories) {
+        final pageIndex = cat.pages.indexWhere(
+          (p) => p.imagePath == creation.sourcePagePath,
+        );
+        if (pageIndex >= 0) {
+          final pageName = cat.pages[pageIndex].name;
+          _clearAutoSaveForPage(pageName);
+          final userProvider =
+              Provider.of<UserProvider>(context, listen: false);
+          userProvider.updateKulayProgress('coloring', false,
+              category: cat.name, index: pageIndex);
+          break;
+        }
+      }
+    }
+
+    _snack(AppLocalizations.of(context)!.artworkDeleted);
+    await _syncKulayProgressWithCreations();
   }
 }

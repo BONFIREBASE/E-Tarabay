@@ -1,10 +1,11 @@
-import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import '../login_screen.dart';
 import 'package:confetti/confetti.dart';
+import '../widgets/custom_header_app_bar.dart';
+import 'package:e_tarabay/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -35,19 +36,9 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)!.myProfile,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: AppColors.secondary,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+      appBar: CustomHeaderAppBar(
+        title: AppLocalizations.of(context)!.myProfile,
+        baseColor: AppColors.secondary,
       ),
       body: userProfile == null
           ? Center(child: Text(AppLocalizations.of(context)!.noProfileData))

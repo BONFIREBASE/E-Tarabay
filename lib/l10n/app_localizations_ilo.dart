@@ -188,6 +188,9 @@ class AppLocalizationsIlo extends AppLocalizations {
   }
 
   @override
+  String get levelShort => 'L';
+
+  @override
   String get perfect => 'Perpekto!';
 
   @override
@@ -274,12 +277,12 @@ class AppLocalizationsIlo extends AppLocalizations {
 
   @override
   String howMany(String item) {
-    return 'il';
+    return 'Mano nga $item?';
   }
 
   @override
   String matchWithNumber(String category) {
-    return 'il';
+    return 'Itugma dagiti $category iti husto a numero';
   }
 
   @override
@@ -513,7 +516,7 @@ class AppLocalizationsIlo extends AppLocalizations {
   }
 
   @override
-  String get saved => 'Naidulin na!';
+  String get saved => 'Naidulinen!';
 
   @override
   String get others => 'Dadduma pay';
@@ -1184,6 +1187,14 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get familyTreeTitle => 'Puno ti Pamilya';
 
   @override
+  String get familyTreeDesc =>
+      'Ti puno ti pamilya ket nagpapakita dagiti miyembro ti pamilyam manipud iti nataengan agingga iti kaungpus.';
+
+  @override
+  String get familyTreeTapHint =>
+      '💡 Tiknapen dagiti miyembro tapno maammuan ti relasyon da!';
+
+  @override
   String get iLearnedFamilyTree => 'Naammuak ti Puno ti Pamilya!';
 
   @override
@@ -1471,4 +1482,57 @@ class AppLocalizationsIlo extends AppLocalizations {
   String familyRoleSentence(String member, String roles) {
     return 'Ni $member ket $roles.';
   }
+
+  @override
+  String get resetAllStudents => 'I-reset Amin nga Estudyante';
+
+  @override
+  String get confirmResetAllStudents =>
+      'Sigurado ka a kayatmo a buraken amin nga naka-enroll nga estudyante? Saan a mabalin a maibalik daytoy.';
+
+  @override
+  String get confirm => 'Pasingkedan';
+
+  @override
+  String get rateYourArtwork => 'Rate Artwork';
+
+  @override
+  String get howManyStars => 'Mano a bituen ti ibagbagnam?';
+
+  @override
+  String get tapToView => 'Pindutan para kitaen';
+
+  @override
+  String get delete => 'Buraken';
+
+  @override
+  String get deleteArtwork => 'Buraken ti Artwork';
+
+  @override
+  String get confirmDeleteArtwork =>
+      'Sigurado ka a kayatmo a buraken daytoy nga artwork? Saan a mabalin a maibalik daytoy.';
+
+  @override
+  String get artworkDeleted => 'Na-delete ti artwork.';
+
+  @override
+  String get zoomOn => 'Zoom';
+
+  @override
+  String get zoomOff => 'Balligi';
+
+  @override
+  String get traceItTitle => 'Surotem - Kaya Mo!';
+
+  @override
+  String get traceItSubtitle => 'Idrawing manipud iti memorya';
+
+  @override
+  String get checkTracing => 'Kitaen';
+
+  @override
+  String get showHint => 'Tulong';
+
+  @override
+  String get almostThere => 'Asideg pay laeng! Padasem manen!';
 }

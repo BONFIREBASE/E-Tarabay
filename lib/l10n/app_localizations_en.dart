@@ -188,6 +188,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get levelShort => 'L';
+
+  @override
   String get perfect => 'Perfect!';
 
   @override
@@ -274,12 +277,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String howMany(String item) {
-    return 'en';
+    return 'How many $item?';
   }
 
   @override
   String matchWithNumber(String category) {
-    return 'en';
+    return 'Match the $category with the correct number';
   }
 
   @override
@@ -1176,6 +1179,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyTreeTitle => 'Family Tree';
 
   @override
+  String get familyTreeDesc =>
+      'The family tree shows your family members from oldest to youngest.';
+
+  @override
+  String get familyTreeTapHint =>
+      '💡 Tap the members to know their relationship!';
+
+  @override
   String get iLearnedFamilyTree => 'I learned the Family Tree!';
 
   @override
@@ -1401,10 +1412,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pagePuppy => 'Puppy';
 
   @override
-  String get pageKuting => 'Kuting';
+  String get pageKuting => 'Cat';
 
   @override
-  String get pageElepante => 'Elepante';
+  String get pageElepante => 'Elephant';
 
   @override
   String get pageFlowerBasket => 'Flower Basket';
@@ -1413,10 +1424,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pageRose => 'Rose';
 
   @override
-  String get pageMansanas => 'Mansanas';
+  String get pageMansanas => 'Apple';
 
   @override
-  String get pageSaging => 'Saging';
+  String get pageSaging => 'Banana';
 
   @override
   String get pageTeddyBear => 'Teddy Bear';
@@ -1458,4 +1469,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String familyRoleSentence(String member, String roles) {
     return '$member is $roles.';
   }
+
+  @override
+  String get resetAllStudents => 'Reset All Students';
+
+  @override
+  String get confirmResetAllStudents =>
+      'Are you sure you want to delete all enrolled students? This cannot be undone.';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get rateYourArtwork => 'Rate Artwork';
+
+  @override
+  String get howManyStars => 'How many stars does it deserve?';
+
+  @override
+  String get tapToView => 'Tap to view';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get deleteArtwork => 'Delete Artwork';
+
+  @override
+  String get confirmDeleteArtwork =>
+      'Are you sure you want to delete this artwork? This cannot be undone.';
+
+  @override
+  String get artworkDeleted => 'Artwork deleted.';
+
+  @override
+  String get zoomOn => 'Zoom';
+
+  @override
+  String get zoomOff => 'Done';
+
+  @override
+  String get traceItTitle => 'Trace It - You Can Do It!';
+
+  @override
+  String get traceItSubtitle => 'Draw from memory';
+
+  @override
+  String get checkTracing => 'Check';
+
+  @override
+  String get showHint => 'Hint';
+
+  @override
+  String get almostThere => 'Almost there! Try again!';
 }

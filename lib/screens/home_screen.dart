@@ -8,10 +8,11 @@ import '../utils/constants.dart';
 import 'matematika_screen.dart';
 import 'pamilya_screen.dart';
 import 'kulay_screen.dart';
-import 'sundan_screen.dart';
+import 'trace_it_screen.dart';
 import 'magbasa_screen.dart';
 import 'lessons_screen.dart';
 import 'awards_screen.dart';
+import 'certificates_screen.dart';
 import 'settings_screen.dart';
 import 'parents_lock_screen.dart';
 import 'profile_screen.dart';
@@ -330,6 +331,45 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
+                        // Certificates Button
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const CertificatesScreen(),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.workspace_premium,
+                                  color: AppColors.success,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${userProvider.earnedCertificates.length}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.success,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
                         // For Parents Button
                         IconButton(
                           onPressed: () {
@@ -447,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           const SizedBox(height: 12),
 
-                          // Row 2 - Kulay & Sundan
+                          // Row 2 - Kulay & Trace It
                           SizedBox(
                             height: cardHeight,
                             child: Row(
@@ -472,17 +512,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: _buildImageCard(
-                                    title:
-                                        AppLocalizations.of(context)!.sundanMo,
+                                    title: AppLocalizations.of(context)!
+                                        .traceItTitle,
                                     subtitle: AppLocalizations.of(context)!
-                                        .sundanMoKayaMo,
+                                        .traceItSubtitle,
                                     imagePath: 'assets/images/card4.png',
                                     color: AppColors.success,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const SundanScreen(),
+                                            const TraceItScreen(),
                                       ),
                                     ),
                                   ),
@@ -496,18 +536,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Row 3 - Magbasa Tayo
                           SizedBox(
                             height: cardHeight,
-                            child: _buildWideImageCard(
-                              title: AppLocalizations.of(context)!.magbasaTitle,
-                              subtitle: AppLocalizations.of(context)!
-                                  .alpabetoAtMgaSalita,
-                              imagePath: 'assets/images/card5.png',
-                              color: AppColors.alphabet,
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const MagbasaScreen(),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _buildImageCard(
+                                    title: AppLocalizations.of(context)!
+                                        .magbasaTitle,
+                                    subtitle: AppLocalizations.of(context)!
+                                        .alpabetoAtMgaSalita,
+                                    imagePath: 'assets/images/card5.png',
+                                    color: AppColors.alphabet,
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MagbasaScreen(),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ],
@@ -681,102 +729,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWideImageCard({
-    required String title,
-    required String subtitle,
-    required String imagePath,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
-            ),
-          ],
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.2),
-              BlendMode.darken,
-            ),
-          ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [Colors.black.withOpacity(0.3), Colors.transparent],
-            ),
-          ),
-          child: Row(
-            children: [
-              const SizedBox(width: 16),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title.isNotEmpty ? title : '',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(blurRadius: 5, color: Colors.black26),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Text(
-                            subtitle.isNotEmpty ? subtitle : '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: color,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),

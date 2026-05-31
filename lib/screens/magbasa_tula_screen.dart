@@ -1,6 +1,7 @@
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
+import '../widgets/custom_back_button.dart';
 
 class MagbasaTulaScreen extends StatefulWidget {
   final int activityIndex;
@@ -28,8 +29,8 @@ class _MagbasaTulaScreenState extends State<MagbasaTulaScreen> {
           widget.activityTitle,
           style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+        leading: CustomBackButton(
+          iconColor: Colors.white,
           onPressed: () => Navigator.pop(context, _isCompleted),
         ),
       ),

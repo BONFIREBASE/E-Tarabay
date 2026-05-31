@@ -1,87 +1,19 @@
-import 'package:e_tarabay/l10n/app_localizations.dart';
-// ignore_for_file: deprecated_member_use
-import 'dart:math';
-import 'package:flutter/material.dart';
-import '../widgets/custom_back_button.dart';
-import 'package:e_tarabay/l10n/app_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../providers/user_provider.dart';
-import '../data/letter_tracing_data.dart';
+import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../data/letter_tracing_data.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import '../widgets/custom_back_button.dart';
 import '../widgets/success_modal.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  PROGRESS KEYS  (shared with for_parents_screen.dart)
+//  HIDDEN-GUIDE TRACING PAINTER
 // ─────────────────────────────────────────────────────────────────────────────
-class SundanProgressKeys {
-  // sundan_upper_A, sundan_upper_B … sundan_lower_a … sundan_num_1 …
-  static String upperKey(String letter) => 'sundan_upper_$letter';
-  static String lowerKey(String letter) => 'sundan_lower_$letter';
-  static String numKey(String num) => 'sundan_num_$num';
 
-  static const String totalAttempts = 'sundan_total_attempts';
-  static const String totalCompleted = 'sundan_total_completed';
-  static const String lastActivity = 'sundan_last_activity';
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  CONFETTI PARTICLE
-// ─────────────────────────────────────────────────────────────────────────────
-class _ConfettiParticle {
-  Offset position;
-  Offset velocity;
-  Color color;
-  double size;
-  double rotation;
-  double rotationSpeed;
-  double opacity;
-
-  _ConfettiParticle({
-    required this.position,
-    required this.velocity,
-    required this.color,
-    required this.size,
-    required this.rotation,
-    required this.rotationSpeed,
-    this.opacity = 1.0,
-  });
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  CONFETTI PAINTER
-// ─────────────────────────────────────────────────────────────────────────────
-class _ConfettiPainter extends CustomPainter {
-  final List<_ConfettiParticle> particles;
-  _ConfettiPainter(this.particles);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (final p in particles) {
-      final paint = Paint()
-        ..color = p.color.withOpacity(p.opacity)
-        ..style = PaintingStyle.fill;
-      canvas.save();
-      canvas.translate(p.position.dx, p.position.dy);
-      canvas.rotate(p.rotation);
-      canvas.drawRect(
-        Rect.fromCenter(
-            center: Offset.zero, width: p.size, height: p.size * 0.5),
-        paint,
-      );
-      canvas.restore();
-    }
-  }
-
-  @override
-  bool shouldRepaint(_ConfettiPainter old) => true;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  LETTER TRACING PAINTER
-// ─────────────────────────────────────────────────────────────────────────────
-class LetterTracingPainter extends CustomPainter {
+class _TracePainter extends CustomPainter {
   final List<Offset> guidePoints;
   final List<Offset> tracedPoints;
   final Color color;
@@ -89,8 +21,9 @@ class LetterTracingPainter extends CustomPainter {
   final Set<int> visitedPoints;
   final double scale;
   final Offset offset;
+  final double? guideProgress;
 
-  LetterTracingPainter({
+  _TracePainter({
     required this.guidePoints,
     required this.tracedPoints,
     required this.color,
@@ -98,7 +31,13 @@ class LetterTracingPainter extends CustomPainter {
     required this.visitedPoints,
     required this.scale,
     required this.offset,
+    this.guideProgress,
   });
+
+  Offset _toScreen(Offset design) => Offset(
+        design.dx * scale + offset.dx,
+        design.dy * scale + offset.dy,
+      );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -116,6 +55,63 @@ class LetterTracingPainter extends CustomPainter {
           ..strokeJoin = StrokeJoin.round,
       );
     }
+
+    // 2. Guide animation & faint letter outline
+    // (drawn from the same points so dot and reference match perfectly)
+    if (guideProgress != null &&
+        guideProgress! >= 0 &&
+        !isCompleted &&
+        tracedPoints.isEmpty) {
+      _drawGuide(canvas);
+    }
+  }
+
+  void _drawGuide(Canvas canvas) {
+    if (guidePoints.isEmpty) return;
+
+    final screenPoints = _densifyPoints(guidePoints.map(_toScreen).toList(), 6);
+    final movingPt = _getPointOnPath(screenPoints, guideProgress!);
+    final pulse = 1.0 + math.sin(guideProgress! * math.pi * 4) * 0.3;
+
+    // Animated dot tracing the letter path
+    canvas.drawCircle(
+      movingPt,
+      10 * pulse,
+      Paint()..color = color.withOpacity(0.22),
+    );
+    canvas.drawCircle(
+      movingPt,
+      5,
+      Paint()..color = color.withOpacity(0.95),
+    );
+    canvas.drawCircle(
+      movingPt,
+      2,
+      Paint()..color = Colors.white.withOpacity(0.95),
+    );
+  }
+
+  Offset _getPointOnPath(List<Offset> points, double t) {
+    if (points.isEmpty) return Offset.zero;
+    if (points.length == 1) return points[0];
+
+    double totalLength = 0;
+    final lengths = <double>[0.0];
+    for (int i = 1; i < points.length; i++) {
+      totalLength += (points[i] - points[i - 1]).distance;
+      lengths.add(totalLength);
+    }
+
+    if (totalLength == 0) return points[0];
+
+    double target = t * totalLength;
+    for (int i = 1; i < lengths.length; i++) {
+      if (target <= lengths[i]) {
+        double segT = (target - lengths[i - 1]) / (lengths[i] - lengths[i - 1]);
+        return Offset.lerp(points[i - 1], points[i], segT)!;
+      }
+    }
+    return points.last;
   }
 
   Path _buildPath(List<Offset> pts) {
@@ -124,7 +120,7 @@ class LetterTracingPainter extends CustomPainter {
     bool first = true;
     for (int i = 0; i < pts.length; i++) {
       if (pts[i].dx.isNaN || pts[i].dy.isNaN) {
-        first = true; // break: next valid point starts a new stroke
+        first = true;
         continue;
       }
       if (first) {
@@ -137,21 +133,38 @@ class LetterTracingPainter extends CustomPainter {
     return path;
   }
 
+  /// Insert [steps] evenly-spaced points between each existing pair.
+  static List<Offset> _densifyPoints(List<Offset> pts, int steps) {
+    if (pts.length < 2 || steps <= 0) return pts;
+    final out = <Offset>[pts[0]];
+    for (int i = 1; i < pts.length; i++) {
+      final p0 = pts[i - 1];
+      final p1 = pts[i];
+      for (int s = 1; s <= steps; s++) {
+        final t = s / (steps + 1);
+        out.add(Offset.lerp(p0, p1, t)!);
+      }
+      out.add(p1);
+    }
+    return out;
+  }
+
   @override
-  bool shouldRepaint(LetterTracingPainter old) => true;
+  bool shouldRepaint(_TracePainter old) => true;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
-class SundanScreen extends StatefulWidget {
-  const SundanScreen({super.key});
+
+class TraceItScreen extends StatefulWidget {
+  const TraceItScreen({super.key});
 
   @override
-  State<SundanScreen> createState() => _SundanScreenState();
+  State<TraceItScreen> createState() => _TraceItScreenState();
 }
 
-class _SundanScreenState extends State<SundanScreen>
+class _TraceItScreenState extends State<TraceItScreen>
     with TickerProviderStateMixin {
   // ── UI state ───────────────────────────────────────────────────────────────
   int _selectedMode = 0; // 0=Uppercase, 1=Lowercase, 2=Numbers
@@ -162,10 +175,8 @@ class _SundanScreenState extends State<SundanScreen>
   // ── Tracing state ──────────────────────────────────────────────────────────
   List<Offset> _tracedPoints = [];
   bool _isCompleted = false;
-  Set<int> _visitedPoints =
-      {}; // Using set for order-independent (but proximity-based) progress
-  bool _outOfBounds = false;
-  int _wrongAttempts = 0;
+  Set<int> _visitedPoints = {};
+  bool _checking = false;
 
   // Store kid's drawing per letter so they can review it later
   Map<int, List<Offset>> _completedTraces = {};
@@ -174,7 +185,7 @@ class _SundanScreenState extends State<SundanScreen>
   String _feedbackMessage = '';
   Color _feedbackColor = Colors.transparent;
 
-  // ── Canvas transform ────────────────────────────────────────────────────────
+  // ── Canvas transform ───────────────────────────────────────────────────────
   double _canvasScale = 1.0;
   Offset _canvasOffset = Offset.zero;
   Size _canvasSize = Size.zero;
@@ -182,26 +193,19 @@ class _SundanScreenState extends State<SundanScreen>
   // ── Animations ─────────────────────────────────────────────────────────────
   late AnimationController _successController;
   late Animation<double> _scaleAnimation;
-  late AnimationController _confettiController;
   late AnimationController _warningController;
   late Animation<double> _warningAnimation;
-
   late PageController _pageController;
 
-  final List<_ConfettiParticle> _confettiParticles = [];
-  final Random _rng = Random();
-
-  static const double _hitRadius = 18.0;
-
-  SharedPreferences? _prefs;
+  // Guide dot animation
+  late AnimationController _guideController;
+  double _guideProgress = -1; // -1 = inactive, 0-1 = active
 
   final Set<int> _completedUpper = {};
   final Set<int> _completedLower = {};
   final Set<int> _completedNums = {};
 
-  // ─────────────────────────────────────────────────────────────────────────
-  //  Letter data
-  // ─────────────────────────────────────────────────────────────────────────
+  static const double _hitRadius = 20.0;
 
   // ─────────────────────────────────────────────────────────────────────────
   //  Getters
@@ -228,16 +232,11 @@ class _SundanScreenState extends State<SundanScreen>
   @override
   void initState() {
     super.initState();
-    _loadProgress();
 
     _successController = AnimationController(
         duration: const Duration(milliseconds: 600), vsync: this);
     _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
         CurvedAnimation(parent: _successController, curve: Curves.elasticOut));
-
-    _confettiController = AnimationController(
-        duration: const Duration(milliseconds: 2500), vsync: this)
-      ..addListener(_updateConfetti);
 
     _warningController = AnimationController(
         duration: const Duration(milliseconds: 300), vsync: this);
@@ -245,6 +244,14 @@ class _SundanScreenState extends State<SundanScreen>
         CurvedAnimation(parent: _warningController, curve: Curves.easeInOut));
 
     _pageController = PageController(initialPage: _selectedIndex);
+
+    _guideController = AnimationController(
+      duration: const Duration(milliseconds: 2500),
+      vsync: this,
+    );
+    _guideController.addListener(() {
+      if (mounted) setState(() => _guideProgress = _guideController.value);
+    });
 
     _loadProgress();
     _initSmartResume();
@@ -260,13 +267,11 @@ class _SundanScreenState extends State<SundanScreen>
         retryCount++;
       }
 
-      // Mode 0=Upper, 1=Lower, 2=Numbers
       int targetMode = 0;
       int targetIndex = 0;
       bool found = false;
 
-      // Mode 0: Uppercase (A-Z)
-      for (int i = 0; i < 26; i++) {
+      for (int i = 0; i < uppercaseLetters.length; i++) {
         if (!userProvider.isTraceItActivityCompleted('uppercase', i)) {
           targetMode = 0;
           targetIndex = i;
@@ -276,8 +281,7 @@ class _SundanScreenState extends State<SundanScreen>
       }
 
       if (!found) {
-        // Mode 1: Lowercase (a-z)
-        for (int i = 0; i < 26; i++) {
+        for (int i = 0; i < lowercaseLetters.length; i++) {
           if (!userProvider.isTraceItActivityCompleted('lowercase', i)) {
             targetMode = 1;
             targetIndex = i;
@@ -288,8 +292,7 @@ class _SundanScreenState extends State<SundanScreen>
       }
 
       if (!found) {
-        // Mode 2: Numbers (1-10)
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < numberLetters.length; i++) {
           if (!userProvider.isTraceItActivityCompleted('numbers', i)) {
             targetMode = 2;
             targetIndex = i;
@@ -299,7 +302,6 @@ class _SundanScreenState extends State<SundanScreen>
         }
       }
 
-      // If all completed, default to the last mode/item
       if (!found) {
         targetMode = 2;
         targetIndex = 9;
@@ -314,16 +316,16 @@ class _SundanScreenState extends State<SundanScreen>
         });
       }
     } catch (e) {
-      debugPrint('Sundan Smart Resume failed: $e');
+      debugPrint('TraceIt Smart Resume failed: $e');
     }
   }
 
   @override
   void dispose() {
     _successController.dispose();
-    _confettiController.dispose();
     _warningController.dispose();
     _pageController.dispose();
+    _guideController.dispose();
     super.dispose();
   }
 
@@ -332,80 +334,40 @@ class _SundanScreenState extends State<SundanScreen>
   // ─────────────────────────────────────────────────────────────────────────
 
   Future<void> _loadProgress() async {
-    _prefs = await SharedPreferences.getInstance();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isInitialized) return;
+
     setState(() {
       _completedUpper.clear();
       _completedLower.clear();
       _completedNums.clear();
 
       for (int i = 0; i < uppercaseLetters.length; i++) {
-        final k = SundanProgressKeys.upperKey(uppercaseLetters[i].letter);
-        if (_prefs!.getBool(k) == true) {
+        if (userProvider.isTraceItActivityCompleted('uppercase', i)) {
           _completedUpper.add(i);
         }
       }
       for (int i = 0; i < lowercaseLetters.length; i++) {
-        final k = SundanProgressKeys.lowerKey(lowercaseLetters[i].letter);
-        if (_prefs!.getBool(k) == true) {
+        if (userProvider.isTraceItActivityCompleted('lowercase', i)) {
           _completedLower.add(i);
         }
       }
       for (int i = 0; i < numberLetters.length; i++) {
-        final k = SundanProgressKeys.numKey(numberLetters[i].letter);
-        if (_prefs!.getBool(k) == true) {
+        if (userProvider.isTraceItActivityCompleted('numbers', i)) {
           _completedNums.add(i);
         }
       }
     });
   }
 
-  void _syncToUserProvider(int modeIndex, int letterIndex) {
+  Future<void> _saveLetterComplete(int modeIndex, int letterIndex) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
     String modeKey = modeIndex == 0
         ? 'uppercase'
         : modeIndex == 1
             ? 'lowercase'
             : 'numbers';
-    userProvider.updateTraceItProgress(modeKey, letterIndex, true);
-  }
-
-  Future<void> _saveLetterComplete(int modeIndex, int letterIndex) async {
-    if (_prefs == null) return;
-    String key;
-    if (modeIndex == 0) {
-      key = SundanProgressKeys.upperKey(uppercaseLetters[letterIndex].letter);
-    } else if (modeIndex == 1) {
-      key = SundanProgressKeys.lowerKey(lowercaseLetters[letterIndex].letter);
-    } else {
-      key = SundanProgressKeys.numKey(numberLetters[letterIndex].letter);
-    }
-    // Check completion BEFORE writing so replay doesn't inflate totals
-    final alreadyDone = _prefs!.getBool(key) == true;
-    await _prefs!.setBool(key, true);
-    final attempts =
-        (_prefs!.getInt(SundanProgressKeys.totalAttempts) ?? 0) + 1;
-    await _prefs!.setInt(SundanProgressKeys.totalAttempts, attempts);
-    if (!alreadyDone) {
-      final completed =
-          (_prefs!.getInt(SundanProgressKeys.totalCompleted) ?? 0) + 1;
-      await _prefs!.setInt(SundanProgressKeys.totalCompleted, completed);
-    }
-
-    final modeName = modeIndex == 0
-        ? 'Uppercase'
-        : modeIndex == 1
-            ? 'Lowercase'
-            : 'Numbers';
-    final letter = modeIndex == 0
-        ? uppercaseLetters[letterIndex].letter
-        : modeIndex == 1
-            ? lowercaseLetters[letterIndex].letter
-            : numberLetters[letterIndex].letter;
-    await _prefs!
-        .setString(SundanProgressKeys.lastActivity, '$modeName: $letter');
-
-    _syncToUserProvider(modeIndex, letterIndex);
+    await userProvider.updateTraceItProgress(modeKey, letterIndex, true);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -416,13 +378,11 @@ class _SundanScreenState extends State<SundanScreen>
     if (_canvasSize == canvasSize) return;
     _canvasSize = canvasSize;
     const designW = 300.0;
-    const designH = 260.0; // Increased design height to prevent clipping
-    const padding = 20.0; // Increased padding for safety
+    const designH = 260.0;
+    const padding = 4.0;
     final scaleX = (canvasSize.width - padding * 2) / designW;
     final scaleY = (canvasSize.height - padding * 2) / designH;
-    _canvasScale = (scaleX < scaleY
-        ? scaleX
-        : scaleY); // Removed the 1.15 multiplier to keep it in view
+    _canvasScale = scaleX < scaleY ? scaleX : scaleY;
     _canvasOffset = Offset(
       (canvasSize.width - designW * _canvasScale) / 2,
       (canvasSize.height - designH * _canvasScale) / 2,
@@ -447,16 +407,22 @@ class _SundanScreenState extends State<SundanScreen>
     }
     final designPt = _toDesign(d.localPosition);
 
-    // Free-draw mode: child can start anywhere on the canvas
+    _guideController.stop();
+
+    // Free draw: start anywhere on canvas
     setState(() {
+      _guideProgress = -1;
       // Break marker for multi-stroke (prevents connecting line between strokes)
       if (_tracedPoints.isNotEmpty) {
         _tracedPoints.add(const Offset(double.nan, double.nan));
       }
       _tracedPoints.add(_toScreen(designPt));
       _outOfBounds = false;
+      _checking = false;
     });
   }
+
+  bool _outOfBounds = false;
 
   void _onPanUpdate(DragUpdateDetails d) {
     if (_isCompleted || _tracedPoints.isEmpty) return;
@@ -468,7 +434,7 @@ class _SundanScreenState extends State<SundanScreen>
     for (int i = 0; i < pts.length; i++) {
       double dist = (designPt - pts[i]).distance;
       double dynamicRadius =
-          _hitRadius * (1.1 + (4 - _currentLetter.difficulty) * 0.12);
+          _hitRadius * (1.2 + (4 - _currentLetter.difficulty) * 0.15);
       if (dist <= dynamicRadius) {
         _visitedPoints.add(i);
       }
@@ -489,79 +455,147 @@ class _SundanScreenState extends State<SundanScreen>
     setState(() => _outOfBounds = false);
   }
 
-  /// Computes a smart score: coverage of guide points + proximity of drawn path.
-  /// Returns 0.0–1.0.  Weighted: 65% coverage, 35% proximity.
+  void _resetTracing() {
+    final completed = _currentCompletedSet.contains(_selectedIndex);
+    setState(() {
+      _tracedPoints = [];
+      _isCompleted = completed;
+      _visitedPoints = {};
+      _outOfBounds = false;
+      _checking = false;
+      _canvasSize = Size.zero;
+      _guideProgress = completed ? -1 : 0;
+    });
+    if (!completed) {
+      _guideController.repeat();
+    } else {
+      _guideController.stop();
+    }
+    _successController.reset();
+  }
+
+  /// Computes a strict score that actually validates letter shape.
+  /// Penalizes random scribbles, out-of-bounds drawing, and wrong path length.
   double _computeSmartScore() {
     final pts = _currentLetter.points;
     if (_tracedPoints.length < 3) return 0.0;
 
-    // 1. Coverage: what % of guide points were passed near
-    double coverage = _visitedPoints.length / pts.length;
-
-    // 2. Proximity: are user strokes near the guide path?
     final validPoints =
         _tracedPoints.where((p) => !p.dx.isNaN && !p.dy.isNaN).toList();
     if (validPoints.isEmpty) return 0.0;
 
+    final designPts = validPoints.map(_toDesign).toList();
+    // Densify guide points so ALL letters have smooth path validation
+    final densePts = _TracePainter._densifyPoints(pts, 6);
+    final outerRadius = _hitRadius * 3.0; // penalty beyond this
+    final nearRadius = _hitRadius * 2.0;
+
     int nearCount = 0;
-    for (final screenPt in validPoints) {
-      final designPt = _toDesign(screenPt);
+    int outOfBoundsCount = 0;
+    for (final dp in designPts) {
       double minDist = double.infinity;
-      for (final gp in pts) {
-        final d = (designPt - gp).distance;
+      for (final gp in densePts) {
+        final d = (dp - gp).distance;
         if (d < minDist) minDist = d;
       }
-      if (minDist <= _hitRadius * 2.5) nearCount++;
+      if (minDist <= nearRadius) nearCount++;
+      if (minDist > outerRadius) outOfBoundsCount++;
     }
-    double proximity = nearCount / validPoints.length;
 
-    return (coverage * 0.65) + (proximity * 0.35);
+    // 1. Proximity: % of drawn points near the guide path
+    double proximity = nearCount / designPts.length;
+
+    // 2. Coverage: % of guide points touched (use original for visited check)
+    double coverage = _visitedPoints.length / pts.length;
+
+    // 3. Out-of-bounds penalty: drawn points far from ANY guide point
+    double outOfBoundsPenalty = outOfBoundsCount / designPts.length;
+
+    // 4. Path-length sanity: drawn length vs guide length
+    double drawnLength = 0;
+    for (int i = 1; i < designPts.length; i++) {
+      drawnLength += (designPts[i] - designPts[i - 1]).distance;
+    }
+    double guideLength = 0;
+    for (int i = 1; i < pts.length; i++) {
+      guideLength += (pts[i] - pts[i - 1]).distance;
+    }
+    double lengthRatio = guideLength > 0 ? drawnLength / guideLength : 0;
+    // Kids draw at different sizes — be lenient
+    double lengthScore = 1.0;
+    if (lengthRatio < 0.2 || lengthRatio > 3.5) {
+      lengthScore = 0.0; // way off
+    } else if (lengthRatio < 0.4 || lengthRatio > 2.5) {
+      lengthScore = 0.6; // somewhat off
+    }
+
+    // 5. Prefer the child touches start and end, but don't require both
+    bool touchedStart = false;
+    bool touchedEnd = false;
+    for (final dp in designPts) {
+      if ((dp - pts.first).distance <= nearRadius) touchedStart = true;
+      if ((dp - pts.last).distance <= nearRadius) touchedEnd = true;
+    }
+    double startEndScore = 0.5;
+    if (touchedStart || touchedEnd) startEndScore = 0.75;
+    if (touchedStart && touchedEnd) startEndScore = 1.0;
+
+    // Combine everything — coverage and proximity matter most
+    double rawScore = (coverage * 0.40) +
+        (proximity * 0.30) +
+        (lengthScore * 0.15) +
+        (startEndScore * 0.15);
+
+    // Moderate penalty for wild scribbling outside the letter
+    rawScore -= outOfBoundsPenalty * 0.35;
+
+    return rawScore.clamp(0.0, 1.0);
   }
 
   void _checkTracing() {
     if (_isCompleted || _tracedPoints.length < 3) return;
+
+    setState(() => _checking = true);
+
     final score = _computeSmartScore();
-    if (score >= 0.55) {
+    if (score >= 0.60) {
       _completeTracing();
     } else {
       _triggerWarning(AppLocalizations.of(context)!.almostThere);
     }
   }
 
-  void _resetTracing() {
-    setState(() {
-      _tracedPoints = [];
-      // CORRECT: Check against the fresh completed sets
-      _isCompleted = _currentCompletedSet.contains(_selectedIndex);
-      _visitedPoints = {};
-      _outOfBounds = false;
-      _wrongAttempts = 0;
-      _canvasSize = Size.zero;
-    });
-    _confettiParticles.clear();
-    _successController.reset();
-    _confettiController.stop();
-  }
-
   void _completeTracing() {
     if (_isCompleted) return;
     setState(() {
       _isCompleted = true;
-      _score += 10;
+      _score += 15;
       _stars += 3;
     });
 
-    // Mark this letter/number as done
     _currentCompletedSet.add(_selectedIndex);
     _saveLetterComplete(_selectedMode, _selectedIndex);
 
     _successController.forward(from: 0);
-    _spawnConfetti();
     _showFeedback(
-        AppLocalizations.of(context)!.goodJobPoints(10), Colors.green);
+        AppLocalizations.of(context)!.goodJobPoints(15), Colors.green);
 
     // Store the kid's drawing for review
     _completedTraces[_selectedIndex] = List.from(_tracedPoints);
+
+    // Auto-advance after a brief celebration
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (!mounted) return;
+      if (_selectedIndex + 1 < _currentLetters.length) {
+        _pageController.animateToPage(
+          _selectedIndex + 1,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _showCompletionDialog();
+      }
+    });
   }
 
   void _triggerWarning(String msg) {
@@ -569,93 +603,7 @@ class _SundanScreenState extends State<SundanScreen>
         .forward(from: 0)
         .then((_) => _warningController.reverse());
     _showFeedback(msg, Colors.orange);
-
-    setState(() {
-      _wrongAttempts++;
-    });
-
-    if (_wrongAttempts >= 5) {
-      _showFeedback(AppLocalizations.of(context)!.tooHardSwitch, Colors.blue);
-      Future.delayed(const Duration(seconds: 2), () {
-        if (!mounted) return;
-        _pageController.nextPage(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut);
-      });
-    }
   }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  //  Confetti
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void _spawnConfetti() {
-    _confettiParticles.clear();
-    const colors = [
-      Colors.red,
-      Colors.blue,
-      Colors.green,
-      Colors.yellow,
-      Colors.pink,
-      Colors.orange,
-      Colors.purple,
-      Colors.cyan
-    ];
-    final cx = _canvasSize.width / 2;
-    final cy = _canvasSize.height / 3;
-    for (int i = 0; i < 60; i++) {
-      final angle = _rng.nextDouble() * 2 * pi;
-      final speed = 3.0 + _rng.nextDouble() * 5;
-      _confettiParticles.add(_ConfettiParticle(
-        position: Offset(cx, cy),
-        velocity: Offset(cos(angle) * speed, sin(angle) * speed - 6),
-        color: colors[_rng.nextInt(colors.length)],
-        size: 8 + _rng.nextDouble() * 8,
-        rotation: _rng.nextDouble() * 2 * pi,
-        rotationSpeed: (_rng.nextDouble() - 0.5) * 0.3,
-        opacity: 1.0,
-      ));
-    }
-    _confettiController.forward(from: 0);
-  }
-
-  void _onPageChanged(int index) {
-    if (index != _selectedIndex) {
-      setState(() {
-        _selectedIndex = index;
-        _isCompleted = _currentCompletedSet.contains(index);
-        if (_isCompleted && _completedTraces.containsKey(index)) {
-          _tracedPoints = List.from(_completedTraces[index]!);
-          _visitedPoints = {};
-        } else {
-          _tracedPoints = [];
-          _visitedPoints = {};
-        }
-        _outOfBounds = false;
-        _wrongAttempts = 0;
-        _canvasSize = Size.zero;
-      });
-      _confettiParticles.clear();
-      _successController.reset();
-      _confettiController.stop();
-    }
-  }
-
-  void _updateConfetti() {
-    if (!mounted) return;
-    setState(() {
-      for (final p in _confettiParticles) {
-        p.position += p.velocity;
-        p.velocity = Offset(p.velocity.dx * 0.98, p.velocity.dy + 0.25);
-        p.rotation += p.rotationSpeed;
-        p.opacity = (1.0 - _confettiController.value).clamp(0.0, 1.0);
-      }
-    });
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  //  Feedback & Dialog
-  // ─────────────────────────────────────────────────────────────────────────
 
   void _showFeedback(String message, Color color) {
     setState(() {
@@ -670,6 +618,37 @@ class _SundanScreenState extends State<SundanScreen>
         });
       }
     });
+  }
+
+  void _resetAllProgress() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isInitialized) return;
+
+    // Clear all traceit progress in UserProvider
+    for (int i = 0; i < uppercaseLetters.length; i++) {
+      await userProvider.updateTraceItProgress('uppercase', i, false);
+    }
+    for (int i = 0; i < lowercaseLetters.length; i++) {
+      await userProvider.updateTraceItProgress('lowercase', i, false);
+    }
+    for (int i = 0; i < numberLetters.length; i++) {
+      await userProvider.updateTraceItProgress('numbers', i, false);
+    }
+
+    setState(() {
+      _completedUpper.clear();
+      _completedLower.clear();
+      _completedNums.clear();
+      _completedTraces.clear();
+      _score = 0;
+      _stars = 0;
+      _selectedIndex = 0;
+      _selectedMode = 0;
+      _resetTracing();
+    });
+
+    _pageController = PageController(initialPage: 0);
+    _guideController.repeat();
   }
 
   void _showCompletionDialog() {
@@ -692,12 +671,43 @@ class _SundanScreenState extends State<SundanScreen>
         secondaryLabel: AppLocalizations.of(context)!.ulitin,
         onSecondaryTap: () {
           Navigator.pop(context);
-          _resetTracing();
-          setState(() => _selectedIndex = 0);
+          _pageController.animateToPage(
+            0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
         },
         mainColor: AppColors.primary,
       ),
     );
+  }
+
+  void _onPageChanged(int index) {
+    if (index != _selectedIndex) {
+      final wasCompleted = _currentCompletedSet.contains(index);
+      setState(() {
+        _selectedIndex = index;
+        _isCompleted = wasCompleted;
+        if (_isCompleted && _completedTraces.containsKey(index)) {
+          _tracedPoints = List.from(_completedTraces[index]!);
+          _visitedPoints = {};
+          _guideProgress = -1;
+        } else {
+          _tracedPoints = [];
+          _visitedPoints = {};
+          _guideProgress = 0;
+        }
+        _outOfBounds = false;
+        _checking = false;
+        _canvasSize = Size.zero;
+      });
+      if (!wasCompleted) {
+        _guideController.repeat();
+      } else {
+        _guideController.stop();
+      }
+      _successController.reset();
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -708,7 +718,6 @@ class _SundanScreenState extends State<SundanScreen>
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
 
-    // Real-time account deletion check
     if (userProvider.isAccountDeleted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -718,6 +727,8 @@ class _SundanScreenState extends State<SundanScreen>
     }
 
     final size = MediaQuery.of(context).size;
+    final loc = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FF),
       appBar: AppBar(
@@ -727,12 +738,18 @@ class _SundanScreenState extends State<SundanScreen>
           iconColor: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(AppLocalizations.of(context)!.surotemKabaelam,
+        title: Text(loc.traceItTitle,
             style: const TextStyle(
                 color: AppColors.textDark,
                 fontSize: 20,
                 fontWeight: FontWeight.bold)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, size: 20),
+            color: Colors.grey.shade400,
+            tooltip: 'Reset (test)',
+            onPressed: _resetAllProgress,
+          ),
           Container(
             margin: const EdgeInsets.all(8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -756,10 +773,9 @@ class _SundanScreenState extends State<SundanScreen>
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildModeTab(0, 'ABC', AppLocalizations.of(context)!.upper),
-                  _buildModeTab(1, 'abc', AppLocalizations.of(context)!.lower),
-                  _buildModeTab(
-                      2, '123', AppLocalizations.of(context)!.numbers),
+                  _buildModeTab(0, 'ABC', loc.upper),
+                  _buildModeTab(1, 'abc', loc.lower),
+                  _buildModeTab(2, '123', loc.numbers),
                 ]),
           ),
         ),
@@ -790,9 +806,7 @@ class _SundanScreenState extends State<SundanScreen>
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                  Text(
-                      AppLocalizations.of(context)!
-                          .letterLabel(_currentLetter.letter),
+                  Text(loc.letterLabel(_currentLetter.letter),
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 3),
@@ -800,7 +814,6 @@ class _SundanScreenState extends State<SundanScreen>
                       style:
                           TextStyle(fontSize: 12, color: Colors.grey.shade600)),
                 ])),
-            // Completed count chip
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
@@ -808,7 +821,7 @@ class _SundanScreenState extends State<SundanScreen>
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Text(
-                '${_currentCompletedSet.length}/${_currentLetters.length} ✓',
+                '${_currentCompletedSet.length}/${_currentLetters.length} \u2713',
                 style: const TextStyle(
                     fontSize: 11,
                     color: Colors.green,
@@ -817,7 +830,7 @@ class _SundanScreenState extends State<SundanScreen>
             ),
             const SizedBox(width: 6),
             Column(children: [
-              Text(AppLocalizations.of(context)!.pointsLabel,
+              Text(loc.pointsLabel,
                   style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
               Text('$_score',
                   style: const TextStyle(
@@ -855,8 +868,8 @@ class _SundanScreenState extends State<SundanScreen>
                 child: AnimatedBuilder(
                   animation: _warningAnimation,
                   builder: (_, child) => Container(
-                    width: size.width * 0.88,
-                    height: size.width * 0.88,
+                    width: size.width,
+                    height: size.height * 0.98,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(28),
@@ -885,36 +898,33 @@ class _SundanScreenState extends State<SundanScreen>
                         onPanUpdate: _onPanUpdate,
                         onPanEnd: _onPanEnd,
                         child: Stack(fit: StackFit.expand, children: [
-                          // Letter reference
+                          // Accurate letter reference (font glyph)
                           Center(
                               child: Opacity(
-                                  opacity: 0.06,
+                                  opacity: 0.18,
                                   child: Text(letter.letter,
                                       style: TextStyle(
-                                          fontSize: 220 * _canvasScale,
+                                          fontSize: 260 * _canvasScale,
                                           fontWeight: FontWeight.bold,
                                           color: letter.color)))),
-                          // Tracing
+                          // Tracing painter
                           CustomPaint(
-                            painter: LetterTracingPainter(
+                            painter: _TracePainter(
                               guidePoints: letter.points,
-                              tracedPoints: _selectedIndex == index
-                                  ? _tracedPoints
-                                  : [], // Only show tracing on active page
+                              tracedPoints:
+                                  _selectedIndex == index ? _tracedPoints : [],
                               color: letter.color,
                               isCompleted: _currentCompletedSet.contains(index),
                               visitedPoints:
                                   _selectedIndex == index ? _visitedPoints : {},
                               scale: _canvasScale,
                               offset: _canvasOffset,
+                              guideProgress: _selectedIndex == index
+                                  ? _guideProgress
+                                  : null,
                             ),
                           ),
-                          // Confetti
-                          if (_confettiParticles.isNotEmpty &&
-                              _selectedIndex == index)
-                            CustomPaint(
-                                painter: _ConfettiPainter(_confettiParticles)),
-                          // Success overlay (Moved to bottom of canvas)
+                          // Success overlay
                           if (_isCompleted && _selectedIndex == index)
                             Positioned(
                               bottom: 20,
@@ -946,9 +956,7 @@ class _SundanScreenState extends State<SundanScreen>
                                             color: Colors.white, size: 28),
                                         const SizedBox(width: 10),
                                         Flexible(
-                                          child: Text(
-                                              AppLocalizations.of(context)!
-                                                  .goodJob,
+                                          child: Text(loc.goodJob,
                                               style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 18,
@@ -987,37 +995,47 @@ class _SundanScreenState extends State<SundanScreen>
                   overflow: TextOverflow.ellipsis),
         ),
 
-        // Check & Reset buttons
+        // Action buttons
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
           child: Row(
             children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _isCompleted ? null : _checkTracing,
-                  icon: const Icon(Icons.check_circle),
-                  label: Text(AppLocalizations.of(context)!.checkTracing),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
+              // Clear button
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _resetTracing,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(AppLocalizations.of(context)!.ulitin),
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: Text(loc.clear),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: BorderSide(color: AppColors.primary.withOpacity(0.4)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    foregroundColor: Colors.grey.shade600,
+                    side: BorderSide(color: Colors.grey.shade400),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Check button
+              Expanded(
+                flex: 2,
+                child: ElevatedButton.icon(
+                  onPressed: _isCompleted ? null : _checkTracing,
+                  icon: _checking
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.check, size: 20),
+                  label: Text(loc.checkTracing),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        _isCompleted ? Colors.green : AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
               ),
@@ -1044,6 +1062,7 @@ class _SundanScreenState extends State<SundanScreen>
         margin: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(children: [
           Text(icon,

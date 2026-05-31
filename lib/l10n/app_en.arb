@@ -78,6 +78,7 @@
   "wrong": "Wrong! Try again!",
   "timeOut": "Time's up! Try again.",
   "level": "Level {level}",
+  "levelShort": "L",
   "@level": {
     "placeholders": {
       "level": {
@@ -126,7 +127,7 @@
   "tapAnotherToSwap": "tap another to swap",
   "whatsMissing": "What\\'s missing?",
   "noGames": "No games available",
-  "howMany": "en",
+  "howMany": "How many {item}?",
   "@howMany": {
     "placeholders": {
       "item": {
@@ -134,7 +135,7 @@
       }
     }
   },
-  "matchWithNumber": "en",
+  "matchWithNumber": "Match the {category} with the correct number",
   "@matchWithNumber": {
     "placeholders": {
       "category": {
@@ -521,13 +522,14 @@
   "straightOrCorrect": "Correct!",
   "iKnowIt": "I learned it!",
   "familyTreeTitle": "Family Tree",
+  "familyTreeDesc": "The family tree shows your family members from oldest to youngest.",
+  "familyTreeTapHint": "\ud83d\udca1 Tap the members to know their relationship!",
   "iLearnedFamilyTree": "I learned the Family Tree!",
   "ourHomeTitle": "Our Home",
   "tapEachRoomPrompt": "Tap each room to know what you do here!",
   "thatIsOurHome": "That is our home!",
   "startOnLine": "Start on the line!",
   "stayInsideLine": "Stay inside the line!",
-  "saved": "Saved!",
   "invalidInput": "Invalid input",
   "tooShort": "Answer too short",
   "selectAnswer": "Please select an answer",
@@ -600,12 +602,12 @@
   "achievementWritingStarDesc": "Complete all numbers",
   "achievementSongbirdDesc": "Complete 10 songs",
   "pagePuppy": "Puppy",
-  "pageKuting": "Kuting",
-  "pageElepante": "Elepante",
+  "pageKuting": "Cat",
+  "pageElepante": "Elephant",
   "pageFlowerBasket": "Flower Basket",
   "pageRose": "Rose",
-  "pageMansanas": "Mansanas",
-  "pageSaging": "Saging",
+  "pageMansanas": "Apple",
+  "pageSaging": "Banana",
   "pageTeddyBear": "Teddy Bear",
   "pageSodaPop": "Soda Pop",
   "achievementStarStudentDesc": "Complete 20 Ang Aking Sarili games",
@@ -624,5 +626,22 @@
       "member": {"type": "String"},
       "roles": {"type": "String"}
     }
-  }
+  },
+  "resetAllStudents": "Reset All Students",
+  "confirmResetAllStudents": "Are you sure you want to delete all enrolled students? This cannot be undone.",
+  "confirm": "Confirm",
+  "rateYourArtwork": "Rate Artwork",
+  "howManyStars": "How many stars does it deserve?",
+  "tapToView": "Tap to view",
+  "delete": "Delete",
+  "deleteArtwork": "Delete Artwork",
+  "confirmDeleteArtwork": "Are you sure you want to delete this artwork? This cannot be undone.",
+  "artworkDeleted": "Artwork deleted.",
+  "zoomOn": "Zoom",
+  "zoomOff": "Done",
+  "traceItTitle": "Trace It - You Can Do It!",
+  "traceItSubtitle": "Draw from memory",
+  "checkTracing": "Check",
+  "showHint": "Hint",
+  "almostThere": "Almost there! Try again!"
 }

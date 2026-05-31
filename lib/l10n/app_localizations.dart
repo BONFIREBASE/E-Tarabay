@@ -442,6 +442,12 @@ abstract class AppLocalizations {
   /// **'Level {level}'**
   String level(int level);
 
+  /// No description provided for @levelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get levelShort;
+
   /// No description provided for @perfect.
   ///
   /// In en, this message translates to:
@@ -607,13 +613,13 @@ abstract class AppLocalizations {
   /// No description provided for @howMany.
   ///
   /// In en, this message translates to:
-  /// **'en'**
+  /// **'How many {item}?'**
   String howMany(String item);
 
   /// No description provided for @matchWithNumber.
   ///
   /// In en, this message translates to:
-  /// **'en'**
+  /// **'Match the {category} with the correct number'**
   String matchWithNumber(String category);
 
   /// No description provided for @whichIsMore.
@@ -2326,6 +2332,18 @@ abstract class AppLocalizations {
   /// **'Family Tree'**
   String get familyTreeTitle;
 
+  /// No description provided for @familyTreeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The family tree shows your family members from oldest to youngest.'**
+  String get familyTreeDesc;
+
+  /// No description provided for @familyTreeTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Tap the members to know their relationship!'**
+  String get familyTreeTapHint;
+
   /// No description provided for @iLearnedFamilyTree.
   ///
   /// In en, this message translates to:
@@ -2767,13 +2785,13 @@ abstract class AppLocalizations {
   /// No description provided for @pageKuting.
   ///
   /// In en, this message translates to:
-  /// **'Kuting'**
+  /// **'Cat'**
   String get pageKuting;
 
   /// No description provided for @pageElepante.
   ///
   /// In en, this message translates to:
-  /// **'Elepante'**
+  /// **'Elephant'**
   String get pageElepante;
 
   /// No description provided for @pageFlowerBasket.
@@ -2791,13 +2809,13 @@ abstract class AppLocalizations {
   /// No description provided for @pageMansanas.
   ///
   /// In en, this message translates to:
-  /// **'Mansanas'**
+  /// **'Apple'**
   String get pageMansanas;
 
   /// No description provided for @pageSaging.
   ///
   /// In en, this message translates to:
-  /// **'Saging'**
+  /// **'Banana'**
   String get pageSaging;
 
   /// No description provided for @pageTeddyBear.
@@ -2877,6 +2895,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{member} is {roles}.'**
   String familyRoleSentence(String member, String roles);
+
+  /// No description provided for @resetAllStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All Students'**
+  String get resetAllStudents;
+
+  /// No description provided for @confirmResetAllStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all enrolled students? This cannot be undone.'**
+  String get confirmResetAllStudents;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @rateYourArtwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate Artwork'**
+  String get rateYourArtwork;
+
+  /// No description provided for @howManyStars.
+  ///
+  /// In en, this message translates to:
+  /// **'How many stars does it deserve?'**
+  String get howManyStars;
+
+  /// No description provided for @tapToView.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view'**
+  String get tapToView;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @deleteArtwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Artwork'**
+  String get deleteArtwork;
+
+  /// No description provided for @confirmDeleteArtwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this artwork? This cannot be undone.'**
+  String get confirmDeleteArtwork;
+
+  /// No description provided for @artworkDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Artwork deleted.'**
+  String get artworkDeleted;
+
+  /// No description provided for @zoomOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom'**
+  String get zoomOn;
+
+  /// No description provided for @zoomOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get zoomOff;
+
+  /// No description provided for @traceItTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace It - You Can Do It!'**
+  String get traceItTitle;
+
+  /// No description provided for @traceItSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw from memory'**
+  String get traceItSubtitle;
+
+  /// No description provided for @checkTracing.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get checkTracing;
+
+  /// No description provided for @showHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hint'**
+  String get showHint;
+
+  /// No description provided for @almostThere.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost there! Try again!'**
+  String get almostThere;
 }
 
 class _AppLocalizationsDelegate

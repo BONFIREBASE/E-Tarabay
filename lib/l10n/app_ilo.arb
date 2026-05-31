@@ -126,7 +126,7 @@
   "tapAnotherToSwap": "pisuem ti sabali tapno agsinnukat",
   "whatsMissing": "Ania ti kurang?",
   "noGames": "Awan ti ay-ayam",
-  "howMany": "il",
+  "howMany": "Mano nga {item}?",
   "@howMany": {
     "placeholders": {
       "item": {
@@ -134,7 +134,7 @@
       }
     }
   },
-  "matchWithNumber": "il",
+  "matchWithNumber": "Itugma dagiti {category} iti husto a numero",
   "@matchWithNumber": {
     "placeholders": {
       "category": {
@@ -521,13 +521,14 @@
   "straightOrCorrect": "Nalinteg!",
   "iKnowIt": "Naammuak!",
   "familyTreeTitle": "Puno ti Pamilya",
+  "familyTreeDesc": "Ti puno ti pamilya ket nagpapakita dagiti miyembro ti pamilyam manipud iti nataengan agingga iti kaungpus.",
+  "familyTreeTapHint": "\ud83d\udca1 Tiknapen dagiti miyembro tapno maammuan ti relasyon da!",
   "iLearnedFamilyTree": "Naammuak ti Puno ti Pamilya!",
   "ourHomeTitle": "Ti Balaymi",
   "tapEachRoomPrompt": "Tiknapen ti tunggal kuarto tapno maammuan ti aramidenyo ditoy!",
   "thatIsOurHome": "Dayta ti balaymi!",
   "startOnLine": "Mangrugi iti linia!",
   "stayInsideLine": "Agtalinaed iti uneg ti linia!",
-  "saved": "Naidulin na!",
   "invalidInput": "Saan a valido a sungbat",
   "tooShort": "Subukanen ti naan-anay a sungbat",
   "selectAnswer": "Pumili ti sungbat",
@@ -624,5 +625,22 @@
       "member": {"type": "String"},
       "roles": {"type": "String"}
     }
-  }
+  },
+  "resetAllStudents": "I-reset Amin nga Estudyante",
+  "confirmResetAllStudents": "Sigurado ka a kayatmo a buraken amin nga naka-enroll nga estudyante? Saan a mabalin a maibalik daytoy.",
+  "confirm": "Pasingkedan",
+  "rateYourArtwork": "Rate Artwork",
+  "howManyStars": "Mano a bituen ti ibagbagnam?",
+  "tapToView": "Pindutan para kitaen",
+  "delete": "Buraken",
+  "deleteArtwork": "Buraken ti Artwork",
+  "confirmDeleteArtwork": "Sigurado ka a kayatmo a buraken daytoy nga artwork? Saan a mabalin a maibalik daytoy.",
+  "artworkDeleted": "Na-delete ti artwork.",
+  "zoomOn": "Zoom",
+  "zoomOff": "Balligi",
+  "traceItTitle": "Surotem - Kaya Mo!",
+  "traceItSubtitle": "Idrawing manipud iti memorya",
+  "checkTracing": "Kitaen",
+  "showHint": "Tulong",
+  "almostThere": "Asideg pay laeng! Padasem manen!"
 }

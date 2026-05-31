@@ -14,7 +14,7 @@ class AchievementsScreen extends StatelessWidget {
 
     // Get progress from each module
     final magbasaProgress = progress['magbasa'] as Map? ?? {};
-    final sundanProgress = progress['sundan'] as Map? ?? {};
+    final traceItProgress = progress['traceit'] as Map? ?? {};
     final kulayProgress = progress['kulay'] as Map? ?? {};
     final matematikaProgress = progress['matematika'] as Map? ?? {};
     final pamilyaProgress = progress['pamilya'] as Map? ?? {};
@@ -22,41 +22,40 @@ class AchievementsScreen extends StatelessWidget {
     // Calculate achievements based on actual progress
     return {
       // First Steps: Complete any 1 activity
-      'firstSteps': (progress['totalCompleted'] ?? 0) >= 1 ? 1 : 0,
+      'firstSteps': progress['totalCompleted'] ?? 0,
 
       // Alphabet: Complete all Magbasa Tayo activities
-      'alphabet': (magbasaProgress['totalCompleted'] ?? 0) >= 12 ? 1 : 0,
+      'alphabet': magbasaProgress['totalCompleted'] ?? 0,
 
       // Numbers: Complete all Matematika games
-      'numbers': (matematikaProgress['gamesCompleted'] ?? 0) >= 20 ? 1 : 0,
+      'numbers': matematikaProgress['gamesCompleted'] ?? 0,
 
       // Colors: Complete all Kulay-Saya activities
-      'colors': (kulayProgress['totalCompleted'] ?? 0) >= 4 ? 1 : 0,
+      'colors': kulayProgress['totalCompleted'] ?? 0,
 
-      // Shapes: Complete all Sundan Mo uppercase letters
-      'shapes': (sundanProgress['uppercase']?['completed'] ?? 0) >= 26 ? 1 : 0,
+      // Shapes: Complete all Trace It uppercase letters
+      'shapes': traceItProgress['uppercase']?['completed'] ?? 0,
 
-      // Animals: Complete all Sundan Mo lowercase letters
-      'animals': (sundanProgress['lowercase']?['completed'] ?? 0) >= 26 ? 1 : 0,
+      // Animals: Complete all Trace It lowercase letters
+      'animals': traceItProgress['lowercase']?['completed'] ?? 0,
 
       // Bookworm: Complete all stories in Magbasa Tayo
-      'bookworm': (magbasaProgress['kwento']?['completed'] ?? 0) >= 4 ? 1 : 0,
+      'bookworm': magbasaProgress['kwento']?['completed'] ?? 0,
 
       // Star Student: Complete all Ang Aking Sarili games
-      'starStudent': (pamilyaProgress['gamesCompleted'] ?? 0) >= 20 ? 1 : 0,
+      'starStudent': pamilyaProgress['gamesCompleted'] ?? 0,
 
       // Math Whiz: Complete all Matematika levels
-      'mathWhiz': (matematikaProgress['completedLevels'] ?? 0) >= 7 ? 1 : 0,
+      'mathWhiz': matematikaProgress['completedLevels'] ?? 0,
 
       // Family Hero: Complete all Ang Aking Sarili levels
-      'familyHero': (pamilyaProgress['completedLevels'] ?? 0) >= 5 ? 1 : 0,
+      'familyHero': pamilyaProgress['completedLevels'] ?? 0,
 
-      // Writing Star: Complete all Sundan Mo numbers
-      'writingStar':
-          (sundanProgress['numbers']?['completed'] ?? 0) >= 10 ? 1 : 0,
+      // Writing Star: Complete all Trace It numbers
+      'writingStar': traceItProgress['numbers']?['completed'] ?? 0,
 
       // Songbird: Complete all songs in Magbasa Tayo
-      'songbird': (magbasaProgress['kanta']?['completed'] ?? 0) >= 10 ? 1 : 0,
+      'songbird': magbasaProgress['kanta']?['completed'] ?? 0,
     };
   }
 
@@ -159,7 +158,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '🔤',
                     color: AppColors.alphabet,
                     progress: achievements['alphabet'] ?? 0,
-                    total: 1,
+                    total: 12,
                     description: AppLocalizations.of(context)!
                         .achievementAlphabetMasterDesc,
                   ),
@@ -170,7 +169,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '🔢',
                     color: AppColors.numbers,
                     progress: achievements['numbers'] ?? 0,
-                    total: 1,
+                    total: 20,
                     description: AppLocalizations.of(context)!
                         .achievementNumberWizardDesc,
                   ),
@@ -180,7 +179,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '🎨',
                     color: AppColors.colors,
                     progress: achievements['colors'] ?? 0,
-                    total: 1,
+                    total: 4,
                     description: AppLocalizations.of(context)!
                         .achievementColorArtistDesc,
                   ),
@@ -191,7 +190,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '⬛',
                     color: AppColors.shapes,
                     progress: achievements['shapes'] ?? 0,
-                    total: 1,
+                    total: 26,
                     description: AppLocalizations.of(context)!
                         .achievementShapeCreatorDesc,
                   ),
@@ -202,7 +201,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '🐶',
                     color: AppColors.animals,
                     progress: achievements['animals'] ?? 0,
-                    total: 1,
+                    total: 26,
                     description: AppLocalizations.of(context)!
                         .achievementAnimalFriendDesc,
                   ),
@@ -212,7 +211,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '📚',
                     color: AppColors.body,
                     progress: achievements['bookworm'] ?? 0,
-                    total: 1,
+                    total: 4,
                     description:
                         AppLocalizations.of(context)!.achievementBookwormDesc,
                   ),
@@ -222,7 +221,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '⭐',
                     color: Colors.amber,
                     progress: achievements['starStudent'] ?? 0,
-                    total: 1,
+                    total: 20,
                     description: AppLocalizations.of(context)!
                         .achievementStarStudentDesc,
                   ),
@@ -232,7 +231,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '🧮',
                     color: AppColors.numbers,
                     progress: achievements['mathWhiz'] ?? 0,
-                    total: 1,
+                    total: 7,
                     description:
                         AppLocalizations.of(context)!.achievementMathWhizDesc,
                   ),
@@ -242,7 +241,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '👨‍👩‍👧',
                     color: AppColors.family,
                     progress: achievements['familyHero'] ?? 0,
-                    total: 1,
+                    total: 5,
                     description:
                         AppLocalizations.of(context)!.achievementFamilyHeroDesc,
                   ),
@@ -252,7 +251,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '✏️',
                     color: Colors.orange,
                     progress: achievements['writingStar'] ?? 0,
-                    total: 1,
+                    total: 10,
                     description: AppLocalizations.of(context)!
                         .achievementWritingStarDesc,
                   ),
@@ -262,7 +261,7 @@ class AchievementsScreen extends StatelessWidget {
                     emoji: '🎵',
                     color: AppColors.colors,
                     progress: achievements['songbird'] ?? 0,
-                    total: 1,
+                    total: 10,
                     description:
                         AppLocalizations.of(context)!.achievementSongbirdDesc,
                   ),
@@ -371,9 +370,9 @@ class AchievementsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isCompleted ? 'Completed!' : 'In Progress',
+                  isCompleted ? 'Completed!' : '$progress / $total',
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: 10,
                     color: isCompleted ? Colors.green : AppColors.textLight,
                     fontWeight:
                         isCompleted ? FontWeight.bold : FontWeight.normal,

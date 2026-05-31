@@ -3,14 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constants.dart';
 
-/// Keys used by SundanScreen — must match sundan_screen.dart exactly.
-class _SundanKeys {
-  static String upperKey(String l) => 'sundan_upper_$l';
-  static String lowerKey(String l) => 'sundan_lower_$l';
-  static String numKey(String n) => 'sundan_num_$n';
-  static const String totalAttempts = 'sundan_total_attempts';
-  static const String totalCompleted = 'sundan_total_completed';
-  static const String lastActivity = 'sundan_last_activity';
+/// Keys used by TraceItScreen.
+class _TraceItKeys {
+  static String upperKey(String l) => 'traceit_upper_$l';
+  static String lowerKey(String l) => 'traceit_lower_$l';
+  static String numKey(String n) => 'traceit_num_$n';
 }
 
 /// Keys used by KulayScreen — must match kulay_screen.dart exactly.
@@ -48,17 +45,14 @@ class _ForParentsScreenState extends State<ForParentsScreen>
   late TabController _tabController;
   bool _isLoading = true;
 
-  // ── Sundan data ──────────────────────────────────────────────────────────
-  final Set<String> _doneUpper = {};
-  final Set<String> _doneLower = {};
-  final Set<String> _doneNums = {};
-  int _sundanTotalAttempts = 0;
-  int _sundanTotalCompleted = 0;
-  String _sundanLastActivity = '—';
+  // ── Trace It data ─────────────────────────────────────────────────────────
+  final Set<String> _traceDoneUpper = {};
+  final Set<String> _traceDoneLower = {};
+  final Set<String> _traceDoneNums = {};
 
-  bool _upperExpanded = false;
-  bool _lowerExpanded = false;
-  bool _numsExpanded = false;
+  bool _traceUpperExpanded = false;
+  bool _traceLowerExpanded = false;
+  bool _traceNumsExpanded = false;
 
   static const List<String> _allUpper = [
     'A',
@@ -245,19 +239,18 @@ class _ForParentsScreenState extends State<ForParentsScreen>
   Future<void> _loadAllProgress() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Sundan
+    // Trace It
     for (final l in _allUpper) {
-      if (prefs.getBool(_SundanKeys.upperKey(l)) == true) _doneUpper.add(l);
+      if (prefs.getBool(_TraceItKeys.upperKey(l)) == true)
+        _traceDoneUpper.add(l);
     }
     for (final l in _allLower) {
-      if (prefs.getBool(_SundanKeys.lowerKey(l)) == true) _doneLower.add(l);
+      if (prefs.getBool(_TraceItKeys.lowerKey(l)) == true)
+        _traceDoneLower.add(l);
     }
     for (final n in _allNums) {
-      if (prefs.getBool(_SundanKeys.numKey(n)) == true) _doneNums.add(n);
+      if (prefs.getBool(_TraceItKeys.numKey(n)) == true) _traceDoneNums.add(n);
     }
-    _sundanTotalAttempts = prefs.getInt(_SundanKeys.totalAttempts) ?? 0;
-    _sundanTotalCompleted = prefs.getInt(_SundanKeys.totalCompleted) ?? 0;
-    _sundanLastActivity = prefs.getString(_SundanKeys.lastActivity) ?? '—';
 
     // Kulay
     for (final cat in _kulayDone.keys) {
@@ -341,7 +334,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
             tabs: [
               Tab(text: AppLocalizations.of(context)!.overviewTab),
               Tab(text: AppLocalizations.of(context)!.kulaySaya),
-              Tab(text: AppLocalizations.of(context)!.sundanMoTab),
+              Tab(text: AppLocalizations.of(context)!.traceItTitle),
               Tab(text: AppLocalizations.of(context)!.magbasaTab),
               Tab(text: AppLocalizations.of(context)!.matematikaTab),
             ],
@@ -353,7 +346,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         children: [
           _buildOverviewTab(),
           _buildKulayTab(),
-          _buildSundanTab(),
+          _buildTraceItTab(),
           _buildMagbasaTab(),
           _buildMatematikaTab(),
         ],
@@ -366,9 +359,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
   // ─────────────────────────────────────────────────────────────────────────
 
   Widget _buildOverviewTab() {
-    final totalSundan =
-        _doneUpper.length + _doneLower.length + _doneNums.length;
-    final maxSundan = _allUpper.length + _allLower.length + _allNums.length;
+    final totalTrace =
+        _traceDoneUpper.length + _traceDoneLower.length + _traceDoneNums.length;
+    final maxTrace = _allUpper.length + _allLower.length + _allNums.length;
     final totalKulay = _kulayDone.values.fold<int>(0, (s, e) => s + e.length);
     final maxKulay = _kulayTotal.values.fold<int>(0, (s, e) => s + e);
     final totalMagbasa =
@@ -418,11 +411,11 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Expanded(
               child: _summaryCard(
             icon: '✏️',
-            label: AppLocalizations.of(context)!.sundanMoTab,
-            value: '$totalSundan/$maxSundan',
+            label: AppLocalizations.of(context)!.traceItTitle,
+            value: '$totalTrace/$maxTrace',
             subtitle: AppLocalizations.of(context)!.lettersLabel,
             color: Colors.indigo,
-            progress: maxSundan > 0 ? totalSundan / maxSundan : 0,
+            progress: maxTrace > 0 ? totalTrace / maxTrace : 0,
           )),
         ]),
         const SizedBox(height: 12),
@@ -464,11 +457,11 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Expanded(
               child: _summaryCard(
             icon: '🖊️',
-            label: AppLocalizations.of(context)!.attemptsLabel,
-            value: '$_sundanTotalAttempts',
-            subtitle: AppLocalizations.of(context)!.attemptsCountLabel,
+            label: AppLocalizations.of(context)!.traceItTitle,
+            value: '$totalTrace/$maxTrace',
+            subtitle: AppLocalizations.of(context)!.lettersLabel,
             color: Colors.deepPurple,
-            progress: null,
+            progress: maxTrace > 0 ? totalTrace / maxTrace : 0,
           )),
         ]),
         const SizedBox(height: 20),
@@ -480,8 +473,10 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         _recentActivityCard('🎨 ${AppLocalizations.of(context)!.kulaySaya}',
             _kulayLastColored, Colors.orange),
         const SizedBox(height: 8),
-        _recentActivityCard('✏️ ${AppLocalizations.of(context)!.sundanMoTab}',
-            _sundanLastActivity, Colors.indigo),
+        _recentActivityCard(
+            '✏️ ${AppLocalizations.of(context)!.traceItTitle}',
+            '$totalTrace / $maxTrace ${AppLocalizations.of(context)!.lettersLabel}',
+            Colors.indigo),
         const SizedBox(height: 20),
 
         // Quick tips
@@ -491,7 +486,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         _tipCard('🎨', 'Kulay-Saya',
             'Hikayatin ang inyong anak na kulayin ang lahat ng pahina sa bawat kategorya.'),
         const SizedBox(height: 8),
-        _tipCard('✏️', 'Sundan Mo',
+        _tipCard('✏️', AppLocalizations.of(context)!.traceItTitle,
             'Gabayan ang inyong anak na sundan ang tamang direksyon ng bawat letra.'),
         const SizedBox(height: 8),
         _tipCard('📖', 'Magbasa',
@@ -800,11 +795,12 @@ class _ForParentsScreenState extends State<ForParentsScreen>
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  //  SUNDAN MO TAB
+  //  TRACE IT TAB
   // ─────────────────────────────────────────────────────────────────────────
 
-  Widget _buildSundanTab() {
-    final totalDone = _doneUpper.length + _doneLower.length + _doneNums.length;
+  Widget _buildTraceItTab() {
+    final totalDone =
+        _traceDoneUpper.length + _traceDoneLower.length + _traceDoneNums.length;
     final totalAll = _allUpper.length + _allLower.length + _allNums.length;
 
     return SingleChildScrollView(
@@ -818,7 +814,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
             Row(children: [
               const Text('✏️', style: TextStyle(fontSize: 28)),
               const SizedBox(width: 10),
-              Text(AppLocalizations.of(context)!.sundanMoProgress,
+              Text(AppLocalizations.of(context)!.traceItTitle,
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -852,18 +848,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                             color: Colors.white.withOpacity(0.9),
                             fontSize: 12)),
                   ])),
-              const SizedBox(width: 16),
-              Column(children: [
-                _statBubble('$_sundanTotalAttempts', 'Attempts'),
-                const SizedBox(height: 8),
-                _statBubble('$_sundanTotalCompleted', 'Done'),
-              ]),
             ]),
           ]),
         ),
-        const SizedBox(height: 12),
-        _infoRow(Icons.star_rounded,
-            AppLocalizations.of(context)!.recentActivity, _sundanLastActivity),
         const SizedBox(height: 20),
 
         // ── Uppercase ────────────────────────────────────────────────────────
@@ -872,11 +859,12 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           icon: '🔠',
           color: Colors.indigo,
           total: _allUpper.length,
-          done: _doneUpper.length,
+          done: _traceDoneUpper.length,
           letters: _allUpper,
-          completedSet: _doneUpper,
-          isExpanded: _upperExpanded,
-          onToggle: () => setState(() => _upperExpanded = !_upperExpanded),
+          completedSet: _traceDoneUpper,
+          isExpanded: _traceUpperExpanded,
+          onToggle: () =>
+              setState(() => _traceUpperExpanded = !_traceUpperExpanded),
         ),
         const SizedBox(height: 14),
 
@@ -886,11 +874,12 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           icon: '🔡',
           color: Colors.purple,
           total: _allLower.length,
-          done: _doneLower.length,
+          done: _traceDoneLower.length,
           letters: _allLower,
-          completedSet: _doneLower,
-          isExpanded: _lowerExpanded,
-          onToggle: () => setState(() => _lowerExpanded = !_lowerExpanded),
+          completedSet: _traceDoneLower,
+          isExpanded: _traceLowerExpanded,
+          onToggle: () =>
+              setState(() => _traceLowerExpanded = !_traceLowerExpanded),
         ),
         const SizedBox(height: 14),
 
@@ -900,11 +889,12 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           icon: '🔢',
           color: Colors.teal,
           total: _allNums.length,
-          done: _doneNums.length,
+          done: _traceDoneNums.length,
           letters: _allNums,
-          completedSet: _doneNums,
-          isExpanded: _numsExpanded,
-          onToggle: () => setState(() => _numsExpanded = !_numsExpanded),
+          completedSet: _traceDoneNums,
+          isExpanded: _traceNumsExpanded,
+          onToggle: () =>
+              setState(() => _traceNumsExpanded = !_traceNumsExpanded),
           isNumbers: true,
         ),
         const SizedBox(height: 20),

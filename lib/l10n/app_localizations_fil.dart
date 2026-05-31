@@ -188,6 +188,9 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
+  String get levelShort => 'L';
+
+  @override
   String get perfect => 'Perpekto!';
 
   @override
@@ -274,12 +277,12 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String howMany(String item) {
-    return 'tl';
+    return 'Ilang $item?';
   }
 
   @override
   String matchWithNumber(String category) {
-    return 'tl';
+    return 'Itugma ang mga $category sa tamang numero';
   }
 
   @override
@@ -513,7 +516,7 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
-  String get saved => 'Na-save!';
+  String get saved => 'Nai-save na!';
 
   @override
   String get others => 'Iba pa';
@@ -1185,6 +1188,14 @@ class AppLocalizationsFil extends AppLocalizations {
   String get familyTreeTitle => 'Family Tree';
 
   @override
+  String get familyTreeDesc =>
+      'Ang puno ng pamilya ay nagpapakita ng mga miyembro ng iyong pamilya mula sa pinakamatanda hanggang sa pinakabata.';
+
+  @override
+  String get familyTreeTapHint =>
+      '💡 Pindutin ang mga miyembro upang malaman ang kanilang relasyon!';
+
+  @override
   String get iLearnedFamilyTree => 'Nalaman ko ang Family Tree!';
 
   @override
@@ -1475,4 +1486,57 @@ class AppLocalizationsFil extends AppLocalizations {
   String familyRoleSentence(String member, String roles) {
     return 'Si $member ay $roles.';
   }
+
+  @override
+  String get resetAllStudents => 'I-reset Lahat ng Mag-aaral';
+
+  @override
+  String get confirmResetAllStudents =>
+      'Sigurado ka bang gusto mong burahin ang lahat ng naka-enroll na mag-aaral? Hindi ito maa-undo.';
+
+  @override
+  String get confirm => 'Kumpirmahin';
+
+  @override
+  String get rateYourArtwork => 'Rate Artwork';
+
+  @override
+  String get howManyStars => 'Ilang bituin ang ibibigay mo?';
+
+  @override
+  String get tapToView => 'Pindutin para tingnan';
+
+  @override
+  String get delete => 'Burahin';
+
+  @override
+  String get deleteArtwork => 'Burahin ang Artwork';
+
+  @override
+  String get confirmDeleteArtwork =>
+      'Sigurado ka bang gusto mong burahin ang artwork na ito? Hindi ito maa-undo.';
+
+  @override
+  String get artworkDeleted => 'Na-delete ang artwork.';
+
+  @override
+  String get zoomOn => 'Zoom';
+
+  @override
+  String get zoomOff => 'Tapos';
+
+  @override
+  String get traceItTitle => 'Sundan Ito - Kaya Mo!';
+
+  @override
+  String get traceItSubtitle => 'Idrowing mula sa memorya';
+
+  @override
+  String get checkTracing => 'Tingnan';
+
+  @override
+  String get showHint => 'Tulong';
+
+  @override
+  String get almostThere => 'Malapit na! Subukan muli!';
 }

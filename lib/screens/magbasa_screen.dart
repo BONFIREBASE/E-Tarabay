@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:e_tarabay/l10n/app_localizations.dart';
+import '../widgets/custom_back_button.dart';
+import '../widgets/success_modal.dart';
 import '../data/magbasa_content.dart';
 import '../providers/language_provider.dart';
 import '../main.dart';
@@ -399,9 +402,8 @@ class _MagbasaScreenState extends State<MagbasaScreen>
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          color: AppColors.textDark,
+        leading: CustomBackButton(
+          iconColor: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -511,10 +513,16 @@ class _MagbasaScreenState extends State<MagbasaScreen>
             indicatorSize: TabBarIndicatorSize.tab,
             labelColor: AppColors.primary,
             unselectedLabelColor: Colors.grey.shade500,
-            tabs: const [
-              Tab(text: 'DANIW', icon: Icon(Icons.menu_book)),
-              Tab(text: 'SARITA', icon: Icon(Icons.book)),
-              Tab(text: 'KANTA', icon: Icon(Icons.music_note)),
+            tabs: [
+              Tab(
+                  text: AppLocalizations.of(context)!.tula.toUpperCase(),
+                  icon: const Icon(Icons.menu_book)),
+              Tab(
+                  text: AppLocalizations.of(context)!.kwento.toUpperCase(),
+                  icon: const Icon(Icons.book)),
+              Tab(
+                  text: AppLocalizations.of(context)!.kanta.toUpperCase(),
+                  icon: const Icon(Icons.music_note)),
             ],
           ),
         ),
@@ -829,8 +837,8 @@ class PoemScreen extends StatelessWidget {
             expandedHeight: 260,
             pinned: true,
             backgroundColor: _poemColor,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+            leading: CustomBackButton(
+              iconColor: Colors.white,
               onPressed: () => Navigator.pop(context, false),
             ),
             actions: [
@@ -1074,8 +1082,8 @@ class StoryScreen extends StatelessWidget {
             expandedHeight: 280,
             pinned: true,
             backgroundColor: _storyColor,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+            leading: CustomBackButton(
+              iconColor: Colors.white,
               onPressed: () => Navigator.pop(context, false),
             ),
             actions: [
@@ -1465,8 +1473,8 @@ class _SongScreenState extends State<SongScreen>
         backgroundColor: _songColor,
         title: Text(widget.songTitle,
             style: const TextStyle(color: Colors.white, fontSize: 16)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+        leading: CustomBackButton(
+          iconColor: Colors.white,
           onPressed: () => Navigator.pop(context, _isCompleted),
         ),
         actions: [

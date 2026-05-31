@@ -7,18 +7,13 @@ import '../utils/constants.dart';
 import 'matematika_screen.dart';
 import 'pamilya_screen.dart';
 import 'kulay_screen.dart';
-import 'sundan_screen.dart';
+import 'trace_it_screen.dart';
 import 'magbasa_screen.dart';
+import '../widgets/custom_header_app_bar.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SharedPreferences key helpers — must match each feature screen exactly
 // ─────────────────────────────────────────────────────────────────────────────
-
-class _SundanKeys {
-  static String upperKey(String l) => 'sundan_upper_$l';
-  static String lowerKey(String l) => 'sundan_lower_$l';
-  static String numKey(String n) => 'sundan_num_$n';
-}
 
 class _KulayKeys {
   static String pageKey(String cat, int i) => 'kulay_page_${cat}_$i';
@@ -47,7 +42,7 @@ class LessonsScreen extends StatefulWidget {
 class _LessonsScreenState extends State<LessonsScreen> {
   bool _isLoading = true;
 
-  // ── Sundan progress ────────────────────────────────────────────────────────
+  // ── Trace It progress ──────────────────────────────────────────────────────
   static const List<String> _allUpper = [
     'A',
     'B',
@@ -116,8 +111,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
     '9',
     '10'
   ];
-  int _sundanDone = 0;
-  final int _sundanTotal = 62; // 26 + 26 + 10
+  // ── Trace It progress ──────────────────────────────────────────────────────
+  int _traceItDone = 0;
+  final int _traceItTotal = 62; // 26 + 26 + 10
 
   // ── Kulay progress ─────────────────────────────────────────────────────────
   static const Map<String, int> _kulayTotals = {
@@ -162,16 +158,16 @@ class _LessonsScreenState extends State<LessonsScreen> {
   Future<void> _loadProgress() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // ── Sundan ───────────────────────────────────────────────────────────────
-    int sundanCount = 0;
+    // ── Trace It ───────────────────────────────────────────────────────────────
+    int traceItCount = 0;
     for (final l in _allUpper) {
-      if (prefs.getBool(_SundanKeys.upperKey(l)) == true) sundanCount++;
+      if (prefs.getBool('traceit_upper_$l') == true) traceItCount++;
     }
     for (final l in _allLower) {
-      if (prefs.getBool(_SundanKeys.lowerKey(l)) == true) sundanCount++;
+      if (prefs.getBool('traceit_lower_$l') == true) traceItCount++;
     }
     for (final n in _allNums) {
-      if (prefs.getBool(_SundanKeys.numKey(n)) == true) sundanCount++;
+      if (prefs.getBool('traceit_num_$n') == true) traceItCount++;
     }
 
     // ── Kulay ────────────────────────────────────────────────────────────────
@@ -211,7 +207,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
     final pamilyaTotal = pamilya['totalLevels'] ?? 5;
 
     setState(() {
-      _sundanDone = sundanCount;
+      _traceItDone = traceItCount;
       _kulayDone = kulayCount;
       _magbasaDone = magbasaCount;
       _matDone = matCount;
@@ -223,10 +219,10 @@ class _LessonsScreenState extends State<LessonsScreen> {
 
   // ── Totals for header ───────────────────────────────────────────────────────
   int get _totalCompleted =>
-      _sundanDone + _kulayDone + _magbasaDone + _matDone + _pamilyaDone;
+      _traceItDone + _kulayDone + _magbasaDone + _matDone + _pamilyaDone;
 
   int get _totalActivities =>
-      _sundanTotal + _kulayTotal + _magbasaTotal + _matTotal + _pamilyaTotal;
+      _traceItTotal + _kulayTotal + _magbasaTotal + _matTotal + _pamilyaTotal;
 
   double get _overallProgress =>
       _totalActivities > 0 ? _totalCompleted / _totalActivities : 0.0;
@@ -245,17 +241,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context)!.lessons,
-          style:
-              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: AppColors.primary,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+      appBar: CustomHeaderAppBar(
+        title: AppLocalizations.of(context)!.lessons,
+        baseColor: AppColors.primary,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
@@ -286,8 +274,9 @@ class _LessonsScreenState extends State<LessonsScreen> {
                 context, AppLocalizations.of(context)!.kulaySaya),
             _buildKulayCard(context),
             const SizedBox(height: 16),
-            _buildSectionTitle(context, AppLocalizations.of(context)!.sundanMo),
-            _buildSundanCard(context),
+            _buildSectionTitle(
+                context, AppLocalizations.of(context)!.traceItTitle),
+            _buildTraceItCard(context),
             const SizedBox(height: 16),
             _buildSectionTitle(
                 context, AppLocalizations.of(context)!.magbasaTitle),
@@ -425,19 +414,19 @@ class _LessonsScreenState extends State<LessonsScreen> {
     );
   }
 
-  Widget _buildSundanCard(BuildContext context) {
+  Widget _buildTraceItCard(BuildContext context) {
     return _buildLessonCard(
       context: context,
-      title: AppLocalizations.of(context)!.sundanMo,
+      title: AppLocalizations.of(context)!.traceItTitle,
       subtitle:
-          '$_sundanDone/$_sundanTotal ${AppLocalizations.of(context)!.activities}',
-      icon: Icons.edit,
+          '$_traceItDone/$_traceItTotal ${AppLocalizations.of(context)!.activities}',
+      icon: Icons.edit_note,
       color: AppColors.success,
-      progress: _sundanTotal > 0 ? _sundanDone / _sundanTotal : 0.0,
+      progress: _traceItTotal > 0 ? _traceItDone / _traceItTotal : 0.0,
       onTap: () async {
         await Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const SundanScreen()),
+          MaterialPageRoute(builder: (context) => const TraceItScreen()),
         );
         setState(() => _isLoading = true);
         _loadProgress();

@@ -22,12 +22,14 @@ class AuthService {
         if (username.toLowerCase().trim() == 'daycare teacher') {
           return {
             'status': 'Error',
-            'message': 'This is the Student Login. Please use the "Continue as Teacher" button at the bottom of the screen.',
+            'message':
+                'This is the Student Login. Please use the "Continue as Teacher" button at the bottom of the screen.',
           };
         }
         return {
           'status': 'Error',
-          'message': 'This username does not exist. Please check your spelling or ask your teacher if you are enrolled.',
+          'message':
+              'This username does not exist. Please check your spelling or ask your teacher if you are enrolled.',
         };
       }
 
@@ -45,7 +47,8 @@ class AuthService {
 
       return {
         'status': 'Error',
-        'message': 'The LRN (password) you entered is incorrect. Please try again.',
+        'message':
+            'The LRN (password) you entered is incorrect. Please try again.',
       };
     } catch (e) {
       debugPrint('Login error: $e');
@@ -140,7 +143,10 @@ class AuthService {
 
   /// Get all enrolled students (for teacher dashboard).
   Stream<QuerySnapshot<Map<String, dynamic>>> getStudentsStream() {
-    return _db.collection('students').orderBy('enrolledAt', descending: true).snapshots();
+    return _db
+        .collection('students')
+        .orderBy('enrolledAt', descending: true)
+        .snapshots();
   }
 
   /// Update student details (name, LRN).
@@ -158,7 +164,7 @@ class AuthService {
         'name': name,
         'lrn': lrn,
       };
-      
+
       final profileUpdates = <String, dynamic>{
         'profile.name': name,
       };
@@ -195,6 +201,46 @@ class AuthService {
       await _db.collection('students').doc(studentId).delete();
     } catch (e) {
       debugPrint('Error deleting student: $e');
+    }
+  }
+
+  /// Delete all student records from Firestore.
+  Future<Map<String, dynamic>> deleteAllStudents() async {
+    try {
+      final querySnapshot = await _db.collection('students').get();
+      final docs = querySnapshot.docs;
+
+      if (docs.isEmpty) {
+        return {
+          'status': 'Success',
+          'message': 'No students to delete.',
+          'count': 0,
+        };
+      }
+
+      // Firestore batches are limited to 500 operations
+      const int batchLimit = 500;
+      for (var i = 0; i < docs.length; i += batchLimit) {
+        final batch = _db.batch();
+        final end =
+            (i + batchLimit < docs.length) ? i + batchLimit : docs.length;
+        for (var j = i; j < end; j++) {
+          batch.delete(docs[j].reference);
+        }
+        await batch.commit();
+      }
+
+      return {
+        'status': 'Success',
+        'message': 'All students deleted.',
+        'count': docs.length,
+      };
+    } catch (e) {
+      debugPrint('Error deleting all students: $e');
+      return {
+        'status': 'Error',
+        'message': 'Could not delete students. Please try again.',
+      };
     }
   }
 }
