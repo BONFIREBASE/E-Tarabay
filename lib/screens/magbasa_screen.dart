@@ -1,10 +1,13 @@
-import 'package:e_tarabay/l10n/app_localizations.dart';
 // ignore_for_file: deprecated_member_use
+import 'dart:async';
+import 'dart:math';
+
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:e_tarabay/l10n/app_localizations.dart';
+import 'package:confetti/confetti.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/success_modal.dart';
 import '../data/magbasa_content.dart';
@@ -12,7 +15,6 @@ import '../providers/language_provider.dart';
 import '../main.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import 'dart:async';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MAIN SCREEN
@@ -968,7 +970,8 @@ class PoemScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            'Basaem ti intero a daniw sakbay iti panagsubli.',
+                            AppLocalizations.of(context)!
+                                .readFullPoemBeforeBack,
                             style: TextStyle(
                                 fontSize: 13,
                                 color: _poemColor.withOpacity(0.9)),
@@ -984,8 +987,8 @@ class PoemScreen extends StatelessWidget {
                     onPressed: () => _markComplete(context),
                     icon: const Icon(Icons.check_circle_rounded,
                         color: Colors.white),
-                    label: const Text(
-                      'Basak ti Daniw! ✓',
+                    label: Text(
+                      AppLocalizations.of(context)!.iReadThePoem,
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -1189,7 +1192,8 @@ class StoryScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            'Basaem ti intero a sarita sakbay iti panagsubli.',
+                            AppLocalizations.of(context)!
+                                .readFullStoryBeforeBack,
                             style: TextStyle(
                                 fontSize: 13,
                                 color: _storyColor.withOpacity(0.9)),
@@ -1204,8 +1208,8 @@ class StoryScreen extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () => _markComplete(context),
                     icon: const Icon(Icons.menu_book, color: Colors.white),
-                    label: const Text(
-                      'Nabasa Kon! ✓',
+                    label: Text(
+                      AppLocalizations.of(context)!.iReadTheStory,
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -1316,7 +1320,7 @@ class StoryScreen extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  SONG SCREEN  — unchanged (line-highlighting + play controls)
+//  SONG SCREEN  — Karaoke-style lyrics with audio sync
 // ─────────────────────────────────────────────────────────────────────────────
 class SongScreen extends StatefulWidget {
   final String songTitle;
@@ -1340,10 +1344,25 @@ class _SongScreenState extends State<SongScreen>
   bool _wasPlayingBeforePause = false;
   late AnimationController _pulseController;
   late AudioPlayer _audioPlayer;
+  late ConfettiController _confettiController;
+
+  int _totalDurationMs = 0;
+  int _currentPositionMs = 0;
+  Timer? _fallbackTimer;
+
   StreamSubscription? _positionSubscription;
+  StreamSubscription? _durationSubscription;
   StreamSubscription? _completeSubscription;
 
   static const Color _songColor = Color(0xFFA8E6CF);
+  static const Color _karaokeHighlight = Color(0xFF6C63FF);
+
+  List<String> get _lyrics {
+    final raw = widget.songData['lyrics'] as List? ?? [];
+    return raw.map((e) => e.toString()).toList();
+  }
+
+  String? get _audioPath => widget.songData['audioPath'] as String?;
 
   @override
   void initState() {
@@ -1352,13 +1371,51 @@ class _SongScreenState extends State<SongScreen>
     _pulseController = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
     _audioPlayer = AudioPlayer();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 5));
 
-    // Listen for completion
-    _completeSubscription = _audioPlayer.onPlayerComplete.listen((event) {
+    _setupAudioListeners();
+  }
+
+  void _setupAudioListeners() {
+    _positionSubscription = _audioPlayer.onPositionChanged.listen((pos) {
       if (mounted) {
-        _stopPlayback();
+        setState(() => _currentPositionMs = pos.inMilliseconds);
+        _syncLineFromPosition();
       }
     });
+
+    _durationSubscription = _audioPlayer.onDurationChanged.listen((dur) {
+      if (mounted) setState(() => _totalDurationMs = dur.inMilliseconds);
+    });
+
+    _completeSubscription = _audioPlayer.onPlayerComplete.listen((_) {
+      if (mounted) _onPlaybackComplete();
+    });
+  }
+
+  void _syncLineFromPosition() {
+    if (_totalDurationMs <= 0 || _lyrics.isEmpty) return;
+    final nonEmpty = _lyrics.where((l) => l.trim().isNotEmpty).toList();
+    if (nonEmpty.isEmpty) return;
+
+    final msPerLine = _totalDurationMs / nonEmpty.length;
+    final target =
+        (_currentPositionMs / msPerLine).floor().clamp(0, _lyrics.length - 1);
+    if (target != _currentLineIndex) {
+      setState(() => _currentLineIndex = target);
+    }
+  }
+
+  void _onPlaybackComplete() {
+    setState(() {
+      _isPlaying = false;
+      _isCompleted = true;
+      _currentLineIndex = _lyrics.length - 1;
+    });
+    _pulseController.stop();
+    _confettiController.play();
+    _showCompletionDialog();
   }
 
   @override
@@ -1369,7 +1426,6 @@ class _SongScreenState extends State<SongScreen>
         _wasPlayingBeforePause = true;
         _audioPlayer.pause();
         _pulseController.stop();
-        // Keep _isPlaying true so we know to resume
       }
     } else if (state == AppLifecycleState.resumed) {
       if (_wasPlayingBeforePause) {
@@ -1384,11 +1440,13 @@ class _SongScreenState extends State<SongScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pulseController.dispose();
+    _confettiController.dispose();
+    _fallbackTimer?.cancel();
     _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
     _completeSubscription?.cancel();
     _audioPlayer.dispose();
 
-    // Ensure music is unmuted if we leave while playing
     if (_isPlaying) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         AudioManager.instance.resumeMusic();
@@ -1406,28 +1464,48 @@ class _SongScreenState extends State<SongScreen>
   }
 
   Future<void> _startPlayback() async {
-    final audioPath = widget.songData['audioPath'] as String?;
-
     setState(() {
       _isPlaying = true;
       _pulseController.repeat(reverse: true);
     });
-
-    // Mute background music
     await AudioManager.instance.pauseMusic();
 
-    if (audioPath != null) {
+    if (_isCompleted) {
+      setState(() {
+        _isCompleted = false;
+        _currentLineIndex = 0;
+      });
+    }
+
+    if (_audioPath != null) {
       try {
-        await _audioPlayer.play(AssetSource(audioPath));
+        await _audioPlayer.play(AssetSource(_audioPath!));
       } catch (e) {
         debugPrint('Error playing song audio: $e');
-        // Fallback to auto-advance if audio fails
-        _autoAdvance();
+        _startFallbackTimer();
       }
     } else {
-      // No audio, use timer-based advance
-      _autoAdvance();
+      _startFallbackTimer();
     }
+  }
+
+  void _startFallbackTimer() {
+    _fallbackTimer?.cancel();
+    final nonEmpty = _lyrics.where((l) => l.trim().isNotEmpty).toList();
+    final secPerLine = nonEmpty.isEmpty ? 3 : max(3, 18 ~/ nonEmpty.length);
+
+    _fallbackTimer = Timer.periodic(Duration(seconds: secPerLine), (timer) {
+      if (!mounted || !_isPlaying) {
+        timer.cancel();
+        return;
+      }
+      if (_currentLineIndex < _lyrics.length - 1) {
+        setState(() => _currentLineIndex++);
+      } else {
+        timer.cancel();
+        _onPlaybackComplete();
+      }
+    });
   }
 
   Future<void> _stopPlayback() async {
@@ -1435,222 +1513,364 @@ class _SongScreenState extends State<SongScreen>
       _isPlaying = false;
       _pulseController.stop();
     });
-
+    _fallbackTimer?.cancel();
     await _audioPlayer.stop();
-
-    // Resume background music
     await AudioManager.instance.resumeMusic();
   }
 
-  void _autoAdvance() {
-    final lyrics = widget.songData['lyrics'] as List;
-    final audioPath = widget.songData['audioPath'] as String?;
+  Future<void> _seekToLine(int index) async {
+    if (index < 0 || index >= _lyrics.length) return;
+    setState(() => _currentLineIndex = index);
 
-    // Only auto-advance if there is no actual audio file playing
-    if (audioPath != null) return;
+    if (_audioPath != null && _totalDurationMs > 0) {
+      final nonEmpty = _lyrics.where((l) => l.trim().isNotEmpty).toList();
+      final msPerLine = _totalDurationMs / max(1, nonEmpty.length);
+      final seekPos = Duration(
+          milliseconds: (index * msPerLine).round().clamp(0, _totalDurationMs));
+      await _audioPlayer.seek(seekPos);
+    } else if (_isPlaying) {
+      _fallbackTimer?.cancel();
+      _startFallbackTimer();
+    }
+  }
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (!_isPlaying || !mounted) return;
-      if (_currentLineIndex < lyrics.length - 1) {
-        setState(() => _currentLineIndex++);
-        _autoAdvance();
-      } else {
-        _stopPlayback();
-      }
-    });
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => SuccessModal(
+        title: AppLocalizations.of(context)!.congratulations,
+        subtitle: AppLocalizations.of(context)!.greatSinging,
+        score: 50,
+        stars: 3,
+        primaryLabel: AppLocalizations.of(context)!.done,
+        onPrimaryTap: () {
+          Navigator.of(dialogContext).pop();
+          Navigator.of(context).pop(true);
+        },
+        secondaryLabel: AppLocalizations.of(context)!.repeat,
+        onSecondaryTap: () {
+          Navigator.of(dialogContext).pop();
+          setState(() {
+            _isCompleted = false;
+            _currentLineIndex = 0;
+          });
+          _startPlayback();
+        },
+      ),
+    );
+  }
+
+  String _formatTime(int ms) {
+    final s = (ms ~/ 1000) % 60;
+    final m = (ms ~/ 60000);
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
   @override
   Widget build(BuildContext context) {
-    final lyrics = widget.songData['lyrics'] as List;
+    final lyrics = _lyrics;
     final tune = widget.songData['tune'] as String;
     final imagePath = widget.songData['image'] as String;
     final action = widget.songData['action'] as String;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: _songColor,
-        title: Text(widget.songTitle,
-            style: const TextStyle(color: Colors.white, fontSize: 16)),
-        leading: CustomBackButton(
-          iconColor: Colors.white,
-          onPressed: () => Navigator.pop(context, _isCompleted),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() => _isCompleted = true);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(AppLocalizations.of(context)!.completed),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ));
-              Future.delayed(const Duration(seconds: 1), () {
-                if (!context.mounted) return;
-                Navigator.pop(context, true);
-              });
-            },
-            child: Text(
-              AppLocalizations.of(context)!.done,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold),
+      backgroundColor: const Color(0xFFF8F9FF),
+      body: Stack(
+        children: [
+          // Confetti
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Colors.pink,
+                Colors.purple,
+                Colors.blue,
+                Colors.green,
+                Colors.yellow,
+              ],
+              numberOfParticles: 25,
+              gravity: 0.15,
+            ),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.secondary],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      CustomBackButton(
+                        iconColor: Colors.white,
+                        onPressed: () => Navigator.pop(context, _isCompleted),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          widget.songTitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (_audioPath != null && _totalDurationMs > 0)
+                        Text(
+                          _formatTime(_currentPositionMs),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Progress bar
+                if (_audioPath != null && _totalDurationMs > 0)
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: _totalDurationMs > 0
+                            ? (_currentPositionMs / _totalDurationMs)
+                                .clamp(0.0, 1.0)
+                            : 0,
+                        minHeight: 4,
+                        backgroundColor: Colors.grey.shade200,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.secondary),
+                      ),
+                    ),
+                  ),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(children: [
+                      // Song image
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          height: 140,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                  color: _songColor.withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5))
+                            ],
+                          ),
+                          child: Image.asset(
+                            imagePath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: _songColor.withOpacity(0.1),
+                              child: const Icon(Icons.music_note,
+                                  size: 50, color: _songColor),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+                      Text(
+                        '${AppLocalizations.of(context)!.tune}: $tune',
+                        style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade500,
+                            fontStyle: FontStyle.italic),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Action chip
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _songColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(30),
+                          border:
+                              Border.all(color: _songColor.withOpacity(0.3)),
+                        ),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          const Icon(Icons.directions_run,
+                              color: _songColor, size: 18),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                                '${AppLocalizations.of(context)!.action}: $action',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500, fontSize: 12)),
+                          ),
+                        ]),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Lyrics with karaoke highlight
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey.withOpacity(0.08),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4))
+                          ],
+                        ),
+                        child: Column(
+                          children: List.generate(lyrics.length, (index) {
+                            final isCurrent =
+                                index == _currentLineIndex && _isPlaying;
+                            final isPast = index < _currentLineIndex;
+                            final line = lyrics[index];
+
+                            if (line.trim().isEmpty) {
+                              return const SizedBox(height: 10);
+                            }
+
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeInOut,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: isCurrent
+                                    ? _karaokeHighlight.withOpacity(0.08)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(14),
+                                border: isCurrent
+                                    ? Border.all(
+                                        color:
+                                            _karaokeHighlight.withOpacity(0.4),
+                                        width: 1.5)
+                                    : null,
+                              ),
+                              child: AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 400),
+                                curve: Curves.easeInOut,
+                                style: TextStyle(
+                                  fontSize: isCurrent ? 22 : (isPast ? 14 : 16),
+                                  fontWeight: isCurrent
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  color: isCurrent
+                                      ? AppColors.primary
+                                      : (isPast
+                                          ? Colors.grey.shade400
+                                          : Colors.grey.shade700),
+                                  height: 1.4,
+                                  shadows: isCurrent
+                                      ? [
+                                          Shadow(
+                                            blurRadius: 10,
+                                            color: _karaokeHighlight
+                                                .withOpacity(0.3),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Text(
+                                  line,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Playback controls
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              onPressed: () =>
+                                  _seekToLine(_currentLineIndex - 1),
+                              icon: const Icon(Icons.skip_previous, size: 36),
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 16),
+                            GestureDetector(
+                              onTap: _togglePlay,
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 72,
+                                height: 72,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      AppColors.primary,
+                                      AppColors.secondary
+                                    ],
+                                  ),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color:
+                                          AppColors.secondary.withOpacity(0.4),
+                                      blurRadius: 16,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                                  color: Colors.white,
+                                  size: 36,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            IconButton(
+                              onPressed: () =>
+                                  _seekToLine(_currentLineIndex + 1),
+                              icon: const Icon(Icons.skip_next, size: 36),
+                              color: AppColors.primary,
+                            ),
+                          ]),
+
+                      const SizedBox(height: 8),
+                      Text(
+                        '${_currentLineIndex + 1} / ${lyrics.length}',
+                        style: TextStyle(
+                            color: Colors.grey.shade500, fontSize: 12),
+                      ),
+                      const SizedBox(height: 20),
+                    ]),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(children: [
-          // Song image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              height: 150,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                      color: _songColor.withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5))
-                ],
-              ),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  color: _songColor.withOpacity(0.1),
-                  child:
-                      const Icon(Icons.music_note, size: 50, color: _songColor),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
-          Text(
-            '${AppLocalizations.of(context)!.tune}: $tune',
-            style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-                fontStyle: FontStyle.italic),
-          ),
-          const SizedBox(height: 16),
-
-          // Action chip
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: _songColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.directions_run, color: _songColor),
-              const SizedBox(width: 8),
-              Text('${AppLocalizations.of(context)!.action}: $action',
-                  style: const TextStyle(fontWeight: FontWeight.w500)),
-            ]),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Lyrics with highlight
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4))
-              ],
-            ),
-            child: Column(
-              children: List.generate(lyrics.length, (index) {
-                final isActive = index == _currentLineIndex && _isPlaying;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? _songColor.withOpacity(0.2)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    lyrics[index],
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          isActive ? FontWeight.bold : FontWeight.normal,
-                      color: isActive
-                          ? const Color(0xFF2D7A5A)
-                          : Colors.grey.shade800,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              }),
-            ),
-          ),
-
-          const SizedBox(height: 28),
-
-          // Playback controls
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            IconButton(
-              onPressed: _currentLineIndex > 0
-                  ? () => setState(() => _currentLineIndex--)
-                  : null,
-              icon: const Icon(Icons.skip_previous, size: 40),
-              color: _songColor,
-            ),
-            const SizedBox(width: 20),
-            GestureDetector(
-              onTap: _togglePlay,
-              child: Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: _songColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                        color: _songColor.withOpacity(0.35),
-                        blurRadius: 12,
-                        spreadRadius: 2)
-                  ],
-                ),
-                child: Icon(
-                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
-                  size: 42,
-                ),
-              ),
-            ),
-            const SizedBox(width: 20),
-            IconButton(
-              onPressed: _currentLineIndex < lyrics.length - 1
-                  ? () => setState(() => _currentLineIndex++)
-                  : null,
-              icon: const Icon(Icons.skip_next, size: 40),
-              color: _songColor,
-            ),
-          ]),
-
-          const SizedBox(height: 10),
-          Text(
-            '${_currentLineIndex + 1} / ${lyrics.length}',
-            style: TextStyle(color: Colors.grey.shade600),
-          ),
-          const SizedBox(height: 20),
-        ]),
       ),
     );
   }

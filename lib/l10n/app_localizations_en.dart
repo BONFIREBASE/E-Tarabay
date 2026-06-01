@@ -1509,6 +1509,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get zoomOff => 'Done';
 
   @override
+  String get karaokeTitle => 'Karaoke';
+
+  @override
+  String get karaokeSubtitle => 'Sing Along!';
+
+  @override
+  String get greatSinging => 'Great singing!';
+
+  @override
+  String get readFullPoemBeforeBack =>
+      'Read the entire poem before going back.';
+
+  @override
+  String get iReadThePoem => 'I Read the Poem! ✓';
+
+  @override
+  String get readFullStoryBeforeBack =>
+      'Read the entire story before going back.';
+
+  @override
+  String get iReadTheStory => 'I Have Read It! ✓';
+
+  @override
+  String get tandaanTitle => 'Remember It!';
+
+  @override
+  String get round => 'Round';
+
+  @override
+  String get matchThePairs => 'Find and match the pairs!';
+
+  @override
+  String get flipCardsToMatch => 'Tap a card to flip it. Find two that match!';
+
+  @override
   String get traceItTitle => 'Trace It - You Can Do It!';
 
   @override

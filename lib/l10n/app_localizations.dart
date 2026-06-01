@@ -2968,6 +2968,72 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get zoomOff;
 
+  /// No description provided for @karaokeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Karaoke'**
+  String get karaokeTitle;
+
+  /// No description provided for @karaokeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sing Along!'**
+  String get karaokeSubtitle;
+
+  /// No description provided for @greatSinging.
+  ///
+  /// In en, this message translates to:
+  /// **'Great singing!'**
+  String get greatSinging;
+
+  /// No description provided for @readFullPoemBeforeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the entire poem before going back.'**
+  String get readFullPoemBeforeBack;
+
+  /// No description provided for @iReadThePoem.
+  ///
+  /// In en, this message translates to:
+  /// **'I Read the Poem! ✓'**
+  String get iReadThePoem;
+
+  /// No description provided for @readFullStoryBeforeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the entire story before going back.'**
+  String get readFullStoryBeforeBack;
+
+  /// No description provided for @iReadTheStory.
+  ///
+  /// In en, this message translates to:
+  /// **'I Have Read It! ✓'**
+  String get iReadTheStory;
+
+  /// No description provided for @tandaanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember It!'**
+  String get tandaanTitle;
+
+  /// No description provided for @round.
+  ///
+  /// In en, this message translates to:
+  /// **'Round'**
+  String get round;
+
+  /// No description provided for @matchThePairs.
+  ///
+  /// In en, this message translates to:
+  /// **'Find and match the pairs!'**
+  String get matchThePairs;
+
+  /// No description provided for @flipCardsToMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a card to flip it. Find two that match!'**
+  String get flipCardsToMatch;
+
   /// No description provided for @traceItTitle.
   ///
   /// In en, this message translates to:

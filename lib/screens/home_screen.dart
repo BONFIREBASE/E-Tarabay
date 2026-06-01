@@ -10,6 +10,7 @@ import 'pamilya_screen.dart';
 import 'kulay_screen.dart';
 import 'trace_it_screen.dart';
 import 'magbasa_screen.dart';
+import 'tandaan_screen.dart';
 import 'lessons_screen.dart';
 import 'awards_screen.dart';
 import 'certificates_screen.dart';
@@ -533,7 +534,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           const SizedBox(height: 12),
 
-                          // Row 3 - Magbasa Tayo
+                          // Row 3 - Magbasa Tayo & Tandaan Mo
                           SizedBox(
                             height: cardHeight,
                             child: Row(
@@ -553,6 +554,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                             const MagbasaScreen(),
                                       ),
                                     ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildGeneratedCard(
+                                    title: AppLocalizations.of(context)!
+                                        .tandaanTitle,
+                                    subtitle: AppLocalizations.of(context)!
+                                        .tandaanTitle,
+                                    color: AppColors.shapes,
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const TandaanScreen(),
+                                      ),
+                                    ),
+                                    child: _buildTandaanThumbnail(),
                                   ),
                                 ),
                               ],
@@ -737,6 +756,248 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildGeneratedCard({
+    required String title,
+    required String subtitle,
+    required Color color,
+    required Widget child,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              child,
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, color.withOpacity(0.7)],
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Text(
+                          title.isNotEmpty ? title : '',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(blurRadius: 5, color: Colors.black26)
+                            ],
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Flexible(
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          subtitle.isNotEmpty ? subtitle : '',
+                          style: TextStyle(
+                            fontSize: 8,
+                            color: color,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTandaanThumbnail() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Soft mint gradient background
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFFE0F7FA), Color(0xFFB2DFDB)],
+            ),
+          ),
+        ),
+        // Decorative soft circles
+        Positioned(
+          top: -20,
+          left: -20,
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.shapes.withOpacity(0.12),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -10,
+          right: -10,
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.animals.withOpacity(0.12),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 30,
+          right: 20,
+          child: Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.colors.withOpacity(0.15),
+            ),
+          ),
+        ),
+        // Floating memory cards
+        Center(
+          child: Transform.rotate(
+            angle: -0.15,
+            child: _thumbCard(
+              color: AppColors.shapes,
+              child:
+                  const Icon(Icons.help_outline, color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 38,
+          top: 42,
+          child: Transform.rotate(
+            angle: 0.12,
+            child: _thumbCard(
+              color: AppColors.animals,
+              child: const Text('🐶', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
+        Positioned(
+          right: 36,
+          top: 38,
+          child: Transform.rotate(
+            angle: -0.08,
+            child: _thumbCard(
+              color: AppColors.colors,
+              child: const Text('🍎', style: TextStyle(fontSize: 18)),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 52,
+          bottom: 44,
+          child: Transform.rotate(
+            angle: 0.18,
+            child: _thumbCard(
+              color: AppColors.alphabet,
+              child: const Text('Aa',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  )),
+            ),
+          ),
+        ),
+        Positioned(
+          right: 48,
+          bottom: 40,
+          child: Transform.rotate(
+            angle: -0.1,
+            child: _thumbCard(
+              color: AppColors.primary.withOpacity(0.7),
+              child: const Icon(Icons.question_mark_rounded,
+                  color: Colors.white, size: 18),
+            ),
+          ),
+        ),
+        // Sparkles
+        Positioned(
+          top: 50,
+          left: 28,
+          child: _sparkle(Colors.amber),
+        ),
+        Positioned(
+          bottom: 55,
+          right: 22,
+          child: _sparkle(AppColors.shapes),
+        ),
+      ],
+    );
+  }
+
+  Widget _thumbCard({required Color color, required Widget child}) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.35),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Center(child: child),
+    );
+  }
+
+  Widget _sparkle(Color color) {
+    return Icon(Icons.auto_awesome_rounded,
+        color: color.withOpacity(0.5), size: 14);
   }
 
   Widget _buildNavItem(IconData icon, String label, int index) {

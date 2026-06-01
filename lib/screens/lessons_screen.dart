@@ -9,6 +9,7 @@ import 'pamilya_screen.dart';
 import 'kulay_screen.dart';
 import 'trace_it_screen.dart';
 import 'magbasa_screen.dart';
+import 'tandaan_screen.dart';
 import '../widgets/custom_header_app_bar.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -139,6 +140,10 @@ class _LessonsScreenState extends State<LessonsScreen> {
   int _matDone = 0;
   final int _matTotal = 31; // sum of _matGameCounts
 
+  // ── Tandaan progress ───────────────────────────────────────────────────
+  int _tandaanDone = 0;
+  final int _tandaanTotal = 12; // 4 categories × 3 rounds
+
   // ── Pamilya progress (still from UserProvider) ────────────────────────────
   int _pamilyaDone = 0;
   int _pamilyaTotal = 5;
@@ -198,6 +203,16 @@ class _LessonsScreenState extends State<LessonsScreen> {
       }
     }
 
+    // ── Tandaan ────────────────────────────────────────────────────────────────
+    int tandaanCount = 0;
+    for (int cat = 0; cat < 4; cat++) {
+      for (int round = 0; round < 3; round++) {
+        if (prefs.getBool('tandaan_cat_${cat}_round_$round') == true) {
+          tandaanCount++;
+        }
+      }
+    }
+
     // ── Pamilya (from UserProvider) ───────────────────────────────────────────
     if (!mounted) return;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -211,6 +226,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
       _kulayDone = kulayCount;
       _magbasaDone = magbasaCount;
       _matDone = matCount;
+      _tandaanDone = tandaanCount;
       _pamilyaDone = pamilyaDone;
       _pamilyaTotal = pamilyaTotal;
       _isLoading = false;
@@ -219,10 +235,20 @@ class _LessonsScreenState extends State<LessonsScreen> {
 
   // ── Totals for header ───────────────────────────────────────────────────────
   int get _totalCompleted =>
-      _traceItDone + _kulayDone + _magbasaDone + _matDone + _pamilyaDone;
+      _traceItDone +
+      _kulayDone +
+      _magbasaDone +
+      _matDone +
+      _tandaanDone +
+      _pamilyaDone;
 
   int get _totalActivities =>
-      _traceItTotal + _kulayTotal + _magbasaTotal + _matTotal + _pamilyaTotal;
+      _traceItTotal +
+      _kulayTotal +
+      _magbasaTotal +
+      _matTotal +
+      _tandaanTotal +
+      _pamilyaTotal;
 
   double get _overallProgress =>
       _totalActivities > 0 ? _totalCompleted / _totalActivities : 0.0;
@@ -281,6 +307,10 @@ class _LessonsScreenState extends State<LessonsScreen> {
             _buildSectionTitle(
                 context, AppLocalizations.of(context)!.magbasaTitle),
             _buildMagbasaCard(context),
+            const SizedBox(height: 16),
+            _buildSectionTitle(
+                context, AppLocalizations.of(context)!.tandaanTitle),
+            _buildTandaanCard(context),
           ],
         ),
       ),
@@ -447,6 +477,26 @@ class _LessonsScreenState extends State<LessonsScreen> {
         await Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const MagbasaScreen()),
+        );
+        setState(() => _isLoading = true);
+        _loadProgress();
+      },
+    );
+  }
+
+  Widget _buildTandaanCard(BuildContext context) {
+    return _buildLessonCard(
+      context: context,
+      title: AppLocalizations.of(context)!.tandaanTitle,
+      subtitle:
+          '$_tandaanDone/$_tandaanTotal ${AppLocalizations.of(context)!.activities}',
+      icon: Icons.psychology,
+      color: AppColors.shapes,
+      progress: _tandaanTotal > 0 ? _tandaanDone / _tandaanTotal : 0.0,
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const TandaanScreen()),
         );
         setState(() => _isLoading = true);
         _loadProgress();

@@ -1522,6 +1522,42 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get zoomOff => 'Balligi';
 
   @override
+  String get karaokeTitle => 'Karaoke';
+
+  @override
+  String get karaokeSubtitle => 'Kantaantayo!';
+
+  @override
+  String get greatSinging => 'Nalaing ti kantam!';
+
+  @override
+  String get readFullPoemBeforeBack =>
+      'Basaem ti intero a daniw sakbay iti panagsubli.';
+
+  @override
+  String get iReadThePoem => 'Basak ti Daniw! ✓';
+
+  @override
+  String get readFullStoryBeforeBack =>
+      'Basaem ti intero a sarita sakbay iti panagsubli.';
+
+  @override
+  String get iReadTheStory => 'Nabasa Kon! ✓';
+
+  @override
+  String get tandaanTitle => 'Tandaem!';
+
+  @override
+  String get round => 'Round';
+
+  @override
+  String get matchThePairs => 'Biruken ken paresen dagiti pares!';
+
+  @override
+  String get flipCardsToMatch =>
+      'Taklaem ti card tapno i-flip. Birukem ti dua a kapada!';
+
+  @override
   String get traceItTitle => 'Surotem - Kaya Mo!';
 
   @override

@@ -1526,6 +1526,41 @@ class AppLocalizationsFil extends AppLocalizations {
   String get zoomOff => 'Tapos';
 
   @override
+  String get karaokeTitle => 'Karaoke';
+
+  @override
+  String get karaokeSubtitle => 'Kantahan Tayo!';
+
+  @override
+  String get greatSinging => 'Ang galing kumanta!';
+
+  @override
+  String get readFullPoemBeforeBack => 'Basahin ang buong tula bago bumalik.';
+
+  @override
+  String get iReadThePoem => 'Nabasa Ko ang Tula! ✓';
+
+  @override
+  String get readFullStoryBeforeBack =>
+      'Basahin ang buong kwento bago bumalik.';
+
+  @override
+  String get iReadTheStory => 'Nabasa Ko! ✓';
+
+  @override
+  String get tandaanTitle => 'Tandaan Mo!';
+
+  @override
+  String get round => 'Round';
+
+  @override
+  String get matchThePairs => 'Hanapin at pagtugmain ang mga pares!';
+
+  @override
+  String get flipCardsToMatch =>
+      'Pindutin ang card para i-flip ito. Hanapin ang dalawang magkatulad!';
+
+  @override
   String get traceItTitle => 'Sundan Ito - Kaya Mo!';
 
   @override
