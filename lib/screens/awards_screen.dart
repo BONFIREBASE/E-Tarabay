@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../widgets/custom_back_button.dart';
+import '../widgets/floating_bottom_nav_bar.dart';
+import '../widgets/staggered_entrance.dart';
+import '../utils/page_transitions.dart';
+import 'lessons_screen.dart';
+import 'settings_screen.dart';
 
 class AwardsScreen extends StatelessWidget {
   const AwardsScreen({super.key});
@@ -15,10 +19,37 @@ class AwardsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FF),
+      extendBody: true,
+      bottomNavigationBar: FloatingBottomNavBar(
+        selectedIndex: 2,
+        onTap: (index) {
+          if (index == 2) return;
+          switch (index) {
+            case 0:
+              Navigator.pop(context);
+              break;
+            case 1:
+              context.pushReplacementPremium(const LessonsScreen());
+              break;
+            case 3:
+              context.pushReplacementPremium(const SettingsScreen());
+              break;
+          }
+        },
+        items: const [
+          NavItemData(icon: Icons.home_rounded, label: 'Home'),
+          NavItemData(icon: Icons.auto_stories_rounded, label: 'Lessons'),
+          NavItemData(icon: Icons.emoji_events_rounded, label: 'Awards'),
+          NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
+        ],
+      ),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: _buildHeader(context, achievements.length, claimed.length),
+            child: StaggeredEntrance(
+              index: 0,
+              child: _buildHeader(context, achievements.length, claimed.length),
+            ),
           ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
@@ -34,12 +65,15 @@ class AwardsScreen extends StatelessWidget {
                   final badge = _allBadges[index];
                   final isEarned = (achievements[badge['id']] ?? 0) >= 1;
                   final isClaimed = claimed.contains(badge['id']);
-                  return _buildBadgeCard(
-                    context,
-                    badge: badge,
-                    isEarned: isEarned,
-                    isClaimed: isClaimed,
-                    userProvider: userProvider,
+                  return StaggeredEntrance(
+                    index: index + 1,
+                    child: _buildBadgeCard(
+                      context,
+                      badge: badge,
+                      isEarned: isEarned,
+                      isClaimed: isClaimed,
+                      userProvider: userProvider,
+                    ),
                   );
                 },
                 childCount: _allBadges.length,
@@ -176,12 +210,6 @@ class AwardsScreen extends StatelessWidget {
         bottom: false,
         child: Row(
           children: [
-            CustomBackButton(
-              onPressed: () => Navigator.pop(context),
-              iconColor: Colors.white,
-              backgroundColor: Colors.white.withOpacity(0.2),
-            ),
-            const SizedBox(width: 16),
             const Expanded(
               child: Text(
                 'Awards',

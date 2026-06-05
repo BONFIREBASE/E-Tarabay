@@ -69,6 +69,7 @@ class AuthService {
     DateTime? birthday,
     String parentName = '',
     String parentContact = '',
+    String? avatar,
   }) async {
     try {
       // Check if LRN already exists to prevent duplicates
@@ -107,6 +108,7 @@ class AuthService {
         'birthday': birthday?.toIso8601String(),
         'parentName': parentName,
         'parentContact': parentContact,
+        'avatar': avatar,
         'enrolledAt': FieldValue.serverTimestamp(),
         'progress': {
           'overallProgress': 0.0,
@@ -119,6 +121,7 @@ class AuthService {
           'birthday': birthday?.toIso8601String(),
           'parentName': parentName,
           'parentContact': parentContact,
+          'avatar': avatar,
           'stars': 0,
           'lessonsCompleted': 0,
           'achievements': {},
@@ -158,6 +161,7 @@ class AuthService {
     DateTime? birthday,
     String? parentName,
     String? parentContact,
+    String? avatar,
   }) async {
     try {
       final updates = <String, dynamic>{
@@ -184,6 +188,10 @@ class AuthService {
       if (parentContact != null) {
         updates['parentContact'] = parentContact;
         profileUpdates['profile.parentContact'] = parentContact;
+      }
+      if (avatar != null) {
+        updates['avatar'] = avatar;
+        profileUpdates['profile.avatar'] = avatar;
       }
 
       await _db.collection('students').doc(studentId).update({

@@ -298,6 +298,12 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get profile;
 
+  /// No description provided for @videoDance.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Dance'**
+  String get videoDance;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
@@ -3063,6 +3069,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Almost there! Try again!'**
   String get almostThere;
+
+  /// No description provided for @progressPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} pages'**
+  String progressPages(int done, int total);
+
+  /// No description provided for @percentComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% complete'**
+  String percentComplete(int percent);
+
+  /// No description provided for @obraLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Artworks'**
+  String get obraLabel;
+
+  /// No description provided for @strokesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Strokes'**
+  String get strokesLabel;
+
+  /// No description provided for @categoryProgressHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress Per Category'**
+  String get categoryProgressHeader;
+
+  /// No description provided for @savedArtworksHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Artworks'**
+  String get savedArtworksHeader;
+
+  /// No description provided for @parentTipsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips for Parents'**
+  String get parentTipsHeader;
+
+  /// No description provided for @tipKulayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kulay-Saya'**
+  String get tipKulayTitle;
+
+  /// No description provided for @tipKulayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Encourage your child to color all the pages in every category.'**
+  String get tipKulayBody;
+
+  /// No description provided for @tipTraceItTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace It'**
+  String get tipTraceItTitle;
+
+  /// No description provided for @tipTraceItBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Guide your child to follow the correct direction of every letter.'**
+  String get tipTraceItBody;
+
+  /// No description provided for @tipMagbasaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Magbasa'**
+  String get tipMagbasaTitle;
+
+  /// No description provided for @tipMagbasaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the poems, stories, and songs aloud together with your child.'**
+  String get tipMagbasaBody;
+
+  /// No description provided for @tipMatematikaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Matematika'**
+  String get tipMatematikaTitle;
+
+  /// No description provided for @tipMatematikaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Encourage your child to complete every game to build stronger number skills.'**
+  String get tipMatematikaBody;
+
+  /// No description provided for @tipStudyTimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study Time'**
+  String get tipStudyTimeTitle;
+
+  /// No description provided for @tipStudyTimeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice 15-20 minutes every day for the best results.'**
+  String get tipStudyTimeBody;
+
+  /// No description provided for @progressCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} completed'**
+  String progressCompleted(int done, int total);
+
+  /// No description provided for @progressActivities.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} activities'**
+  String progressActivities(int done, int total);
+
+  /// No description provided for @progressGames.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} games'**
+  String progressGames(int done, int total);
+
+  /// No description provided for @pointsStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get pointsStatLabel;
+
+  /// No description provided for @starsStatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars'**
+  String get starsStatLabel;
+
+  /// No description provided for @gameProgressHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress Per Game'**
+  String get gameProgressHeader;
+
+  /// No description provided for @tipPencilGripTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Proper Pencil Grip'**
+  String get tipPencilGripTitle;
+
+  /// No description provided for @tipPencilGripBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure your child holds the stylus or finger correctly while tracing.'**
+  String get tipPencilGripBody;
+
+  /// No description provided for @tipRepeatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat Often'**
+  String get tipRepeatTitle;
+
+  /// No description provided for @tipRepeatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Encourage your child to redo the letters that are not yet completed.'**
+  String get tipRepeatBody;
+
+  /// No description provided for @tipPraiseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Praise Your Child'**
+  String get tipPraiseTitle;
+
+  /// No description provided for @tipPraiseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Praise every achievement, big or small, to build their confidence.'**
+  String get tipPraiseBody;
+
+  /// No description provided for @tipTulaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Poems'**
+  String get tipTulaTitle;
+
+  /// No description provided for @tipTulaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the poems aloud with your child to improve pronunciation.'**
+  String get tipTulaBody;
+
+  /// No description provided for @tipKwentoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stories'**
+  String get tipKwentoTitle;
+
+  /// No description provided for @tipKwentoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your child about the story after reading to strengthen comprehension.'**
+  String get tipKwentoBody;
+
+  /// No description provided for @tipKantaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Songs'**
+  String get tipKantaTitle;
+
+  /// No description provided for @tipKantaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sing the songs together so that learning becomes fun.'**
+  String get tipKantaBody;
+
+  /// No description provided for @tipCountingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting'**
+  String get tipCountingTitle;
+
+  /// No description provided for @tipCountingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Use real objects like fruits or toys to help your child count.'**
+  String get tipCountingBody;
+
+  /// No description provided for @tipPraiseMatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Praise'**
+  String get tipPraiseMatTitle;
+
+  /// No description provided for @tipPraiseMatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Praise your child for every correct answer to build their confidence in math.'**
+  String get tipPraiseMatBody;
+
+  /// No description provided for @tipGameFunTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Games'**
+  String get tipGameFunTitle;
+
+  /// No description provided for @tipGameFunBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The games are designed to be fun — let your child enjoy learning.'**
+  String get tipGameFunBody;
 }
 
 class _AppLocalizationsDelegate

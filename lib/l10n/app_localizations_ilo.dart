@@ -114,6 +114,9 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get profile => 'Profil';
 
   @override
+  String get videoDance => 'Sayaw Video';
+
+  @override
   String get settingsTitle => 'Pangpaandar';
 
   @override
@@ -1571,4 +1574,151 @@ class AppLocalizationsIlo extends AppLocalizations {
 
   @override
   String get almostThere => 'Asideg pay laeng! Padasem manen!';
+
+  @override
+  String progressPages(int done, int total) {
+    return '$done / $total a panid';
+  }
+
+  @override
+  String percentComplete(int percent) {
+    return '$percent% a nakompleto';
+  }
+
+  @override
+  String get obraLabel => 'Obra';
+
+  @override
+  String get strokesLabel => 'Strokes';
+
+  @override
+  String get categoryProgressHeader => 'Rang-ay iti Tunggal Kategorya';
+
+  @override
+  String get savedArtworksHeader => 'Dagiti Naidulin nga Obra';
+
+  @override
+  String get parentTipsHeader => 'Tips para kadagiti Nagannak';
+
+  @override
+  String get tipKulayTitle => 'Kolor-Saya';
+
+  @override
+  String get tipKulayBody =>
+      'Paregtaen ti anakyo nga agkolor iti amin a panid iti tunggal kategorya.';
+
+  @override
+  String get tipTraceItTitle => 'Surotem';
+
+  @override
+  String get tipTraceItBody =>
+      'Iwanwan ti anakyo a suroten ti umiso a turong ti tunggal letra.';
+
+  @override
+  String get tipMagbasaTitle => 'Agbasa';
+
+  @override
+  String get tipMagbasaBody =>
+      'Basaen a napigsa kadua ti anakyo dagiti daniw, sarita ken kanta.';
+
+  @override
+  String get tipMatematikaTitle => 'Matematika';
+
+  @override
+  String get tipMatematikaBody =>
+      'Paregtaen ti anakyo a lpasen ti tunggal ay-ayam tapno rumang-ay ti kabaelanda iti bilang.';
+
+  @override
+  String get tipStudyTimeTitle => 'Oras ti Panagadal';
+
+  @override
+  String get tipStudyTimeBody =>
+      'Agpraktis iti 15-20 a minuto iti inaldaw tapno nasayaat ti resulta.';
+
+  @override
+  String progressCompleted(int done, int total) {
+    return '$done / $total a nalpas';
+  }
+
+  @override
+  String progressActivities(int done, int total) {
+    return '$done / $total nga aktibidad';
+  }
+
+  @override
+  String progressGames(int done, int total) {
+    return '$done / $total nga ay-ayam';
+  }
+
+  @override
+  String get pointsStatLabel => 'Puntos';
+
+  @override
+  String get starsStatLabel => 'Bituen';
+
+  @override
+  String get gameProgressHeader => 'Rang-ay iti Tunggal Ay-ayam';
+
+  @override
+  String get tipPencilGripTitle => 'Umiso a Panagiggemm ti Lapis';
+
+  @override
+  String get tipPencilGripBody =>
+      'Siguraduwen a husto ti panagiggemm ti anakyo iti stylus wenno ramayda bayat ti panagsursurot.';
+
+  @override
+  String get tipRepeatTitle => 'Ulit-uliten';
+
+  @override
+  String get tipRepeatBody =>
+      'Paregtaen ti anakyo nga uliten dagiti letra a saan pay a nakompleto.';
+
+  @override
+  String get tipPraiseTitle => 'Dayawen ti Anakyo';
+
+  @override
+  String get tipPraiseBody =>
+      'Dayawen ti tunggal balligi, dakkel man wenno bassit, tapno pumigsa ti kompiansada.';
+
+  @override
+  String get tipTulaTitle => 'Daniw';
+
+  @override
+  String get tipTulaBody =>
+      'Basaen a napigsa dagiti daniw kadua ti anakyo tapno mapasayaat ti panagsaoda.';
+
+  @override
+  String get tipKwentoTitle => 'Sarita';
+
+  @override
+  String get tipKwentoBody =>
+      'Saludsoden ti anakyo maipanggep iti sarita kalpasan a basaen tapno pumigsa ti pannakaawatda.';
+
+  @override
+  String get tipKantaTitle => 'Kanta';
+
+  @override
+  String get tipKantaBody =>
+      'Agkantaankayo a sangsangkamaysa tapno naragsak ti panagadal.';
+
+  @override
+  String get tipCountingTitle => 'Panagbilang';
+
+  @override
+  String get tipCountingBody =>
+      'Usaren dagiti pudno a banag kas prutas wenno al-aliwa tapno matulongan ti anakyo a mangbilang.';
+
+  @override
+  String get tipPraiseMatTitle => 'Pammadayaw';
+
+  @override
+  String get tipPraiseMatBody =>
+      'Dayawen ti anakyo iti tunggal umiso a sungbat tapno pumigsa ti kompiansada iti matematika.';
+
+  @override
+  String get tipGameFunTitle => 'Ay-ayam';
+
+  @override
+  String get tipGameFunBody =>
+      'Dagiti ay-ayam ket naaramid tapno naragsak — palubosan ti anakyo a mag-enjoy iti panagadal.';
 }

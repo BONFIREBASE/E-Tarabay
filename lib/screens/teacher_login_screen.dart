@@ -52,18 +52,20 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
 
       setState(() => _isLoading = false);
 
-      if (username.toLowerCase().trim() == TeacherCredentials.username.toLowerCase().trim() &&
+      if (username.toLowerCase().trim() ==
+              TeacherCredentials.username.toLowerCase().trim() &&
           password.trim() == TeacherCredentials.password.trim()) {
-        
         // Save session
-        Provider.of<UserProvider>(context, listen: false).setCurrentRole('teacher');
+        Provider.of<UserProvider>(context, listen: false)
+            .setCurrentRole('teacher');
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const TeacherDashboardScreen()),
         );
       } else {
-        _showErrorDialog(AppLocalizations.of(context)!.invalidTeacherCredentials);
+        _showErrorDialog(
+            AppLocalizations.of(context)!.invalidTeacherCredentials);
       }
     });
   }
@@ -76,7 +78,10 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
           children: [
             const Icon(Icons.error_outline, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text(message, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white))),
+            Expanded(
+                child: Text(message,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white))),
           ],
         ),
         backgroundColor: Colors.red.shade600,
@@ -88,170 +93,271 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
     );
   }
 
+  InputDecoration _modernInputDecoration({
+    required String label,
+    required IconData icon,
+    Widget? suffix,
+    bool disabled = false,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(
+        color: disabled ? Colors.grey.shade400 : Colors.grey.shade500,
+        fontSize: 14,
+      ),
+      prefixIcon: Icon(
+        icon,
+        color: disabled ? Colors.grey.shade400 : AppColors.primary,
+        size: 20,
+      ),
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: disabled ? const Color(0xFFF0F1F2) : const Color(0xFFF8F9FA),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: CustomBackButton(
-          iconColor: AppColors.textDark,
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
         child: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               )
-            : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 40),
-
-                    // Teacher icon
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.primary.withOpacity(0.3),
-                          width: 2,
-                        ),
+            : LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
                       ),
-                      child: const Icon(
-                        Icons.school,
-                        size: 40,
-                        color: AppColors.primary,
+                      child: IntrinsicHeight(
+                        child: Column(
+                          children: [
+                            // Back button row
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 8, top: 8, right: 16),
+                              child: Row(
+                                children: [
+                                  CustomBackButton(
+                                    iconColor: Colors.white,
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                  const Spacer(),
+                                ],
+                              ),
+                            ),
+
+                            // Top header
+                            Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(
+                                left: 24,
+                                right: 24,
+                                top: 16,
+                              ),
+                              padding: const EdgeInsets.only(
+                                top: 24,
+                                bottom: 80,
+                                left: 32,
+                                right: 32,
+                              ),
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Color(0xFF2D3436),
+                                    Color(0xFF636E72),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.vertical(
+                                  bottom: Radius.circular(40),
+                                  top: Radius.circular(30),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  // Teacher icon
+                                  Container(
+                                    width: 72,
+                                    height: 72,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.15),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.school,
+                                      size: 36,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    AppLocalizations.of(context)!
+                                        .teacherLoginTitle,
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    AppLocalizations.of(context)!
+                                        .teacherLoginPrompt,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.white.withOpacity(0.8),
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Form card overlapping header
+                            Transform.translate(
+                              offset: const Offset(0, -48),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(28),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(28),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.06),
+                                        blurRadius: 24,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Sign in to your teacher account',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade500,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 24),
+
+                                      // Username field (pre-filled, disabled)
+                                      TextField(
+                                        controller: _usernameController,
+                                        enabled: false,
+                                        decoration: _modernInputDecoration(
+                                          label: AppLocalizations.of(context)!
+                                              .username,
+                                          icon: Icons.person_outline,
+                                          disabled: true,
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textDark,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 16),
+
+                                      // Password field
+                                      TextField(
+                                        controller: _passwordController,
+                                        obscureText: _obscurePassword,
+                                        decoration: _modernInputDecoration(
+                                          label: AppLocalizations.of(context)!
+                                              .password,
+                                          icon: Icons.lock_outline,
+                                          suffix: IconButton(
+                                            icon: Icon(
+                                              _obscurePassword
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
+                                              color: Colors.grey.shade400,
+                                              size: 20,
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _obscurePassword =
+                                                    !_obscurePassword;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        textInputAction: TextInputAction.done,
+                                        onSubmitted: (_) => _loginTeacher(),
+                                        style: const TextStyle(fontSize: 15),
+                                      ),
+
+                                      const SizedBox(height: 28),
+
+                                      // Login Button
+                                      SizedBox(
+                                        width: double.infinity,
+                                        height: 56,
+                                        child: ElevatedButton(
+                                          onPressed: _loginTeacher,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primary,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            AppLocalizations.of(context)!
+                                                .teacherLoginButtonLabel,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const Spacer(),
+
+                            const SizedBox(height: 20),
+                          ],
+                        ),
                       ),
                     ),
-
-                    const SizedBox(height: 24),
-
-                    Text(
-                      AppLocalizations.of(context)!.teacherLoginTitle,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      AppLocalizations.of(context)!.teacherLoginPrompt,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textLight,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    const SizedBox(height: 40),
-
-                    // Username field (clearly identified as fixed)
-                    TextField(
-                      controller: _usernameController,
-                      enabled: false,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.username,
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        prefixIcon: const Icon(
-                          Icons.person_outline,
-                          color: AppColors.primary,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      textInputAction: TextInputAction.next,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Password field
-                    TextField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.password,
-                        prefixIcon: const Icon(
-                          Icons.lock_outline,
-                          color: AppColors.primary,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: AppColors.textLight,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            color: AppColors.primary,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => _loginTeacher(),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Login Button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _loginTeacher,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                          elevation: 2,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)!.teacherLoginButtonLabel,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
       ),
     );

@@ -11,6 +11,11 @@ import 'trace_it_screen.dart';
 import 'magbasa_screen.dart';
 import 'tandaan_screen.dart';
 import '../widgets/custom_header_app_bar.dart';
+import '../widgets/floating_bottom_nav_bar.dart';
+import '../widgets/staggered_entrance.dart';
+import '../utils/page_transitions.dart';
+import 'awards_screen.dart';
+import 'settings_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SharedPreferences key helpers — must match each feature screen exactly
@@ -267,9 +272,11 @@ class _LessonsScreenState extends State<LessonsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      extendBody: true,
       appBar: CustomHeaderAppBar(
         title: AppLocalizations.of(context)!.lessons,
         baseColor: AppColors.primary,
+        showBackButton: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: Colors.white),
@@ -281,36 +288,110 @@ class _LessonsScreenState extends State<LessonsScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: FloatingBottomNavBar(
+        selectedIndex: 1,
+        onTap: (index) {
+          if (index == 1) return;
+          switch (index) {
+            case 0:
+              Navigator.pop(context);
+              break;
+            case 2:
+              context.pushReplacementPremium(const AwardsScreen());
+              break;
+            case 3:
+              context.pushReplacementPremium(const SettingsScreen());
+              break;
+          }
+        },
+        items: const [
+          NavItemData(icon: Icons.home_rounded, label: 'Home'),
+          NavItemData(icon: Icons.auto_stories_rounded, label: 'Lessons'),
+          NavItemData(icon: Icons.emoji_events_rounded, label: 'Awards'),
+          NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(context),
+            StaggeredEntrance(
+              index: 0,
+              child: _buildHeader(context),
+            ),
             const SizedBox(height: 20),
-            _buildSectionTitle(
-                context, AppLocalizations.of(context)!.matematika),
-            _buildMatematikaCard(context),
+            StaggeredEntrance(
+              index: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(
+                      context, AppLocalizations.of(context)!.matematika),
+                  _buildMatematikaCard(context),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
-            _buildSectionTitle(
-                context, AppLocalizations.of(context)!.angAkingSariliTitle),
-            _buildPamilyaCard(context),
+            StaggeredEntrance(
+              index: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(context,
+                      AppLocalizations.of(context)!.angAkingSariliTitle),
+                  _buildPamilyaCard(context),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
-            _buildSectionTitle(
-                context, AppLocalizations.of(context)!.kulaySaya),
-            _buildKulayCard(context),
+            StaggeredEntrance(
+              index: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(
+                      context, AppLocalizations.of(context)!.kulaySaya),
+                  _buildKulayCard(context),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
-            _buildSectionTitle(
-                context, AppLocalizations.of(context)!.traceItTitle),
-            _buildTraceItCard(context),
+            StaggeredEntrance(
+              index: 4,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(
+                      context, AppLocalizations.of(context)!.traceItTitle),
+                  _buildTraceItCard(context),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
-            _buildSectionTitle(
-                context, AppLocalizations.of(context)!.magbasaTitle),
-            _buildMagbasaCard(context),
+            StaggeredEntrance(
+              index: 5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(
+                      context, AppLocalizations.of(context)!.magbasaTitle),
+                  _buildMagbasaCard(context),
+                ],
+              ),
+            ),
             const SizedBox(height: 16),
-            _buildSectionTitle(
-                context, AppLocalizations.of(context)!.tandaanTitle),
-            _buildTandaanCard(context),
+            StaggeredEntrance(
+              index: 6,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(
+                      context, AppLocalizations.of(context)!.tandaanTitle),
+                  _buildTandaanCard(context),
+                ],
+              ),
+            ),
           ],
         ),
       ),

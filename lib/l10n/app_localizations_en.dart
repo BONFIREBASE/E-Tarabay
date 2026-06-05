@@ -114,6 +114,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profile => 'Profile';
 
   @override
+  String get videoDance => 'Video Dance';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -1557,4 +1560,151 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get almostThere => 'Almost there! Try again!';
+
+  @override
+  String progressPages(int done, int total) {
+    return '$done / $total pages';
+  }
+
+  @override
+  String percentComplete(int percent) {
+    return '$percent% complete';
+  }
+
+  @override
+  String get obraLabel => 'Artworks';
+
+  @override
+  String get strokesLabel => 'Strokes';
+
+  @override
+  String get categoryProgressHeader => 'Progress Per Category';
+
+  @override
+  String get savedArtworksHeader => 'Saved Artworks';
+
+  @override
+  String get parentTipsHeader => 'Tips for Parents';
+
+  @override
+  String get tipKulayTitle => 'Kulay-Saya';
+
+  @override
+  String get tipKulayBody =>
+      'Encourage your child to color all the pages in every category.';
+
+  @override
+  String get tipTraceItTitle => 'Trace It';
+
+  @override
+  String get tipTraceItBody =>
+      'Guide your child to follow the correct direction of every letter.';
+
+  @override
+  String get tipMagbasaTitle => 'Magbasa';
+
+  @override
+  String get tipMagbasaBody =>
+      'Read the poems, stories, and songs aloud together with your child.';
+
+  @override
+  String get tipMatematikaTitle => 'Matematika';
+
+  @override
+  String get tipMatematikaBody =>
+      'Encourage your child to complete every game to build stronger number skills.';
+
+  @override
+  String get tipStudyTimeTitle => 'Study Time';
+
+  @override
+  String get tipStudyTimeBody =>
+      'Practice 15-20 minutes every day for the best results.';
+
+  @override
+  String progressCompleted(int done, int total) {
+    return '$done / $total completed';
+  }
+
+  @override
+  String progressActivities(int done, int total) {
+    return '$done / $total activities';
+  }
+
+  @override
+  String progressGames(int done, int total) {
+    return '$done / $total games';
+  }
+
+  @override
+  String get pointsStatLabel => 'Points';
+
+  @override
+  String get starsStatLabel => 'Stars';
+
+  @override
+  String get gameProgressHeader => 'Progress Per Game';
+
+  @override
+  String get tipPencilGripTitle => 'Proper Pencil Grip';
+
+  @override
+  String get tipPencilGripBody =>
+      'Make sure your child holds the stylus or finger correctly while tracing.';
+
+  @override
+  String get tipRepeatTitle => 'Repeat Often';
+
+  @override
+  String get tipRepeatBody =>
+      'Encourage your child to redo the letters that are not yet completed.';
+
+  @override
+  String get tipPraiseTitle => 'Praise Your Child';
+
+  @override
+  String get tipPraiseBody =>
+      'Praise every achievement, big or small, to build their confidence.';
+
+  @override
+  String get tipTulaTitle => 'Poems';
+
+  @override
+  String get tipTulaBody =>
+      'Read the poems aloud with your child to improve pronunciation.';
+
+  @override
+  String get tipKwentoTitle => 'Stories';
+
+  @override
+  String get tipKwentoBody =>
+      'Ask your child about the story after reading to strengthen comprehension.';
+
+  @override
+  String get tipKantaTitle => 'Songs';
+
+  @override
+  String get tipKantaBody =>
+      'Sing the songs together so that learning becomes fun.';
+
+  @override
+  String get tipCountingTitle => 'Counting';
+
+  @override
+  String get tipCountingBody =>
+      'Use real objects like fruits or toys to help your child count.';
+
+  @override
+  String get tipPraiseMatTitle => 'Praise';
+
+  @override
+  String get tipPraiseMatBody =>
+      'Praise your child for every correct answer to build their confidence in math.';
+
+  @override
+  String get tipGameFunTitle => 'Games';
+
+  @override
+  String get tipGameFunBody =>
+      'The games are designed to be fun — let your child enjoy learning.';
 }

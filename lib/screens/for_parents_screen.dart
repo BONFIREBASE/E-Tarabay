@@ -481,22 +481,22 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
         // Quick tips
         _sectionHeader(
-            AppLocalizations.of(context)!.forParents, Icons.lightbulb_rounded),
+            AppLocalizations.of(context)!.parentTipsHeader, Icons.lightbulb_rounded),
         const SizedBox(height: 10),
-        _tipCard('🎨', 'Kulay-Saya',
-            'Hikayatin ang inyong anak na kulayin ang lahat ng pahina sa bawat kategorya.'),
+        _tipCard('🎨', AppLocalizations.of(context)!.tipKulayTitle,
+            AppLocalizations.of(context)!.tipKulayBody),
         const SizedBox(height: 8),
-        _tipCard('✏️', AppLocalizations.of(context)!.traceItTitle,
-            'Gabayan ang inyong anak na sundan ang tamang direksyon ng bawat letra.'),
+        _tipCard('✏️', AppLocalizations.of(context)!.tipTraceItTitle,
+            AppLocalizations.of(context)!.tipTraceItBody),
         const SizedBox(height: 8),
-        _tipCard('📖', 'Magbasa',
-            'Basahin nang malakas kasama ang inyong anak ang mga tula, kwento at kanta.'),
+        _tipCard('📖', AppLocalizations.of(context)!.tipMagbasaTitle,
+            AppLocalizations.of(context)!.tipMagbasaBody),
         const SizedBox(height: 8),
-        _tipCard('🔢', 'Matematika',
-            'Hikayatin ang inyong anak na matapos ang bawat laro para mas lumago ang kakayahan sa bilang.'),
+        _tipCard('🔢', AppLocalizations.of(context)!.tipMatematikaTitle,
+            AppLocalizations.of(context)!.tipMatematikaBody),
         const SizedBox(height: 8),
-        _tipCard('⏰', 'Oras ng Pag-aaral',
-            'Mag-practice nang 15-20 minuto araw-araw para sa pinakamabuting resulta.'),
+        _tipCard('⏰', AppLocalizations.of(context)!.tipStudyTimeTitle,
+            AppLocalizations.of(context)!.tipStudyTimeBody),
       ]),
     );
   }
@@ -532,7 +532,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Text('$totalDone / $totalPages pahina',
+                    Text(AppLocalizations.of(context)!.progressPages(totalDone, totalPages),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 24,
@@ -549,16 +549,16 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                         )),
                     const SizedBox(height: 4),
                     Text(
-                        '${totalPages > 0 ? (totalDone / totalPages * 100).toInt() : 0}% kumpleto',
+                        AppLocalizations.of(context)!.percentComplete(totalPages > 0 ? (totalDone / totalPages * 100).toInt() : 0),
                         style: TextStyle(
                             color: Colors.white.withOpacity(0.9),
                             fontSize: 12)),
                   ])),
               const SizedBox(width: 16),
               Column(children: [
-                _statBubble('$_kulayTotalCreations', 'Obra'),
+                _statBubble('$_kulayTotalCreations', AppLocalizations.of(context)!.obraLabel),
                 const SizedBox(height: 8),
-                _statBubble('$_kulayTotalStrokes', 'Strokes'),
+                _statBubble('$_kulayTotalStrokes', AppLocalizations.of(context)!.strokesLabel),
               ]),
             ]),
           ]),
@@ -571,7 +571,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         const SizedBox(height: 16),
 
         // Per-category breakdown
-        _sectionHeader('Progreso sa Bawat Kategorya', Icons.grid_view_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.categoryProgressHeader, Icons.grid_view_rounded),
         const SizedBox(height: 12),
 
         ..._kulayDone.keys.map((catName) {
@@ -743,7 +743,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
         // My Creations section
         const SizedBox(height: 4),
-        _sectionHeader('Mga Nai-save na Obra', Icons.collections_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.savedArtworksHeader, Icons.collections_rounded),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(16),
@@ -826,7 +826,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Text('$totalDone / $totalAll natatapos',
+                    Text(AppLocalizations.of(context)!.progressCompleted(totalDone, totalAll),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
@@ -843,7 +843,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                         )),
                     const SizedBox(height: 4),
                     Text(
-                        '${totalAll > 0 ? (totalDone / totalAll * 100).toInt() : 0}% kumpleto',
+                        AppLocalizations.of(context)!.percentComplete(totalAll > 0 ? (totalDone / totalAll * 100).toInt() : 0),
                         style: TextStyle(
                             color: Colors.white.withOpacity(0.9),
                             fontSize: 12)),
@@ -900,16 +900,16 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         const SizedBox(height: 20),
 
         // Tips for parents
-        _sectionHeader('Tips para sa Magulang', Icons.lightbulb_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, Icons.lightbulb_rounded),
         const SizedBox(height: 10),
-        _tipCard('✏️', 'Tamang Hawak ng Lapis',
-            'Siguraduhin na tamang hawak ng inyong anak ang stylus o daliri habang nag-tracing.'),
+        _tipCard('✏️', AppLocalizations.of(context)!.tipPencilGripTitle,
+            AppLocalizations.of(context)!.tipPencilGripBody),
         const SizedBox(height: 8),
-        _tipCard('🔄', 'Ulit-ulitin',
-            'Hikayatin ang inyong anak na ulit-ulitin ang mga letra na hindi pa kumpleto.'),
+        _tipCard('🔄', AppLocalizations.of(context)!.tipRepeatTitle,
+            AppLocalizations.of(context)!.tipRepeatBody),
         const SizedBox(height: 8),
-        _tipCard('🌟', 'Purihin ang Inyong Anak',
-            'Purihin ang bawat tagumpay, malaki man o maliit, para mapalakas ang kanilang kumpiyansa.'),
+        _tipCard('🌟', AppLocalizations.of(context)!.tipPraiseTitle,
+            AppLocalizations.of(context)!.tipPraiseBody),
       ]),
     );
   }
@@ -945,7 +945,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Text('$totalDone / $totalItems aktibidad',
+                    Text(AppLocalizations.of(context)!.progressActivities(totalDone, totalItems),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
@@ -962,7 +962,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                         )),
                     const SizedBox(height: 4),
                     Text(
-                        '${totalItems > 0 ? (totalDone / totalItems * 100).toInt() : 0}% kumpleto',
+                        AppLocalizations.of(context)!.percentComplete(totalItems > 0 ? (totalDone / totalItems * 100).toInt() : 0),
                         style: TextStyle(
                             color: Colors.white.withOpacity(0.9),
                             fontSize: 12)),
@@ -972,7 +972,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         ),
         const SizedBox(height: 16),
 
-        _sectionHeader('Progreso sa Bawat Kategorya', Icons.grid_view_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.categoryProgressHeader, Icons.grid_view_rounded),
         const SizedBox(height: 12),
 
         ..._magbasaDone.keys.map((cat) {
@@ -1077,16 +1077,16 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         }),
 
         const SizedBox(height: 4),
-        _sectionHeader('Tips para sa Magulang', Icons.lightbulb_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, Icons.lightbulb_rounded),
         const SizedBox(height: 10),
-        _tipCard('📖', 'Tula',
-            'Basahin nang malakas ang mga tula kasama ang inyong anak para mapabuti ang pagbigkas.'),
+        _tipCard('📖', AppLocalizations.of(context)!.tipTulaTitle,
+            AppLocalizations.of(context)!.tipTulaBody),
         const SizedBox(height: 8),
-        _tipCard('📚', 'Kwento',
-            'Itanong sa inyong anak ang tungkol sa kwento pagkatapos basahin para mapalakas ang pag-unawa.'),
+        _tipCard('📚', AppLocalizations.of(context)!.tipKwentoTitle,
+            AppLocalizations.of(context)!.tipKwentoBody),
         const SizedBox(height: 8),
-        _tipCard('🎵', 'Kanta',
-            'Awitin nang magkasama ang mga kanta para maging masaya ang pag-aaral.'),
+        _tipCard('🎵', AppLocalizations.of(context)!.tipKantaTitle,
+            AppLocalizations.of(context)!.tipKantaBody),
       ]),
     );
   }
@@ -1122,7 +1122,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    Text('$totalDone / $totalGames laro',
+                    Text(AppLocalizations.of(context)!.progressGames(totalDone, totalGames),
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
@@ -1139,23 +1139,23 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                         )),
                     const SizedBox(height: 4),
                     Text(
-                        '${totalGames > 0 ? (totalDone / totalGames * 100).toInt() : 0}% kumpleto',
+                        AppLocalizations.of(context)!.percentComplete(totalGames > 0 ? (totalDone / totalGames * 100).toInt() : 0),
                         style: TextStyle(
                             color: Colors.white.withOpacity(0.9),
                             fontSize: 12)),
                   ])),
               const SizedBox(width: 16),
               Column(children: [
-                _statBubble('$_matTotalScore', 'Puntos'),
+                _statBubble('$_matTotalScore', AppLocalizations.of(context)!.pointsStatLabel),
                 const SizedBox(height: 8),
-                _statBubble('$_matTotalStars ⭐', 'Bituen'),
+                _statBubble('$_matTotalStars ⭐', AppLocalizations.of(context)!.starsStatLabel),
               ]),
             ]),
           ]),
         ),
         const SizedBox(height: 16),
 
-        _sectionHeader('Progreso sa Bawat Laro', Icons.grid_view_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.gameProgressHeader, Icons.grid_view_rounded),
         const SizedBox(height: 12),
 
         ...List.generate(_matLevelTitles.length, (lvl) {
@@ -1262,16 +1262,16 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         }),
 
         const SizedBox(height: 4),
-        _sectionHeader('Tips para sa Magulang', Icons.lightbulb_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, Icons.lightbulb_rounded),
         const SizedBox(height: 10),
-        _tipCard('🔢', 'Bilangan',
-            'Gumamit ng tunay na bagay tulad ng prutas o laruan para matulungan ang inyong anak na mabilang.'),
+        _tipCard('🔢', AppLocalizations.of(context)!.tipCountingTitle,
+            AppLocalizations.of(context)!.tipCountingBody),
         const SizedBox(height: 8),
-        _tipCard('⭐', 'Papuri',
-            'Purihin ang inyong anak sa bawat tamang sagot para mapalakas ang kanilang kumpiyansa sa matematika.'),
+        _tipCard('⭐', AppLocalizations.of(context)!.tipPraiseMatTitle,
+            AppLocalizations.of(context)!.tipPraiseMatBody),
         const SizedBox(height: 8),
-        _tipCard('🎮', 'Laro',
-            'Ang mga laro ay dinisenyo para maging masaya — hayaan ang inyong anak na mag-enjoy sa pag-aaral.'),
+        _tipCard('🎮', AppLocalizations.of(context)!.tipGameFunTitle,
+            AppLocalizations.of(context)!.tipGameFunBody),
       ]),
     );
   }
@@ -1353,7 +1353,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                             valueColor: AlwaysStoppedAnimation<Color>(color),
                             minHeight: 7)),
                     const SizedBox(height: 4),
-                    Text('${(progress * 100).toInt()}% kumpleto',
+                    Text(AppLocalizations.of(context)!.percentComplete((progress * 100).toInt()),
                         style: TextStyle(
                             fontSize: 10, color: Colors.grey.shade500)),
                   ])),

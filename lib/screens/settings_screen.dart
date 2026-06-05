@@ -5,6 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/language_provider.dart';
 import '../main.dart';
 import '../widgets/custom_header_app_bar.dart';
+import '../widgets/floating_bottom_nav_bar.dart';
+import '../widgets/staggered_entrance.dart';
+import '../utils/page_transitions.dart';
+import 'lessons_screen.dart';
+import 'awards_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -56,134 +61,180 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerHighest,
+      extendBody: true,
       appBar: CustomHeaderAppBar(
         title: loc.settingsTitle,
         baseColor: colorScheme.primary,
+        showBackButton: false,
+      ),
+      bottomNavigationBar: FloatingBottomNavBar(
+        selectedIndex: 3,
+        onTap: (index) {
+          if (index == 3) return;
+          switch (index) {
+            case 0:
+              Navigator.pop(context);
+              break;
+            case 1:
+              context.pushReplacementPremium(const LessonsScreen());
+              break;
+            case 2:
+              context.pushReplacementPremium(const AwardsScreen());
+              break;
+          }
+        },
+        items: const [
+          NavItemData(icon: Icons.home_rounded, label: 'Home'),
+          NavItemData(icon: Icons.auto_stories_rounded, label: 'Lessons'),
+          NavItemData(icon: Icons.emoji_events_rounded, label: 'Awards'),
+          NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
-          _sectionHeader(loc.language),
-          Card.filled(
-            clipBehavior: Clip.antiAlias,
+          StaggeredEntrance(
+            index: 0,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _LanguageTile(
-                  flag: '🇺🇸',
-                  label: 'English',
-                  code: 'en',
-                  isSelected: languageProvider.currentLanguageCode == 'en',
-                  onTap: () => _setLanguage('en'),
-                ),
-                const Divider(height: 0, indent: 72),
-                _LanguageTile(
-                  flag: '🇵🇭',
-                  label: 'Filipino',
-                  code: 'fil',
-                  isSelected: languageProvider.currentLanguageCode == 'fil',
-                  onTap: () => _setLanguage('fil'),
-                ),
-                const Divider(height: 0, indent: 72),
-                _LanguageTile(
-                  flag: '🇵🇭',
-                  label: 'Ilokano',
-                  code: 'ilo',
-                  isSelected: languageProvider.currentLanguageCode == 'ilo',
-                  onTap: () => _setLanguage('ilo'),
+                _sectionHeader(loc.language),
+                Card.filled(
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      _LanguageTile(
+                        flag: '🇺🇸',
+                        label: 'English',
+                        code: 'en',
+                        isSelected:
+                            languageProvider.currentLanguageCode == 'en',
+                        onTap: () => _setLanguage('en'),
+                      ),
+                      const Divider(height: 0, indent: 72),
+                      _LanguageTile(
+                        flag: '🇵🇭',
+                        label: 'Filipino',
+                        code: 'fil',
+                        isSelected:
+                            languageProvider.currentLanguageCode == 'fil',
+                        onTap: () => _setLanguage('fil'),
+                      ),
+                      const Divider(height: 0, indent: 72),
+                      _LanguageTile(
+                        flag: '🇵🇭',
+                        label: 'Ilokano',
+                        code: 'ilo',
+                        isSelected:
+                            languageProvider.currentLanguageCode == 'ilo',
+                        onTap: () => _setLanguage('ilo'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-
-          // ── Audio ────────────────────────────────────────────────────────────
-          _sectionHeader('Audio'),
-          Card.filled(
-            clipBehavior: Clip.antiAlias,
+          StaggeredEntrance(
+            index: 1,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SwitchListTile(
-                  secondary: _IconBadge(icon: Icons.volume_up_rounded),
-                  title: Text(loc.sound),
-                  value: _soundEnabled,
-                  onChanged: (value) {
-                    setState(() => _soundEnabled = value);
-                    SharedPreferences.getInstance().then(
-                      (prefs) => prefs.setBool('sound_enabled', value),
-                    );
-                  },
-                ),
-                const Divider(height: 0, indent: 72),
-                SwitchListTile(
-                  secondary: _IconBadge(icon: Icons.music_note_rounded),
-                  title: Text(loc.music),
-                  value: _musicEnabled,
-                  onChanged: _toggleMusic,
+                _sectionHeader('Audio'),
+                Card.filled(
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      SwitchListTile(
+                        secondary: _IconBadge(icon: Icons.volume_up_rounded),
+                        title: Text(loc.sound),
+                        value: _soundEnabled,
+                        onChanged: (value) {
+                          setState(() => _soundEnabled = value);
+                          SharedPreferences.getInstance().then(
+                            (prefs) => prefs.setBool('sound_enabled', value),
+                          );
+                        },
+                      ),
+                      const Divider(height: 0, indent: 72),
+                      SwitchListTile(
+                        secondary: _IconBadge(icon: Icons.music_note_rounded),
+                        title: Text(loc.music),
+                        value: _musicEnabled,
+                        onChanged: _toggleMusic,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-
-          // ── Notifications ──────────────────────────────────────────────────
-          _sectionHeader(loc.notifications),
-          Card.filled(
-            clipBehavior: Clip.antiAlias,
-            child: SwitchListTile(
-              secondary: _IconBadge(icon: Icons.notifications_rounded),
-              title: Text(loc.notifications),
-              value: _notificationsEnabled,
-              onChanged: (value) {
-                setState(() => _notificationsEnabled = value);
-                SharedPreferences.getInstance().then(
-                  (prefs) => prefs.setBool('notifications_enabled', value),
-                );
-              },
+          StaggeredEntrance(
+            index: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeader(loc.notifications),
+                Card.filled(
+                  clipBehavior: Clip.antiAlias,
+                  child: SwitchListTile(
+                    secondary: _IconBadge(icon: Icons.notifications_rounded),
+                    title: Text(loc.notifications),
+                    value: _notificationsEnabled,
+                    onChanged: (value) {
+                      setState(() => _notificationsEnabled = value);
+                      SharedPreferences.getInstance().then(
+                        (prefs) =>
+                            prefs.setBool('notifications_enabled', value),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
-
           const SizedBox(height: 24),
-
-          // ── App Info ─────────────────────────────────────────────────────────
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ClipOval(
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
+          StaggeredEntrance(
+            index: 3,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'E-Tarabay',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
+                  const SizedBox(height: 8),
+                  Text(
+                    'E-Tarabay',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${loc.version} 1.0.4',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: colorScheme.onSurfaceVariant,
+                  const SizedBox(height: 4),
+                  Text(
+                    '${loc.version} 1.0.4',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                if (audioManager.isPlaying) ...[
-                  const SizedBox(height: 10),
-                  _MusicPill(text: loc.backgroundMusicPlaying),
+                  if (audioManager.isPlaying) ...[
+                    const SizedBox(height: 10),
+                    _MusicPill(text: loc.backgroundMusicPlaying),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-
           const SizedBox(height: 24),
         ],
       ),

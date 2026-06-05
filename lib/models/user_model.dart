@@ -5,6 +5,7 @@ class UserProfile {
   String parentName;
   String parentContact;
   String lrn;
+  String avatar;
   int stars;
   int lessonsCompleted;
   Map<String, int> achievements;
@@ -30,6 +31,7 @@ class UserProfile {
     this.parentName = '',
     this.parentContact = '',
     this.lrn = '',
+    this.avatar = '',
     this.stars = 0,
     this.lessonsCompleted = 0,
     Map<String, int>? achievements,
@@ -47,6 +49,7 @@ class UserProfile {
       'parentName': parentName,
       'parentContact': parentContact,
       'lrn': lrn,
+      'avatar': avatar,
       'stars': stars,
       'lessonsCompleted': lessonsCompleted,
       'achievements': achievements,
@@ -64,6 +67,7 @@ class UserProfile {
       parentName: json['parentName']?.toString() ?? '',
       parentContact: json['parentContact']?.toString() ?? '',
       lrn: json['lrn']?.toString() ?? '',
+      avatar: json['avatar']?.toString() ?? '',
       stars: json['stars'] ?? 0,
       lessonsCompleted: json['lessonsCompleted'] ?? 0,
       achievements: Map<String, int>.from(json['achievements'] ?? {}),

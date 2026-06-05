@@ -114,6 +114,9 @@ class AppLocalizationsFil extends AppLocalizations {
   String get profile => 'Profile';
 
   @override
+  String get videoDance => 'Sayaw Video';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -1574,4 +1577,151 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get almostThere => 'Malapit na! Subukan muli!';
+
+  @override
+  String progressPages(int done, int total) {
+    return '$done / $total pahina';
+  }
+
+  @override
+  String percentComplete(int percent) {
+    return '$percent% kumpleto';
+  }
+
+  @override
+  String get obraLabel => 'Obra';
+
+  @override
+  String get strokesLabel => 'Strokes';
+
+  @override
+  String get categoryProgressHeader => 'Progreso sa Bawat Kategorya';
+
+  @override
+  String get savedArtworksHeader => 'Mga Nai-save na Obra';
+
+  @override
+  String get parentTipsHeader => 'Tips para sa Magulang';
+
+  @override
+  String get tipKulayTitle => 'Kulay-Saya';
+
+  @override
+  String get tipKulayBody =>
+      'Hikayatin ang inyong anak na kulayin ang lahat ng pahina sa bawat kategorya.';
+
+  @override
+  String get tipTraceItTitle => 'Sundan Mo';
+
+  @override
+  String get tipTraceItBody =>
+      'Gabayan ang inyong anak na sundan ang tamang direksyon ng bawat letra.';
+
+  @override
+  String get tipMagbasaTitle => 'Magbasa';
+
+  @override
+  String get tipMagbasaBody =>
+      'Basahin nang malakas kasama ang inyong anak ang mga tula, kwento at kanta.';
+
+  @override
+  String get tipMatematikaTitle => 'Matematika';
+
+  @override
+  String get tipMatematikaBody =>
+      'Hikayatin ang inyong anak na matapos ang bawat laro para mas lumago ang kakayahan sa bilang.';
+
+  @override
+  String get tipStudyTimeTitle => 'Oras ng Pag-aaral';
+
+  @override
+  String get tipStudyTimeBody =>
+      'Mag-practice nang 15-20 minuto araw-araw para sa pinakamabuting resulta.';
+
+  @override
+  String progressCompleted(int done, int total) {
+    return '$done / $total natatapos';
+  }
+
+  @override
+  String progressActivities(int done, int total) {
+    return '$done / $total aktibidad';
+  }
+
+  @override
+  String progressGames(int done, int total) {
+    return '$done / $total laro';
+  }
+
+  @override
+  String get pointsStatLabel => 'Puntos';
+
+  @override
+  String get starsStatLabel => 'Bituin';
+
+  @override
+  String get gameProgressHeader => 'Progreso sa Bawat Laro';
+
+  @override
+  String get tipPencilGripTitle => 'Tamang Hawak ng Lapis';
+
+  @override
+  String get tipPencilGripBody =>
+      'Siguraduhin na tamang hawak ng inyong anak ang stylus o daliri habang nag-tracing.';
+
+  @override
+  String get tipRepeatTitle => 'Ulit-ulitin';
+
+  @override
+  String get tipRepeatBody =>
+      'Hikayatin ang inyong anak na ulit-ulitin ang mga letra na hindi pa kumpleto.';
+
+  @override
+  String get tipPraiseTitle => 'Purihin ang Inyong Anak';
+
+  @override
+  String get tipPraiseBody =>
+      'Purihin ang bawat tagumpay, malaki man o maliit, para mapalakas ang kanilang kumpiyansa.';
+
+  @override
+  String get tipTulaTitle => 'Tula';
+
+  @override
+  String get tipTulaBody =>
+      'Basahin nang malakas ang mga tula kasama ang inyong anak para mapabuti ang pagbigkas.';
+
+  @override
+  String get tipKwentoTitle => 'Kwento';
+
+  @override
+  String get tipKwentoBody =>
+      'Itanong sa inyong anak ang tungkol sa kwento pagkatapos basahin para mapalakas ang pag-unawa.';
+
+  @override
+  String get tipKantaTitle => 'Kanta';
+
+  @override
+  String get tipKantaBody =>
+      'Awitin nang magkasama ang mga kanta para maging masaya ang pag-aaral.';
+
+  @override
+  String get tipCountingTitle => 'Bilangan';
+
+  @override
+  String get tipCountingBody =>
+      'Gumamit ng tunay na bagay tulad ng prutas o laruan para matulungan ang inyong anak na mabilang.';
+
+  @override
+  String get tipPraiseMatTitle => 'Papuri';
+
+  @override
+  String get tipPraiseMatBody =>
+      'Purihin ang inyong anak sa bawat tamang sagot para mapalakas ang kanilang kumpiyansa sa matematika.';
+
+  @override
+  String get tipGameFunTitle => 'Laro';
+
+  @override
+  String get tipGameFunBody =>
+      'Ang mga laro ay dinisenyo para maging masaya — hayaan ang inyong anak na mag-enjoy sa pag-aaral.';
 }

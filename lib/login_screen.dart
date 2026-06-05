@@ -6,6 +6,7 @@ import 'services/auth_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/teacher_login_screen.dart';
 import 'utils/constants.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -117,10 +118,38 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  InputDecoration _modernInputDecoration({
+    required String label,
+    required IconData icon,
+    Widget? suffix,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+      prefixIcon: Icon(icon, color: AppColors.primary, size: 20),
+      suffixIcon: suffix,
+      filled: true,
+      fillColor: const Color(0xFFF8F9FA),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
         child: _isLoading
             ? const Center(
@@ -134,203 +163,219 @@ class _LoginScreenState extends State<LoginScreen> {
                         minHeight: constraints.maxHeight,
                       ),
                       child: IntrinsicHeight(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 60),
-
-                              // App Logo Header
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                        child: Column(
+                          children: [
+                            // Top decorative header
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.only(
+                                top: 48,
+                                bottom: 80,
+                                left: 32,
+                                right: 32,
+                              ),
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppColors.primary,
+                                    Color(0xFF5B8DEF),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.vertical(
+                                  bottom: Radius.circular(40),
+                                ),
+                              ),
+                              child: Column(
                                 children: [
+                                  // Logo
                                   Container(
-                                    width: 60,
-                                    height: 60,
+                                    width: 72,
+                                    height: 72,
                                     decoration: BoxDecoration(
-                                      color: AppColors.primary.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(16),
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: const Icon(
-                                      Icons.auto_stories,
-                                      color: AppColors.primary,
-                                      size: 32,
+                                    padding: const EdgeInsets.all(10),
+                                    child: Image.asset(
+                                      'assets/images/splash_logo.png',
+                                      fit: BoxFit.contain,
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
+                                  const SizedBox(height: 20),
                                   const Text(
                                     'E-Tarabay',
                                     style: TextStyle(
                                       fontSize: 28,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                      letterSpacing: 1.0,
+                                      color: Colors.white,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    AppLocalizations.of(context)!.welcome,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
                               ),
+                            ),
 
-                              const SizedBox(height: 40),
-
-                              // Welcome text
-                              SizedBox(
-                                width: double.infinity,
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      AppLocalizations.of(context)!.welcome,
-                                      style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textDark,
+                            // Form card overlapping the header
+                            Transform.translate(
+                              offset: const Offset(0, -48),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(28),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(28),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.06),
+                                        blurRadius: 24,
+                                        offset: const Offset(0, 8),
                                       ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      AppLocalizations.of(context)!.loginPrompt,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: AppColors.textLight,
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(context)!
+                                            .loginPrompt,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade500,
+                                        ),
                                       ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                      const SizedBox(height: 24),
 
-                              const SizedBox(height: 40),
-
-                              // Username field
-                              TextField(
-                                controller: _usernameController,
-                                decoration: InputDecoration(
-                                  labelText: AppLocalizations.of(context)!.username,
-                                  prefixIcon: const Icon(
-                                    Icons.person_outline,
-                                    color: AppColors.primary,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.primary,
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
-                                textInputAction: TextInputAction.next,
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // Password field (LRN)
-                              TextField(
-                                controller: _passwordController,
-                                obscureText: _obscurePassword,
-                                decoration: InputDecoration(
-                                  labelText:
-                                      '${AppLocalizations.of(context)!.password} (LRN)',
-                                  prefixIcon: const Icon(
-                                    Icons.lock_outline,
-                                    color: AppColors.primary,
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility_off
-                                          : Icons.visibility,
-                                      color: AppColors.textLight,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _obscurePassword = !_obscurePassword;
-                                      });
-                                    },
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.primary,
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
-                                textInputAction: TextInputAction.done,
-                                onSubmitted: (_) => _loginStudent(),
-                              ),
-
-                              const SizedBox(height: 32),
-
-                              // Login Button
-                              SizedBox(
-                                width: double.infinity,
-                                height: 56,
-                                child: ElevatedButton(
-                                  onPressed: _loginStudent,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(28),
-                                    ),
-                                    elevation: 2,
-                                  ),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.loginButton,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              const Spacer(),
-
-                              // Continue as Teacher button
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 40),
-                                child: OutlinedButton.icon(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            const TeacherLoginScreen(),
+                                      // Username field
+                                      TextField(
+                                        controller: _usernameController,
+                                        decoration: _modernInputDecoration(
+                                          label: AppLocalizations.of(context)!
+                                              .username,
+                                          icon: Icons.person_outline,
+                                        ),
+                                        textInputAction: TextInputAction.next,
+                                        style: const TextStyle(fontSize: 15),
                                       ),
-                                    );
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    side: const BorderSide(
-                                        color: AppColors.primary, width: 2),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 24, vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                  ),
-                                  icon: const Icon(
-                                    Icons.school_outlined,
-                                    color: AppColors.primary,
-                                  ),
-                                  label: Text(
-                                    AppLocalizations.of(context)!.teacherLoginButton,
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+
+                                      const SizedBox(height: 16),
+
+                                      // Password field (LRN)
+                                      TextField(
+                                        controller: _passwordController,
+                                        obscureText: _obscurePassword,
+                                        decoration: _modernInputDecoration(
+                                          label:
+                                              '${AppLocalizations.of(context)!.password} (LRN)',
+                                          icon: Icons.lock_outline,
+                                          suffix: IconButton(
+                                            icon: Icon(
+                                              _obscurePassword
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
+                                              color: Colors.grey.shade400,
+                                              size: 20,
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _obscurePassword =
+                                                    !_obscurePassword;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        textInputAction: TextInputAction.done,
+                                        onSubmitted: (_) => _loginStudent(),
+                                        style: const TextStyle(fontSize: 15),
+                                      ),
+
+                                      const SizedBox(height: 28),
+
+                                      // Login Button
+                                      SizedBox(
+                                        width: double.infinity,
+                                        height: 56,
+                                        child: ElevatedButton(
+                                          onPressed: _loginStudent,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primary,
+                                            foregroundColor: Colors.white,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            AppLocalizations.of(context)!
+                                                .loginButton,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+
+                            const Spacer(),
+
+                            // Continue as Teacher
+                            Transform.translate(
+                              offset: const Offset(0, -24),
+                              child: TextButton.icon(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          const TeacherLoginScreen(),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(
+                                  Icons.school_outlined,
+                                  size: 18,
+                                  color: AppColors.primary,
+                                ),
+                                label: Text(
+                                  AppLocalizations.of(context)!
+                                      .teacherLoginButton,
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 10,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 20),
+                          ],
                         ),
                       ),
                     ),

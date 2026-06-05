@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'custom_back_button.dart';
 
-class CustomHeaderAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomHeaderAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   final String title;
   final Color baseColor;
   final List<Widget>? actions;
+  final bool showBackButton;
 
   const CustomHeaderAppBar({
     super.key,
     required this.title,
     required this.baseColor,
     this.actions,
+    this.showBackButton = true,
   });
 
   @override
@@ -18,7 +21,8 @@ class CustomHeaderAppBar extends StatelessWidget implements PreferredSizeWidget 
     // The padding logic ensures the content stays below the system status bar,
     // mimicking a standard AppBar layout but with custom decoration.
     return Container(
-      padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 20, 20, 24),
+      padding: EdgeInsets.fromLTRB(
+          20, MediaQuery.of(context).padding.top + 20, 20, 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -39,12 +43,14 @@ class CustomHeaderAppBar extends StatelessWidget implements PreferredSizeWidget 
       ),
       child: Row(
         children: [
-          CustomBackButton(
-            onPressed: () => Navigator.pop(context),
-            iconColor: Colors.white,
-            backgroundColor: Colors.white.withOpacity(0.2),
-          ),
-          const SizedBox(width: 16),
+          if (showBackButton) ...[
+            CustomBackButton(
+              onPressed: () => Navigator.pop(context),
+              iconColor: Colors.white,
+              backgroundColor: Colors.white.withOpacity(0.2),
+            ),
+            const SizedBox(width: 16),
+          ],
           Expanded(
             child: Text(
               title,

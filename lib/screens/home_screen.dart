@@ -5,6 +5,10 @@ import 'package:confetti/confetti.dart';
 import '../main.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import '../widgets/floating_bottom_nav_bar.dart';
+import '../widgets/staggered_entrance.dart';
+import '../widgets/cached_avatar.dart';
+import '../utils/page_transitions.dart';
 import 'matematika_screen.dart';
 import 'pamilya_screen.dart';
 import 'kulay_screen.dart';
@@ -170,24 +174,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
     switch (index) {
       case 0:
+        // Home - no navigation needed
         break;
       case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LessonsScreen()),
-        ).then((_) => setState(() => _selectedIndex = 0));
+        context
+            .pushPremium(const LessonsScreen())
+            .then((_) => setState(() => _selectedIndex = 0));
         break;
       case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AwardsScreen()),
-        ).then((_) => setState(() => _selectedIndex = 0));
+        context
+            .pushPremium(const AwardsScreen())
+            .then((_) => setState(() => _selectedIndex = 0));
         break;
       case 3:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SettingsScreen()),
-        ).then((_) => setState(() => _selectedIndex = 0));
+        context
+            .pushPremium(const SettingsScreen())
+            .then((_) => setState(() => _selectedIndex = 0));
         break;
     }
   }
@@ -208,12 +210,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final padding = MediaQuery.of(context).padding;
     final safeHeight = size.height - padding.top - padding.bottom;
 
-    // Get user name with null safety
-    String userName = userProvider.userProfile?.name ?? 'Noel';
-    String userInitial = userName.isNotEmpty ? userName[0].toUpperCase() : 'N';
-    int userAge = userProvider.userProfile?.age ?? 2;
+    // Get user info with null safety
+    final profile = userProvider.userProfile;
+    String userName = profile?.name ?? 'Noel';
+    int userAge = profile?.age ?? 2;
+    final avatar = profile?.avatar ?? '';
 
     return Scaffold(
+      extendBody: true,
       body: Container(
         color: const Color(0xFFF5F7FA),
         child: SafeArea(
@@ -275,16 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: Text(
-                                userInitial,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                            child: _buildHomeAvatar(avatar, userName),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -442,42 +437,47 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       return Column(
                         children: [
-                          // Row 1 - Matematika & Pamilya
                           SizedBox(
                             height: cardHeight,
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: _buildImageCard(
-                                    title: AppLocalizations.of(context)!
-                                        .matematika,
-                                    subtitle: AppLocalizations.of(context)!
-                                        .sundanMoKayaMo,
-                                    imagePath: 'assets/images/card1.png',
-                                    color: AppColors.numbers,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const MatematikaScreen(),
+                                  child: StaggeredEntrance(
+                                    index: 0,
+                                    child: _buildImageCard(
+                                      title: AppLocalizations.of(context)!
+                                          .matematika,
+                                      subtitle: AppLocalizations.of(context)!
+                                          .sundanMoKayaMo,
+                                      imagePath: 'assets/images/card1.png',
+                                      color: AppColors.numbers,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const MatematikaScreen(),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: _buildImageCard(
-                                    title: AppLocalizations.of(context)!
-                                        .angAkingSarili,
-                                    subtitle: AppLocalizations.of(context)!
-                                        .atAkingPamilya,
-                                    imagePath: 'assets/images/card2.png',
-                                    color: AppColors.family,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const PamilyaScreen(),
+                                  child: StaggeredEntrance(
+                                    index: 1,
+                                    child: _buildImageCard(
+                                      title: AppLocalizations.of(context)!
+                                          .angAkingSarili,
+                                      subtitle: AppLocalizations.of(context)!
+                                          .atAkingPamilya,
+                                      imagePath: 'assets/images/card2.png',
+                                      color: AppColors.family,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const PamilyaScreen(),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -485,45 +485,48 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-
                           const SizedBox(height: 12),
-
-                          // Row 2 - Kulay & Trace It
                           SizedBox(
                             height: cardHeight,
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: _buildImageCard(
-                                    title:
-                                        AppLocalizations.of(context)!.kulaySaya,
-                                    subtitle: AppLocalizations.of(context)!
-                                        .magkulayTayo,
-                                    imagePath: 'assets/images/card3.png',
-                                    color: AppColors.colors,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const KulayScreen(),
+                                  child: StaggeredEntrance(
+                                    index: 2,
+                                    child: _buildImageCard(
+                                      title: AppLocalizations.of(context)!
+                                          .kulaySaya,
+                                      subtitle: AppLocalizations.of(context)!
+                                          .magkulayTayo,
+                                      imagePath: 'assets/images/card3.png',
+                                      color: AppColors.colors,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const KulayScreen(),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: _buildImageCard(
-                                    title: AppLocalizations.of(context)!
-                                        .traceItTitle,
-                                    subtitle: AppLocalizations.of(context)!
-                                        .traceItSubtitle,
-                                    imagePath: 'assets/images/card4.png',
-                                    color: AppColors.success,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const TraceItScreen(),
+                                  child: StaggeredEntrance(
+                                    index: 3,
+                                    child: _buildImageCard(
+                                      title: AppLocalizations.of(context)!
+                                          .traceItTitle,
+                                      subtitle: AppLocalizations.of(context)!
+                                          .traceItSubtitle,
+                                      imagePath: 'assets/images/card4.png',
+                                      color: AppColors.success,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TraceItScreen(),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -531,47 +534,50 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-
                           const SizedBox(height: 12),
-
-                          // Row 3 - Magbasa Tayo & Tandaan Mo
                           SizedBox(
                             height: cardHeight,
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: _buildImageCard(
-                                    title: AppLocalizations.of(context)!
-                                        .magbasaTitle,
-                                    subtitle: AppLocalizations.of(context)!
-                                        .alpabetoAtMgaSalita,
-                                    imagePath: 'assets/images/card5.png',
-                                    color: AppColors.alphabet,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const MagbasaScreen(),
+                                  child: StaggeredEntrance(
+                                    index: 4,
+                                    child: _buildImageCard(
+                                      title: AppLocalizations.of(context)!
+                                          .magbasaTitle,
+                                      subtitle: AppLocalizations.of(context)!
+                                          .alpabetoAtMgaSalita,
+                                      imagePath: 'assets/images/card5.png',
+                                      color: AppColors.alphabet,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const MagbasaScreen(),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: _buildGeneratedCard(
-                                    title: AppLocalizations.of(context)!
-                                        .tandaanTitle,
-                                    subtitle: AppLocalizations.of(context)!
-                                        .tandaanTitle,
-                                    color: AppColors.shapes,
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const TandaanScreen(),
+                                  child: StaggeredEntrance(
+                                    index: 5,
+                                    child: _buildGeneratedCard(
+                                      title: AppLocalizations.of(context)!
+                                          .tandaanTitle,
+                                      subtitle: AppLocalizations.of(context)!
+                                          .tandaanTitle,
+                                      color: AppColors.shapes,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const TandaanScreen(),
+                                        ),
                                       ),
+                                      child: _buildTandaanThumbnail(),
                                     ),
-                                    child: _buildTandaanThumbnail(),
                                   ),
                                 ),
                               ],
@@ -588,52 +594,28 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      // Bottom Navigation Bar
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(25),
-            topRight: Radius.circular(25),
+      // Modern Bottom Navigation Bar
+      bottomNavigationBar: FloatingBottomNavBar(
+        selectedIndex: _selectedIndex,
+        onTap: _onNavItemTapped,
+        items: [
+          NavItemData(
+            icon: Icons.home_rounded,
+            label: AppLocalizations.of(context)!.home,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 15,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  Icons.home_rounded,
-                  AppLocalizations.of(context)!.home,
-                  0,
-                ),
-                _buildNavItem(
-                  Icons.auto_stories_rounded,
-                  AppLocalizations.of(context)!.lessons,
-                  1,
-                ),
-                _buildNavItem(
-                  Icons.emoji_events_rounded,
-                  AppLocalizations.of(context)!.awards,
-                  2,
-                ),
-                _buildNavItem(
-                  Icons.settings_rounded,
-                  AppLocalizations.of(context)!.settings,
-                  3,
-                ),
-              ],
-            ),
+          NavItemData(
+            icon: Icons.auto_stories_rounded,
+            label: AppLocalizations.of(context)!.lessons,
           ),
-        ),
+          NavItemData(
+            icon: Icons.emoji_events_rounded,
+            label: AppLocalizations.of(context)!.awards,
+          ),
+          NavItemData(
+            icon: Icons.settings_rounded,
+            label: AppLocalizations.of(context)!.settings,
+          ),
+        ],
       ),
     );
   }
@@ -1000,36 +982,6 @@ class _HomeScreenState extends State<HomeScreen> {
         color: color.withOpacity(0.5), size: 14);
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    final isActive = _selectedIndex == index;
-
-    return GestureDetector(
-      onTap: () => _onNavItemTapped(index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isActive ? AppColors.primary : Colors.grey.shade400,
-              size: 20,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label.isNotEmpty ? label : '',
-              style: TextStyle(
-                fontSize: 9,
-                color: isActive ? AppColors.primary : Colors.grey.shade400,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildPerformanceGrade(UserProvider userProvider) {
     final progress = userProvider.getAllProgress();
     final grade = progress['grade'] ?? 'Not Started';
@@ -1069,6 +1021,37 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHomeAvatar(String avatar, String userName) {
+    if (avatar.startsWith('http')) {
+      return CachedAvatar(imageUrl: avatar, size: 50);
+    }
+    if (avatar.isNotEmpty) {
+      final presets = <String, IconData>{
+        'boy1': Icons.face,
+        'boy2': Icons.sentiment_satisfied,
+        'boy3': Icons.child_care,
+        'girl1': Icons.face_2,
+        'girl2': Icons.face_3,
+        'girl3': Icons.face_4,
+        'neutral1': Icons.person,
+        'neutral2': Icons.sentiment_very_satisfied,
+      };
+      final icon = presets[avatar] ?? Icons.person;
+      return Center(child: Icon(icon, size: 24, color: Colors.white));
+    }
+    final initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'N';
+    return Center(
+      child: Text(
+        initial,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
     );
   }

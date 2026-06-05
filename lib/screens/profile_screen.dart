@@ -5,6 +5,7 @@ import '../utils/constants.dart';
 import '../login_screen.dart';
 import 'package:confetti/confetti.dart';
 import '../widgets/custom_header_app_bar.dart';
+import '../widgets/cached_avatar.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -531,6 +532,47 @@ class _BirthdayAvatarState extends State<_BirthdayAvatar> {
     super.dispose();
   }
 
+  Widget _buildAvatarContent() {
+    final avatar = widget.userProfile?.avatar?.toString() ?? '';
+
+    // Network image URL (cached for offline)
+    if (avatar.startsWith('http')) {
+      return CachedAvatar(imageUrl: avatar, size: 120);
+    }
+
+    // Preset icon
+    if (avatar.isNotEmpty) {
+      final presets = <String, IconData>{
+        'boy1': Icons.face,
+        'boy2': Icons.sentiment_satisfied,
+        'boy3': Icons.child_care,
+        'girl1': Icons.face_2,
+        'girl2': Icons.face_3,
+        'girl3': Icons.face_4,
+        'neutral1': Icons.person,
+        'neutral2': Icons.sentiment_very_satisfied,
+      };
+      final icon = presets[avatar] ?? Icons.person;
+      return Center(
+        child: Icon(icon, size: 56, color: Colors.white),
+      );
+    }
+
+    // Fallback to initial letter
+    return Center(
+      child: Text(
+        (widget.userProfile?.name != null && widget.userProfile.name.isNotEmpty)
+            ? widget.userProfile.name[0].toUpperCase()
+            : '?',
+        style: const TextStyle(
+          fontSize: 48,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -567,19 +609,7 @@ class _BirthdayAvatarState extends State<_BirthdayAvatar> {
               ),
             ],
           ),
-          child: Center(
-            child: Text(
-              (widget.userProfile?.name != null &&
-                      widget.userProfile.name.isNotEmpty)
-                  ? widget.userProfile.name[0].toUpperCase()
-                  : '?',
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
+          child: _buildAvatarContent(),
         ),
       ],
     );

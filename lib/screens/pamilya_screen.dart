@@ -6,9 +6,7 @@ import '../data/pamilya_content.dart';
 import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
-import '../widgets/badge_earned_modal.dart';
 import '../widgets/custom_back_button.dart';
-import 'package:e_tarabay/l10n/app_localizations.dart';
 import '../widgets/success_modal.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../main.dart';
@@ -518,10 +516,11 @@ class _PamilyaScreenState extends State<PamilyaScreen>
 
   void _startTimer() {
     _timer?.cancel();
-    
+
     try {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      if (userProvider.isPamilyaGameCompleted(_selectedMainCategory, _selectedLevel, _currentGameIndex)) {
+      if (userProvider.isPamilyaGameCompleted(
+          _selectedMainCategory, _selectedLevel, _currentGameIndex)) {
         return;
       }
     } catch (_) {}
@@ -1094,7 +1093,6 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         ],
       ),
       actions: [
-
         _buildTimerPill(),
         _buildAppBarPill(
           icon: '⭐',
@@ -1342,9 +1340,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                         size: 14,
                         color: active
                             ? Colors.white
-                            : (earned
-                                ? Colors.green
-                                : Colors.grey.shade500)),
+                            : (earned ? Colors.green : Colors.grey.shade500)),
                     const SizedBox(width: 6),
                     Text(
                       _getLevelTitle(_selectedMainCategory, i),
@@ -1513,7 +1509,8 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     }
 
     final userProvider = Provider.of<UserProvider>(context);
-    final isCompleted = userProvider.isPamilyaGameCompleted(_selectedMainCategory, _selectedLevel, _currentGameIndex);
+    final isCompleted = userProvider.isPamilyaGameCompleted(
+        _selectedMainCategory, _selectedLevel, _currentGameIndex);
 
     if (isCompleted && !_showCorrectOverlay) {
       return Stack(
@@ -1531,13 +1528,15 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: Colors.green, width: 3),
                 boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2)
+                  BoxShadow(
+                      color: Colors.black12, blurRadius: 10, spreadRadius: 2)
                 ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check_circle_rounded, color: Colors.green, size: 50),
+                  const Icon(Icons.check_circle_rounded,
+                      color: Colors.green, size: 50),
                   const SizedBox(height: 10),
                   Text(
                     AppLocalizations.of(context)!.finishedAlready,
@@ -2209,8 +2208,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                     color: _currentMainColor)),
           ]),
           const SizedBox(height: 6),
-          Text(
-              AppLocalizations.of(context)!.familyTreeDesc,
+          Text(AppLocalizations.of(context)!.familyTreeDesc,
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               textAlign: TextAlign.center),
           const SizedBox(height: 20),
@@ -2290,8 +2288,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             decoration: BoxDecoration(
                 color: Colors.amber.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(14)),
-            child: Text(
-                AppLocalizations.of(context)!.familyTreeTapHint,
+            child: Text(AppLocalizations.of(context)!.familyTreeTapHint,
                 style: const TextStyle(fontSize: 13),
                 textAlign: TextAlign.center),
           ),

@@ -85,6 +85,11 @@ class UserProvider extends ChangeNotifier {
         final data = snapshot.data();
         if (data != null && data.containsKey('profile')) {
           final profileData = Map<String, dynamic>.from(data['profile'] as Map);
+          // Inject root-level avatar if profile.avatar is missing
+          if (data.containsKey('avatar') &&
+              (profileData['avatar'] == null || profileData['avatar'] == '')) {
+            profileData['avatar'] = data['avatar'];
+          }
           if (profileData.isNotEmpty) {
             _userProfile = UserProfile.fromJson(profileData);
             _profileBox.put('currentUser', _userProfile!.toJson());
@@ -351,11 +356,18 @@ class UserProvider extends ChangeNotifier {
 
         // THEN extract root fields and overwrite the nested ones (if root is not empty),
         // because previous versions of the app might have saved empty strings inside the nested profile map.
-        if (data['name'] != null && data['name'].toString().isNotEmpty) mergedProfileData['name'] = data['name'];
-        if (data['gender'] != null && data['gender'].toString().isNotEmpty) mergedProfileData['gender'] = data['gender'];
-        if (data['lrn'] != null && data['lrn'].toString().isNotEmpty) mergedProfileData['lrn'] = data['lrn'];
-        if (data['parentName'] != null && data['parentName'].toString().isNotEmpty) mergedProfileData['parentName'] = data['parentName'];
-        if (data['parentContact'] != null && data['parentContact'].toString().isNotEmpty) mergedProfileData['parentContact'] = data['parentContact'];
+        if (data['name'] != null && data['name'].toString().isNotEmpty)
+          mergedProfileData['name'] = data['name'];
+        if (data['gender'] != null && data['gender'].toString().isNotEmpty)
+          mergedProfileData['gender'] = data['gender'];
+        if (data['lrn'] != null && data['lrn'].toString().isNotEmpty)
+          mergedProfileData['lrn'] = data['lrn'];
+        if (data['parentName'] != null &&
+            data['parentName'].toString().isNotEmpty)
+          mergedProfileData['parentName'] = data['parentName'];
+        if (data['parentContact'] != null &&
+            data['parentContact'].toString().isNotEmpty)
+          mergedProfileData['parentContact'] = data['parentContact'];
 
         if (mergedProfileData.isNotEmpty) {
           _userProfile = UserProfile.fromJson(mergedProfileData);
@@ -1035,18 +1047,75 @@ class UserProvider extends ChangeNotifier {
 
   bool isTraceItActivityCompleted(String mode, int index) {
     if (!_isInitialized) return false;
-    
+
     if (_prefs != null) {
       String prefKey = '';
       if (mode == 'uppercase') {
-        const allUpper = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-        if (index >= 0 && index < allUpper.length) prefKey = 'traceit_upper_${allUpper[index]}';
+        const allUpper = [
+          'A',
+          'B',
+          'C',
+          'D',
+          'E',
+          'F',
+          'G',
+          'H',
+          'I',
+          'J',
+          'K',
+          'L',
+          'M',
+          'N',
+          'O',
+          'P',
+          'Q',
+          'R',
+          'S',
+          'T',
+          'U',
+          'V',
+          'W',
+          'X',
+          'Y',
+          'Z'
+        ];
+        if (index >= 0 && index < allUpper.length)
+          prefKey = 'traceit_upper_${allUpper[index]}';
       } else if (mode == 'lowercase') {
-        const allLower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
-        if (index >= 0 && index < allLower.length) prefKey = 'traceit_lower_${allLower[index]}';
+        const allLower = [
+          'a',
+          'b',
+          'c',
+          'd',
+          'e',
+          'f',
+          'g',
+          'h',
+          'i',
+          'j',
+          'k',
+          'l',
+          'm',
+          'n',
+          'o',
+          'p',
+          'q',
+          'r',
+          's',
+          't',
+          'u',
+          'v',
+          'w',
+          'x',
+          'y',
+          'z'
+        ];
+        if (index >= 0 && index < allLower.length)
+          prefKey = 'traceit_lower_${allLower[index]}';
       } else if (mode == 'numbers') {
-        const allNums = ['1','2','3','4','5','6','7','8','9','10'];
-        if (index >= 0 && index < allNums.length) prefKey = 'traceit_num_${allNums[index]}';
+        const allNums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+        if (index >= 0 && index < allNums.length)
+          prefKey = 'traceit_num_${allNums[index]}';
       }
       if (prefKey.isNotEmpty && _prefs!.getBool(prefKey) == true) return true;
     }
@@ -1547,19 +1616,22 @@ class UserProvider extends ChangeNotifier {
   // GET SPECIFIC PROGRESS
   bool isMagbasaActivityCompleted(String category, int index) {
     if (!_isInitialized) return false;
-    if (_prefs != null && _prefs!.getBool('${category}_activity_$index') == true) return true;
+    if (_prefs != null &&
+        _prefs!.getBool('${category}_activity_$index') == true) return true;
     return _progressBox.get('magbasa_${category}_$index') ?? false;
   }
 
   bool isKulayActivityCompleted(String activity) {
     if (!_isInitialized) return false;
-    if (_prefs != null && _prefs!.getBool('kulay_$activity') == true) return true;
+    if (_prefs != null && _prefs!.getBool('kulay_$activity') == true)
+      return true;
     return _progressBox.get('kulay_$activity') ?? false;
   }
 
   bool isKulayPageCompleted(String category, int index) {
     if (!_isInitialized) return false;
-    if (_prefs != null && _prefs!.getBool('kulay_page_${category}_$index') == true) return true;
+    if (_prefs != null &&
+        _prefs!.getBool('kulay_page_${category}_$index') == true) return true;
     return _progressBox.get('kulay_page_${category}_$index') ?? false;
   }
 
@@ -1567,8 +1639,9 @@ class UserProvider extends ChangeNotifier {
     if (!_isInitialized) return false;
     List<dynamic> completedLevels = _progressBox.get('matematika_levels') ??
         [false, false, false, false, false, false, false];
-    
-    if (_prefs != null && _prefs!.getBool('mat_level_complete_$level') == true) return true;
+
+    if (_prefs != null && _prefs!.getBool('mat_level_complete_$level') == true)
+      return true;
 
     return level < completedLevels.length ? completedLevels[level] : false;
   }
@@ -1577,10 +1650,12 @@ class UserProvider extends ChangeNotifier {
     if (!_isInitialized) return false;
     Map<String, dynamic> games =
         Map<String, dynamic>.from(_progressBox.get('matematika_games') ?? {});
-    
+
     if (_prefs != null) {
-      if (_prefs!.getBool('mat_level_${level}_game_$gameIndex') == true) return true;
-      if (_prefs!.getBool('matematika_game_${level}_$gameIndex') == true) return true;
+      if (_prefs!.getBool('mat_level_${level}_game_$gameIndex') == true)
+        return true;
+      if (_prefs!.getBool('matematika_game_${level}_$gameIndex') == true)
+        return true;
     }
 
     return games['level${level}_game$gameIndex'] ?? false;

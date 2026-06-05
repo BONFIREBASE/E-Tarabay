@@ -54,6 +54,7 @@
   "alpabetoAtMgaSalita": "DANIW, SARITA KEN KANKANTA",
   "home": "Balay",
   "profile": "Profil",
+  "videoDance": "Sayaw Video",
   "settingsTitle": "Pangpaandar",
   "totalProgress": "Dagup a Progress",
   "poems": "Daniw",
@@ -653,5 +654,75 @@
   "traceItSubtitle": "Idrawing manipud iti memorya",
   "checkTracing": "Kitaen",
   "showHint": "Tulong",
-  "almostThere": "Asideg pay laeng! Padasem manen!"
+  "almostThere": "Asideg pay laeng! Padasem manen!",
+  "progressPages": "{done} / {total} a panid",
+  "@progressPages": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "percentComplete": "{percent}% a nakompleto",
+  "@percentComplete": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+  "obraLabel": "Obra",
+  "strokesLabel": "Strokes",
+  "categoryProgressHeader": "Rang-ay iti Tunggal Kategorya",
+  "savedArtworksHeader": "Dagiti Naidulin nga Obra",
+  "parentTipsHeader": "Tips para kadagiti Nagannak",
+  "tipKulayTitle": "Kolor-Saya",
+  "tipKulayBody": "Paregtaen ti anakyo nga agkolor iti amin a panid iti tunggal kategorya.",
+  "tipTraceItTitle": "Surotem",
+  "tipTraceItBody": "Iwanwan ti anakyo a suroten ti umiso a turong ti tunggal letra.",
+  "tipMagbasaTitle": "Agbasa",
+  "tipMagbasaBody": "Basaen a napigsa kadua ti anakyo dagiti daniw, sarita ken kanta.",
+  "tipMatematikaTitle": "Matematika",
+  "tipMatematikaBody": "Paregtaen ti anakyo a lpasen ti tunggal ay-ayam tapno rumang-ay ti kabaelanda iti bilang.",
+  "tipStudyTimeTitle": "Oras ti Panagadal",
+  "tipStudyTimeBody": "Agpraktis iti 15-20 a minuto iti inaldaw tapno nasayaat ti resulta.",
+  "progressCompleted": "{done} / {total} a nalpas",
+  "@progressCompleted": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "progressActivities": "{done} / {total} nga aktibidad",
+  "@progressActivities": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "progressGames": "{done} / {total} nga ay-ayam",
+  "@progressGames": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "pointsStatLabel": "Puntos",
+  "starsStatLabel": "Bituen",
+  "gameProgressHeader": "Rang-ay iti Tunggal Ay-ayam",
+  "tipPencilGripTitle": "Umiso a Panagiggemm ti Lapis",
+  "tipPencilGripBody": "Siguraduwen a husto ti panagiggemm ti anakyo iti stylus wenno ramayda bayat ti panagsursurot.",
+  "tipRepeatTitle": "Ulit-uliten",
+  "tipRepeatBody": "Paregtaen ti anakyo nga uliten dagiti letra a saan pay a nakompleto.",
+  "tipPraiseTitle": "Dayawen ti Anakyo",
+  "tipPraiseBody": "Dayawen ti tunggal balligi, dakkel man wenno bassit, tapno pumigsa ti kompiansada.",
+  "tipTulaTitle": "Daniw",
+  "tipTulaBody": "Basaen a napigsa dagiti daniw kadua ti anakyo tapno mapasayaat ti panagsaoda.",
+  "tipKwentoTitle": "Sarita",
+  "tipKwentoBody": "Saludsoden ti anakyo maipanggep iti sarita kalpasan a basaen tapno pumigsa ti pannakaawatda.",
+  "tipKantaTitle": "Kanta",
+  "tipKantaBody": "Agkantaankayo a sangsangkamaysa tapno naragsak ti panagadal.",
+  "tipCountingTitle": "Panagbilang",
+  "tipCountingBody": "Usaren dagiti pudno a banag kas prutas wenno al-aliwa tapno matulongan ti anakyo a mangbilang.",
+  "tipPraiseMatTitle": "Pammadayaw",
+  "tipPraiseMatBody": "Dayawen ti anakyo iti tunggal umiso a sungbat tapno pumigsa ti kompiansada iti matematika.",
+  "tipGameFunTitle": "Ay-ayam",
+  "tipGameFunBody": "Dagiti ay-ayam ket naaramid tapno naragsak — palubosan ti anakyo a mag-enjoy iti panagadal."
 }

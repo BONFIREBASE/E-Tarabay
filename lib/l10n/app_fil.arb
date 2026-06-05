@@ -54,6 +54,7 @@
   "alpabetoAtMgaSalita": "MGA TULA, KWENTO AT KANTA",
   "home": "Home",
   "profile": "Profile",
+  "videoDance": "Sayaw Video",
   "settingsTitle": "Settings",
   "totalProgress": "Kabuuang Progress",
   "poems": "Mga Tula",
@@ -653,5 +654,75 @@
   "traceItSubtitle": "Idrowing mula sa memorya",
   "checkTracing": "Tingnan",
   "showHint": "Tulong",
-  "almostThere": "Malapit na! Subukan muli!"
+  "almostThere": "Malapit na! Subukan muli!",
+  "progressPages": "{done} / {total} pahina",
+  "@progressPages": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "percentComplete": "{percent}% kumpleto",
+  "@percentComplete": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+  "obraLabel": "Obra",
+  "strokesLabel": "Strokes",
+  "categoryProgressHeader": "Progreso sa Bawat Kategorya",
+  "savedArtworksHeader": "Mga Nai-save na Obra",
+  "parentTipsHeader": "Tips para sa Magulang",
+  "tipKulayTitle": "Kulay-Saya",
+  "tipKulayBody": "Hikayatin ang inyong anak na kulayin ang lahat ng pahina sa bawat kategorya.",
+  "tipTraceItTitle": "Sundan Mo",
+  "tipTraceItBody": "Gabayan ang inyong anak na sundan ang tamang direksyon ng bawat letra.",
+  "tipMagbasaTitle": "Magbasa",
+  "tipMagbasaBody": "Basahin nang malakas kasama ang inyong anak ang mga tula, kwento at kanta.",
+  "tipMatematikaTitle": "Matematika",
+  "tipMatematikaBody": "Hikayatin ang inyong anak na matapos ang bawat laro para mas lumago ang kakayahan sa bilang.",
+  "tipStudyTimeTitle": "Oras ng Pag-aaral",
+  "tipStudyTimeBody": "Mag-practice nang 15-20 minuto araw-araw para sa pinakamabuting resulta.",
+  "progressCompleted": "{done} / {total} natatapos",
+  "@progressCompleted": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "progressActivities": "{done} / {total} aktibidad",
+  "@progressActivities": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "progressGames": "{done} / {total} laro",
+  "@progressGames": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "pointsStatLabel": "Puntos",
+  "starsStatLabel": "Bituin",
+  "gameProgressHeader": "Progreso sa Bawat Laro",
+  "tipPencilGripTitle": "Tamang Hawak ng Lapis",
+  "tipPencilGripBody": "Siguraduhin na tamang hawak ng inyong anak ang stylus o daliri habang nag-tracing.",
+  "tipRepeatTitle": "Ulit-ulitin",
+  "tipRepeatBody": "Hikayatin ang inyong anak na ulit-ulitin ang mga letra na hindi pa kumpleto.",
+  "tipPraiseTitle": "Purihin ang Inyong Anak",
+  "tipPraiseBody": "Purihin ang bawat tagumpay, malaki man o maliit, para mapalakas ang kanilang kumpiyansa.",
+  "tipTulaTitle": "Tula",
+  "tipTulaBody": "Basahin nang malakas ang mga tula kasama ang inyong anak para mapabuti ang pagbigkas.",
+  "tipKwentoTitle": "Kwento",
+  "tipKwentoBody": "Itanong sa inyong anak ang tungkol sa kwento pagkatapos basahin para mapalakas ang pag-unawa.",
+  "tipKantaTitle": "Kanta",
+  "tipKantaBody": "Awitin nang magkasama ang mga kanta para maging masaya ang pag-aaral.",
+  "tipCountingTitle": "Bilangan",
+  "tipCountingBody": "Gumamit ng tunay na bagay tulad ng prutas o laruan para matulungan ang inyong anak na mabilang.",
+  "tipPraiseMatTitle": "Papuri",
+  "tipPraiseMatBody": "Purihin ang inyong anak sa bawat tamang sagot para mapalakas ang kanilang kumpiyansa sa matematika.",
+  "tipGameFunTitle": "Laro",
+  "tipGameFunBody": "Ang mga laro ay dinisenyo para maging masaya — hayaan ang inyong anak na mag-enjoy sa pag-aaral."
 }

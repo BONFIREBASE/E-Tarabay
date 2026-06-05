@@ -54,6 +54,7 @@
   "alpabetoAtMgaSalita": "Poems, Stories and Songs",
   "home": "Home",
   "profile": "Profile",
+  "videoDance": "Video Dance",
   "settingsTitle": "Settings",
   "totalProgress": "Total Progress",
   "poems": "Poems",
@@ -654,5 +655,75 @@
   "traceItSubtitle": "Draw from memory",
   "checkTracing": "Check",
   "showHint": "Hint",
-  "almostThere": "Almost there! Try again!"
+  "almostThere": "Almost there! Try again!",
+  "progressPages": "{done} / {total} pages",
+  "@progressPages": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "percentComplete": "{percent}% complete",
+  "@percentComplete": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+  "obraLabel": "Artworks",
+  "strokesLabel": "Strokes",
+  "categoryProgressHeader": "Progress Per Category",
+  "savedArtworksHeader": "Saved Artworks",
+  "parentTipsHeader": "Tips for Parents",
+  "tipKulayTitle": "Kulay-Saya",
+  "tipKulayBody": "Encourage your child to color all the pages in every category.",
+  "tipTraceItTitle": "Trace It",
+  "tipTraceItBody": "Guide your child to follow the correct direction of every letter.",
+  "tipMagbasaTitle": "Magbasa",
+  "tipMagbasaBody": "Read the poems, stories, and songs aloud together with your child.",
+  "tipMatematikaTitle": "Matematika",
+  "tipMatematikaBody": "Encourage your child to complete every game to build stronger number skills.",
+  "tipStudyTimeTitle": "Study Time",
+  "tipStudyTimeBody": "Practice 15-20 minutes every day for the best results.",
+  "progressCompleted": "{done} / {total} completed",
+  "@progressCompleted": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "progressActivities": "{done} / {total} activities",
+  "@progressActivities": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "progressGames": "{done} / {total} games",
+  "@progressGames": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "pointsStatLabel": "Points",
+  "starsStatLabel": "Stars",
+  "gameProgressHeader": "Progress Per Game",
+  "tipPencilGripTitle": "Proper Pencil Grip",
+  "tipPencilGripBody": "Make sure your child holds the stylus or finger correctly while tracing.",
+  "tipRepeatTitle": "Repeat Often",
+  "tipRepeatBody": "Encourage your child to redo the letters that are not yet completed.",
+  "tipPraiseTitle": "Praise Your Child",
+  "tipPraiseBody": "Praise every achievement, big or small, to build their confidence.",
+  "tipTulaTitle": "Poems",
+  "tipTulaBody": "Read the poems aloud with your child to improve pronunciation.",
+  "tipKwentoTitle": "Stories",
+  "tipKwentoBody": "Ask your child about the story after reading to strengthen comprehension.",
+  "tipKantaTitle": "Songs",
+  "tipKantaBody": "Sing the songs together so that learning becomes fun.",
+  "tipCountingTitle": "Counting",
+  "tipCountingBody": "Use real objects like fruits or toys to help your child count.",
+  "tipPraiseMatTitle": "Praise",
+  "tipPraiseMatBody": "Praise your child for every correct answer to build their confidence in math.",
+  "tipGameFunTitle": "Games",
+  "tipGameFunBody": "The games are designed to be fun — let your child enjoy learning."
 }
