@@ -11,6 +11,7 @@ import '../data/letter_tracing_data.dart';
 
 import '../utils/constants.dart';
 import '../widgets/success_modal.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  PROGRESS KEYS  (shared with for_parents_screen.dart)
@@ -741,7 +742,7 @@ class _SundanScreenState extends State<SundanScreen>
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(children: [
-              const Icon(Icons.star, color: Colors.amber, size: 16),
+              const Icon(LucideIcons.star, color: Colors.amber, size: 16),
               const SizedBox(width: 4),
               Text('$_stars',
                   style: const TextStyle(
@@ -942,7 +943,7 @@ class _SundanScreenState extends State<SundanScreen>
                                           MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.check_circle,
+                                        const Icon(LucideIcons.circle_check,
                                             color: Colors.white, size: 28),
                                         const SizedBox(width: 10),
                                         Flexible(
@@ -995,7 +996,7 @@ class _SundanScreenState extends State<SundanScreen>
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: _isCompleted ? null : _checkTracing,
-                  icon: const Icon(Icons.check_circle),
+                  icon: const Icon(LucideIcons.circle_check),
                   label: Text(AppLocalizations.of(context)!.checkTracing),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -1010,7 +1011,7 @@ class _SundanScreenState extends State<SundanScreen>
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _resetTracing,
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(LucideIcons.refresh_cw),
                   label: Text(AppLocalizations.of(context)!.ulitin),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,

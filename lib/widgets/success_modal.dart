@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class SuccessModal extends StatefulWidget {
   final String title;
@@ -109,7 +110,7 @@ class _SuccessModalState extends State<SuccessModal> {
                   children: List.generate(3, (index) {
                     final bool isFull = index < widget.stars;
                     return Icon(
-                      isFull ? Icons.star_rounded : Icons.star_outline_rounded,
+                      isFull ? LucideIcons.star : LucideIcons.star,
                       color: Colors.amber,
                       size: 48,
                     )
@@ -137,7 +138,7 @@ class _SuccessModalState extends State<SuccessModal> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildStatItem('Score', widget.score.toString(),
-                          Icons.emoji_events_rounded, Colors.orange),
+                          LucideIcons.trophy, Colors.orange),
                       if (widget.streak != null) ...[
                         Container(
                             width: 1.5,
@@ -146,7 +147,7 @@ class _SuccessModalState extends State<SuccessModal> {
                         _buildStatItem(
                             'Streak',
                             widget.streak.toString(),
-                            Icons.local_fire_department_rounded,
+                            LucideIcons.flame,
                             Colors.deepOrange),
                       ],
                     ],
@@ -250,7 +251,7 @@ class _SuccessModalState extends State<SuccessModal> {
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.celebration_rounded,
+                    LucideIcons.party_popper,
                     color: Colors.white,
                     size: 40,
                   ),
@@ -319,7 +320,7 @@ class _SuccessModalState extends State<SuccessModal> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.workspace_premium_rounded,
+          const Icon(LucideIcons.award,
               color: Colors.amber, size: 16),
           const SizedBox(width: 4),
           Text(

@@ -2,6 +2,7 @@ import 'dart:math' show pi;
 
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 /// Shows a beautiful celebration modal when a badge is earned
 class BadgeEarnedModal extends StatefulWidget {
@@ -237,7 +238,7 @@ class _BadgeEarnedModalState extends State<BadgeEarnedModal>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.star,
+                            LucideIcons.star,
                             color: Colors.white,
                             size: 20,
                           ),

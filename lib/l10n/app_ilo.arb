@@ -523,7 +523,7 @@
   "iKnowIt": "Naammuak!",
   "familyTreeTitle": "Puno ti Pamilya",
   "familyTreeDesc": "Ti puno ti pamilya ket nagpapakita dagiti miyembro ti pamilyam manipud iti nataengan agingga iti kaungpus.",
-  "familyTreeTapHint": "\ud83d\udca1 Tiknapen dagiti miyembro tapno maammuan ti relasyon da!",
+  "familyTreeTapHint": "💡 Tiknapen dagiti miyembro tapno maammuan ti relasyon da!",
   "iLearnedFamilyTree": "Naammuak ti Puno ti Pamilya!",
   "ourHomeTitle": "Ti Balaymi",
   "tapEachRoomPrompt": "Tiknapen ti tunggal kuarto tapno maammuan ti aramidenyo ditoy!",
@@ -587,7 +587,9 @@
   "levelComplete": "Nakompleto ti Level {level}!",
   "@levelComplete": {
     "placeholders": {
-      "level": {"type": "int"}
+      "level": {
+        "type": "int"
+      }
     }
   },
   "achievementFirstStepsDesc": "Nakompleto ti umuna a gawain",
@@ -623,8 +625,12 @@
   "familyRoleSentence": "Ni {member} ket {roles}.",
   "@familyRoleSentence": {
     "placeholders": {
-      "member": {"type": "String"},
-      "roles": {"type": "String"}
+      "member": {
+        "type": "String"
+      },
+      "roles": {
+        "type": "String"
+      }
     }
   },
   "resetAllStudents": "I-reset Amin nga Estudyante",
@@ -658,14 +664,20 @@
   "progressPages": "{done} / {total} a panid",
   "@progressPages": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "percentComplete": "{percent}% a nakompleto",
   "@percentComplete": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "obraLabel": "Obra",
@@ -686,22 +698,34 @@
   "progressCompleted": "{done} / {total} a nalpas",
   "@progressCompleted": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "progressActivities": "{done} / {total} nga aktibidad",
   "@progressActivities": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "progressGames": "{done} / {total} nga ay-ayam",
   "@progressGames": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "pointsStatLabel": "Puntos",
@@ -724,5 +748,37 @@
   "tipPraiseMatTitle": "Pammadayaw",
   "tipPraiseMatBody": "Dayawen ti anakyo iti tunggal umiso a sungbat tapno pumigsa ti kompiansada iti matematika.",
   "tipGameFunTitle": "Ay-ayam",
-  "tipGameFunBody": "Dagiti ay-ayam ket naaramid tapno naragsak — palubosan ti anakyo a mag-enjoy iti panagadal."
+  "tipGameFunBody": "Dagiti ay-ayam ket naaramid tapno naragsak — palubosan ti anakyo a mag-enjoy iti panagadal.",
+  "badgeFirstStepsTitle": "Umuna a Addang",
+  "badgeFirstStepsHint": "Lippasen ti 1 nga aktibidad",
+  "badgeAlphabetTitle": "Maestro ti Alpabeto",
+  "badgeAlphabetHint": "Lippasen ti 12 nga aktibidad ti panagbasa",
+  "badgeNumbersTitle": "Salamangkero ti Numero",
+  "badgeNumbersHint": "Agay-ayam ti 20 a math games",
+  "badgeColorsTitle": "Artista ti Kolor",
+  "badgeColorsHint": "Lippasen ti 4 nga aktibidad ti panagkolor",
+  "badgeShapesTitle": "Manangparsua ti Sukog",
+  "badgeShapesHint": "Suroten ti 26 a dadakkel a letra",
+  "badgeAnimalsTitle": "Gayyem dagiti Ayup",
+  "badgeAnimalsHint": "Suroten ti 26 a babassit a letra",
+  "badgeBookwormTitle": "Mannakabasa",
+  "badgeBookwormHint": "Agbasa ti 4 a sarita",
+  "badgeStarStudentTitle": "Bituen nga Estudiante",
+  "badgeStarStudentHint": "Agay-ayam ti 20 a pamilya games",
+  "badgeMathWhizTitle": "Henyo iti Matematika",
+  "badgeMathWhizHint": "Lippasen ti 7 a level ti matematika",
+  "badgeFamilyHeroTitle": "Bannuar ti Pamilia",
+  "badgeFamilyHeroHint": "Lippasen ti 5 a level ti pamilia",
+  "badgeWritingStarTitle": "Bituen iti Panagsurat",
+  "badgeWritingStarHint": "Suroten ti 10 a numero",
+  "badgeSongbirdTitle": "Mannakakanta",
+  "badgeSongbirdHint": "Agkanta ti 10 a kanta",
+  "tapToClaim": "I-tap tapno Alaen",
+  "claimBadgeButton": "Alaen ti Badge",
+  "badgeClaimed": "NAALAN",
+  "awesome": "Nagsayaat!",
+  "claimBadgeBody": "Nagun-odmo daytoy a badge! Alaem tapno mainayon iti koleksionmo.",
+  "claimBadge": "Alaen ti {title}",
+  "plusStarsLabel": "+{stars} a Bituen",
+  "awardsWaiting": "{earned} ti nagun-od, {remaining} ti aguray a maala!"
 }

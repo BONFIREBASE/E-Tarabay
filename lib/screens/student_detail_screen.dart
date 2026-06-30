@@ -1,6 +1,7 @@
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class StudentDetailScreen extends StatelessWidget {
   final String studentName;
@@ -123,28 +124,28 @@ class StudentDetailScreen extends StatelessWidget {
 
             _buildModuleCard(
               title: AppLocalizations.of(context)!.magbasaTitle,
-              icon: Icons.menu_book,
+              icon: LucideIcons.book_open,
               color: AppColors.alphabet,
               completed: magbasa['totalCompleted'] ?? 0,
               total: magbasa['totalActivities'] ?? 23,
             ),
             _buildModuleCard(
               title: AppLocalizations.of(context)!.traceTitle,
-              icon: Icons.edit,
+              icon: LucideIcons.pencil,
               color: AppColors.success,
               completed: traceit['totalCompleted'] ?? 0,
               total: traceit['totalActivities'] ?? 62,
             ),
             _buildModuleCard(
               title: AppLocalizations.of(context)!.kulaySaya,
-              icon: Icons.palette,
+              icon: LucideIcons.palette,
               color: AppColors.colors,
               completed: kulay['totalCompleted'] ?? 0,
               total: kulay['totalActivities'] ?? 4,
             ),
             _buildModuleCard(
               title: AppLocalizations.of(context)!.matematika,
-              icon: Icons.calculate,
+              icon: LucideIcons.calculator,
               color: AppColors.numbers,
               completed: matematika['gamesCompleted'] ?? 0,
               total: matematika['totalGames'] ?? 31,
@@ -153,7 +154,7 @@ class StudentDetailScreen extends StatelessWidget {
             ),
             _buildModuleCard(
               title: AppLocalizations.of(context)!.angAkingSariliTitle,
-              icon: Icons.family_restroom,
+              icon: LucideIcons.users,
               color: AppColors.family,
               completed: pamilya['gamesCompleted'] ?? 0,
               total: pamilya['totalGames'] ?? 25,

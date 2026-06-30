@@ -1707,4 +1707,107 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tipGameFunBody =>
       'The games are designed to be fun — let your child enjoy learning.';
+
+  @override
+  String get badgeFirstStepsTitle => 'First Steps';
+
+  @override
+  String get badgeFirstStepsHint => 'Complete 1 activity';
+
+  @override
+  String get badgeAlphabetTitle => 'Alphabet Master';
+
+  @override
+  String get badgeAlphabetHint => 'Complete 12 reading activities';
+
+  @override
+  String get badgeNumbersTitle => 'Number Wizard';
+
+  @override
+  String get badgeNumbersHint => 'Play 20 math games';
+
+  @override
+  String get badgeColorsTitle => 'Color Artist';
+
+  @override
+  String get badgeColorsHint => 'Complete 4 coloring activities';
+
+  @override
+  String get badgeShapesTitle => 'Shape Creator';
+
+  @override
+  String get badgeShapesHint => 'Trace 26 uppercase letters';
+
+  @override
+  String get badgeAnimalsTitle => 'Animal Friend';
+
+  @override
+  String get badgeAnimalsHint => 'Trace 26 lowercase letters';
+
+  @override
+  String get badgeBookwormTitle => 'Bookworm';
+
+  @override
+  String get badgeBookwormHint => 'Read 4 stories';
+
+  @override
+  String get badgeStarStudentTitle => 'Star Student';
+
+  @override
+  String get badgeStarStudentHint => 'Play 20 family games';
+
+  @override
+  String get badgeMathWhizTitle => 'Math Whiz';
+
+  @override
+  String get badgeMathWhizHint => 'Complete 7 math levels';
+
+  @override
+  String get badgeFamilyHeroTitle => 'Family Hero';
+
+  @override
+  String get badgeFamilyHeroHint => 'Complete 5 family levels';
+
+  @override
+  String get badgeWritingStarTitle => 'Writing Star';
+
+  @override
+  String get badgeWritingStarHint => 'Trace 10 numbers';
+
+  @override
+  String get badgeSongbirdTitle => 'Songbird';
+
+  @override
+  String get badgeSongbirdHint => 'Sing 10 songs';
+
+  @override
+  String get tapToClaim => 'Tap to Claim';
+
+  @override
+  String get claimBadgeButton => 'Claim Badge';
+
+  @override
+  String get badgeClaimed => 'BADGE CLAIMED';
+
+  @override
+  String get awesome => 'Awesome!';
+
+  @override
+  String get claimBadgeBody =>
+      'You earned this badge! Claim it to add it to your collection.';
+
+  @override
+  String claimBadge(String title) {
+    return 'Claim $title';
+  }
+
+  @override
+  String plusStarsLabel(int stars) {
+    return '+$stars Stars';
+  }
+
+  @override
+  String awardsWaiting(int earned, int remaining) {
+    return '$earned earned, $remaining waiting to claim!';
+  }
 }

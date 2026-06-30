@@ -15,6 +15,7 @@ import '../providers/language_provider.dart';
 import '../main.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  MAIN SCREEN
@@ -453,7 +454,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                   child: Image.asset(
                     'assets/images/progress_icon.png',
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.auto_stories,
+                    errorBuilder: (_, __, ___) => const Icon(LucideIcons.book_open,
                         color: Colors.white, size: 40),
                   ),
                 ),
@@ -518,13 +519,13 @@ class _MagbasaScreenState extends State<MagbasaScreen>
             tabs: [
               Tab(
                   text: AppLocalizations.of(context)!.tula.toUpperCase(),
-                  icon: const Icon(Icons.menu_book)),
+                  icon: const Icon(LucideIcons.book_open)),
               Tab(
                   text: AppLocalizations.of(context)!.kwento.toUpperCase(),
-                  icon: const Icon(Icons.book)),
+                  icon: const Icon(LucideIcons.book)),
               Tab(
                   text: AppLocalizations.of(context)!.kanta.toUpperCase(),
-                  icon: const Icon(Icons.music_note)),
+                  icon: const Icon(LucideIcons.music)),
             ],
           ),
         ),
@@ -677,10 +678,10 @@ class _MagbasaScreenState extends State<MagbasaScreen>
     required VoidCallback onTap,
   }) {
     final IconData typeIcon = type == 'poem'
-        ? Icons.menu_book
+        ? LucideIcons.book_open
         : type == 'story'
-            ? Icons.book
-            : Icons.music_note;
+            ? LucideIcons.book
+            : LucideIcons.music;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -773,7 +774,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                         : Colors.transparent,
                     shape: BoxShape.circle),
                 child: Icon(
-                  isCompleted ? Icons.check_circle : Icons.arrow_forward_ios,
+                  isCompleted ? LucideIcons.circle_check : LucideIcons.chevron_right,
                   color: isCompleted ? color : Colors.grey.shade400,
                   size: 18,
                 ),
@@ -846,7 +847,7 @@ class PoemScreen extends StatelessWidget {
             actions: [
               TextButton.icon(
                 onPressed: () => _markComplete(context),
-                icon: const Icon(Icons.check_circle_outline,
+                icon: const Icon(LucideIcons.circle_check,
                     color: Colors.white, size: 18),
                 label: Text(
                   AppLocalizations.of(context)!.done,
@@ -965,7 +966,7 @@ class PoemScreen extends StatelessWidget {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.info_outline,
+                        const Icon(LucideIcons.info,
                             color: _poemColor, size: 16),
                         const SizedBox(width: 8),
                         Flexible(
@@ -985,7 +986,7 @@ class PoemScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () => _markComplete(context),
-                    icon: const Icon(Icons.check_circle_rounded,
+                    icon: const Icon(LucideIcons.circle_check,
                         color: Colors.white),
                     label: Text(
                       AppLocalizations.of(context)!.iReadThePoem,
@@ -1032,7 +1033,7 @@ class PoemScreen extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle, color: _poemColor, size: 48),
+            Icon(LucideIcons.circle_check, color: _poemColor, size: 48),
             SizedBox(height: 16),
             Text(AppLocalizations.of(context)!.readingFinishedGood,
                 textAlign: TextAlign.center,
@@ -1092,7 +1093,7 @@ class StoryScreen extends StatelessWidget {
             actions: [
               TextButton.icon(
                 onPressed: () => _markComplete(context),
-                icon: const Icon(Icons.check_circle_outline,
+                icon: const Icon(LucideIcons.circle_check,
                     color: Colors.white, size: 18),
                 label: Text(
                   AppLocalizations.of(context)!.done,
@@ -1187,7 +1188,7 @@ class StoryScreen extends StatelessWidget {
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.auto_stories,
+                        const Icon(LucideIcons.book_open,
                             color: _storyColor, size: 16),
                         const SizedBox(width: 8),
                         Flexible(
@@ -1207,7 +1208,7 @@ class StoryScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () => _markComplete(context),
-                    icon: const Icon(Icons.menu_book, color: Colors.white),
+                    icon: const Icon(LucideIcons.book_open, color: Colors.white),
                     label: Text(
                       AppLocalizations.of(context)!.iReadTheStory,
                       style: TextStyle(
@@ -1301,7 +1302,7 @@ class StoryScreen extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle, color: _storyColor, size: 48),
+            Icon(LucideIcons.circle_check, color: _storyColor, size: 48),
             SizedBox(height: 16),
             Text(AppLocalizations.of(context)!.readingFinishedHappy,
                 textAlign: TextAlign.center,
@@ -1687,7 +1688,7 @@ class _SongScreenState extends State<SongScreen>
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
                               color: _songColor.withOpacity(0.1),
-                              child: const Icon(Icons.music_note,
+                              child: const Icon(LucideIcons.music,
                                   size: 50, color: _songColor),
                             ),
                           ),
@@ -1715,7 +1716,7 @@ class _SongScreenState extends State<SongScreen>
                               Border.all(color: _songColor.withOpacity(0.3)),
                         ),
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.directions_run,
+                          const Icon(LucideIcons.footprints,
                               color: _songColor, size: 18),
                           const SizedBox(width: 8),
                           Flexible(
@@ -1814,7 +1815,7 @@ class _SongScreenState extends State<SongScreen>
                             IconButton(
                               onPressed: () =>
                                   _seekToLine(_currentLineIndex - 1),
-                              icon: const Icon(Icons.skip_previous, size: 36),
+                              icon: const Icon(LucideIcons.skip_back, size: 36),
                               color: AppColors.primary,
                             ),
                             const SizedBox(width: 16),
@@ -1842,7 +1843,7 @@ class _SongScreenState extends State<SongScreen>
                                   ],
                                 ),
                                 child: Icon(
-                                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                                  _isPlaying ? LucideIcons.pause : LucideIcons.play,
                                   color: Colors.white,
                                   size: 36,
                                 ),
@@ -1852,7 +1853,7 @@ class _SongScreenState extends State<SongScreen>
                             IconButton(
                               onPressed: () =>
                                   _seekToLine(_currentLineIndex + 1),
-                              icon: const Icon(Icons.skip_next, size: 36),
+                              icon: const Icon(LucideIcons.skip_forward, size: 36),
                               color: AppColors.primary,
                             ),
                           ]),

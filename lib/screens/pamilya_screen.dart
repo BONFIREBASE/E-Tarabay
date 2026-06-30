@@ -11,6 +11,7 @@ import '../widgets/success_modal.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../main.dart';
 import 'dart:async';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  BADGE MODEL
@@ -118,17 +119,17 @@ class _PamilyaScreenState extends State<PamilyaScreen>
 
   final List<List<IconData>> _categoryLevelIcons = [
     [
-      Icons.person,
-      Icons.emoji_emotions_rounded,
-      Icons.schedule_rounded,
-      Icons.favorite
+      LucideIcons.user,
+      LucideIcons.smile,
+      LucideIcons.clock,
+      LucideIcons.heart
     ],
     [
-      Icons.group_rounded,
-      Icons.work_rounded,
-      Icons.celebration_rounded,
-      Icons.account_tree_rounded,
-      Icons.home_rounded
+      LucideIcons.users,
+      LucideIcons.briefcase,
+      LucideIcons.party_popper,
+      LucideIcons.workflow,
+      LucideIcons.house
     ],
   ];
 
@@ -1160,7 +1161,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               border: Border.all(color: color.withOpacity(0.25), width: 1.5),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(Icons.timer_rounded, color: color, size: 15),
+              Icon(LucideIcons.timer, color: color, size: 15),
               const SizedBox(width: 4),
               Text('$_secondsLeft',
                   style: TextStyle(
@@ -1335,7 +1336,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                   children: [
                     Icon(
                         earned && !active
-                            ? Icons.check_circle_rounded
+                            ? LucideIcons.circle_check
                             : icons[i],
                         size: 14,
                         color: active
@@ -1449,7 +1450,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             ),
             child:
                 Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 60),
+              Icon(LucideIcons.circle_check, color: Colors.white, size: 60),
               SizedBox(height: 6),
               Text(AppLocalizations.of(context)!.straightOrCorrect,
                   style: TextStyle(
@@ -1535,7 +1536,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check_circle_rounded,
+                  const Icon(LucideIcons.circle_check,
                       color: Colors.green, size: 50),
                   const SizedBox(height: 10),
                   Text(
@@ -1619,9 +1620,9 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         ),
         child: Row(children: [
           if (isSelected && isCorrect == true)
-            const Icon(Icons.check_circle, color: Colors.green, size: 20),
+            const Icon(LucideIcons.circle_check, color: Colors.green, size: 20),
           if (isSelected && isCorrect == false)
-            const Icon(Icons.cancel, color: Colors.red, size: 20),
+            const Icon(LucideIcons.circle_x, color: Colors.red, size: 20),
           if (!isSelected || isCorrect == null) const SizedBox(width: 4),
           const SizedBox(width: 8),
           Expanded(
@@ -1676,7 +1677,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                 color: _currentMainColor.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(14)),
             child: Row(children: [
-              Icon(Icons.lightbulb_rounded, color: _currentMainColor, size: 18),
+              Icon(LucideIcons.lightbulb, color: _currentMainColor, size: 18),
               const SizedBox(width: 8),
               Expanded(
                   child: Text(_getGameString(game, 'description'),
@@ -2198,7 +2199,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         _gameCard(
             child: Column(children: [
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(Icons.account_tree_rounded,
+            Icon(LucideIcons.workflow,
                 color: _currentMainColor, size: 24),
             const SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.familyTreeTitle,
@@ -2297,7 +2298,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: _handleFamilyTreeComplete,
-              icon: const Icon(Icons.check_circle, color: Colors.white),
+              icon: const Icon(LucideIcons.circle_check, color: Colors.white),
               label: Text(AppLocalizations.of(context)!.iLearnedFamilyTree,
                   style: TextStyle(fontSize: 15, color: Colors.white)),
               style: ElevatedButton.styleFrom(
@@ -2324,7 +2325,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         _gameCard(
             child: Column(children: [
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(Icons.home_rounded, color: _currentMainColor, size: 26),
+            Icon(LucideIcons.house, color: _currentMainColor, size: 26),
             const SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.ourHomeTitle,
                 style: TextStyle(
@@ -2388,7 +2389,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                                     ? roomColor
                                     : Colors.grey.shade700)),
                         if (visited)
-                          const Icon(Icons.check_circle,
+                          const Icon(LucideIcons.circle_check,
                               color: Colors.green, size: 16),
                       ]),
                 ),
@@ -2421,7 +2422,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _handleMyHomeComplete,
-                icon: const Icon(Icons.home, color: Colors.white),
+                icon: const Icon(LucideIcons.house, color: Colors.white),
                 label: Text(AppLocalizations.of(context)!.thatIsOurHome,
                     style: TextStyle(fontSize: 15, color: Colors.white)),
                 style: ElevatedButton.styleFrom(

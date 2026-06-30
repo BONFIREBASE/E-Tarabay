@@ -23,7 +23,7 @@
       }
     }
   },
-  "finished": "Finished! \ud83c\udfc6",
+  "finished": "Finished! 🏆",
   "previous": "Previous",
   "completed": "Completed",
   "inProgress": "In Progress",
@@ -155,10 +155,10 @@
       }
     }
   },
-  "incorrectAnswer": "\u274c INCORRECT ANSWER",
+  "incorrectAnswer": "❌ INCORRECT ANSWER",
   "selectCorrectAnswer": "Select the correct answer:",
   "tryAgain": "Try Again",
-  "tapLeftTapRight": "Tap the group (left) \u2192 tap the number (right)",
+  "tapLeftTapRight": "Tap the group (left) → tap the number (right)",
   "angAkingSariliTitle": "Ang Aking Sarili",
   "angAkingPamilyaTitle": "Ang Aking Pamilya",
   "allAboutMe": "All About Me",
@@ -180,8 +180,8 @@
   "genderDescription": "Knowing if you are a boy or a girl helps us know more about you!",
   "typeNameHint": "Type your name here",
   "ageHint": "Example: 5, 7, 10",
-  "girlLabel": "\ud83d\udc67 Girl",
-  "boyLabel": "\ud83d\udc66 Boy",
+  "girlLabel": "👧 Girl",
+  "boyLabel": "👦 Boy",
   "aboutMeSubtitle": "All About Me",
   "myEmotionsSubtitle": "Explain your feelings",
   "dailyRoutinesSubtitle": "Learn daily activities",
@@ -280,7 +280,7 @@
     }
   },
   "pointsLabel": "Points",
-  "goodJob": "Good Job! \ud83c\udf1f",
+  "goodJob": "Good Job! 🌟",
   "ulitin": "Repeat",
   "traceTitle": "Follow Me, You Can Do It!",
   "uppercase": "Uppercase",
@@ -297,7 +297,7 @@
   "sundanPoints": "Points",
   "reset": "Reset",
   "finishedThisLetter": "You finished this letter!",
-  "goodJobPoints": "\ud83c\udf1f Good Job! +{points} points",
+  "goodJobPoints": "🌟 Good Job! +{points} points",
   "@goodJobPoints": {
     "placeholders": {
       "points": {
@@ -498,7 +498,7 @@
   "magbasaProgress": "Magbasa Progress",
   "matematikaProgress": "Matematika Progress",
   "noResults": "No results",
-  "greatWorkKulay": "Finished! Great Work! \ud83c\udf1f",
+  "greatWorkKulay": "Finished! Great Work! 🌟",
   "imageNotFound": "Image not found",
   "clearCanvasQuestion": "Clear Canvas?",
   "eraseColoringWarning": "This will erase all your coloring.",
@@ -510,21 +510,21 @@
   "okButton": "OK",
   "storyFinishedGreatJob": "Great job! You finished the story!",
   "finishedExclamation": "Finished!",
-  "readingFinishedGood": "\u2713 Finished! Good reading!",
-  "readingFinishedHappy": "\u2713 Finished! Happy reading!",
+  "readingFinishedGood": "✓ Finished! Good reading!",
+  "readingFinishedHappy": "✓ Finished! Happy reading!",
   "poemFinishedGreatJob": "Great job! You finished the poem!",
   "doneAlready": "Done already!",
   "checkAnswer": "Check",
   "noGamesAvailable2": "No games available",
   "countAndDragCorrectNumber": "Count and drag the correct number!",
-  "theyAreSame": "They are the same! \u2713",
+  "theyAreSame": "They are the same! ✓",
   "whatIsMissingNumber": "What is the missing number?",
-  "badgesWithIcon": "\ud83c\udfc5 Badges",
+  "badgesWithIcon": "🏅 Badges",
   "straightOrCorrect": "Correct!",
   "iKnowIt": "I learned it!",
   "familyTreeTitle": "Family Tree",
   "familyTreeDesc": "The family tree shows your family members from oldest to youngest.",
-  "familyTreeTapHint": "\ud83d\udca1 Tap the members to know their relationship!",
+  "familyTreeTapHint": "💡 Tap the members to know their relationship!",
   "iLearnedFamilyTree": "I learned the Family Tree!",
   "ourHomeTitle": "Our Home",
   "tapEachRoomPrompt": "Tap each room to know what you do here!",
@@ -588,7 +588,9 @@
   "levelComplete": "Level {level} Complete!",
   "@levelComplete": {
     "placeholders": {
-      "level": {"type": "int"}
+      "level": {
+        "type": "int"
+      }
     }
   },
   "achievementFirstStepsDesc": "Complete your first activity",
@@ -624,8 +626,12 @@
   "familyRoleSentence": "{member} is {roles}.",
   "@familyRoleSentence": {
     "placeholders": {
-      "member": {"type": "String"},
-      "roles": {"type": "String"}
+      "member": {
+        "type": "String"
+      },
+      "roles": {
+        "type": "String"
+      }
     }
   },
   "resetAllStudents": "Reset All Students",
@@ -649,7 +655,7 @@
   "iReadTheStory": "I Have Read It! ✓",
   "tandaanTitle": "Remember It!",
   "round": "Round",
-  "matchThePairs": "Find and match the pairs!", 
+  "matchThePairs": "Find and match the pairs!",
   "flipCardsToMatch": "Tap a card to flip it. Find two that match!",
   "traceItTitle": "Trace It - You Can Do It!",
   "traceItSubtitle": "Draw from memory",
@@ -659,14 +665,20 @@
   "progressPages": "{done} / {total} pages",
   "@progressPages": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "percentComplete": "{percent}% complete",
   "@percentComplete": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "obraLabel": "Artworks",
@@ -687,22 +699,34 @@
   "progressCompleted": "{done} / {total} completed",
   "@progressCompleted": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "progressActivities": "{done} / {total} activities",
   "@progressActivities": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "progressGames": "{done} / {total} games",
   "@progressGames": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "pointsStatLabel": "Points",
@@ -725,5 +749,61 @@
   "tipPraiseMatTitle": "Praise",
   "tipPraiseMatBody": "Praise your child for every correct answer to build their confidence in math.",
   "tipGameFunTitle": "Games",
-  "tipGameFunBody": "The games are designed to be fun — let your child enjoy learning."
+  "tipGameFunBody": "The games are designed to be fun — let your child enjoy learning.",
+  "badgeFirstStepsTitle": "First Steps",
+  "badgeFirstStepsHint": "Complete 1 activity",
+  "badgeAlphabetTitle": "Alphabet Master",
+  "badgeAlphabetHint": "Complete 12 reading activities",
+  "badgeNumbersTitle": "Number Wizard",
+  "badgeNumbersHint": "Play 20 math games",
+  "badgeColorsTitle": "Color Artist",
+  "badgeColorsHint": "Complete 4 coloring activities",
+  "badgeShapesTitle": "Shape Creator",
+  "badgeShapesHint": "Trace 26 uppercase letters",
+  "badgeAnimalsTitle": "Animal Friend",
+  "badgeAnimalsHint": "Trace 26 lowercase letters",
+  "badgeBookwormTitle": "Bookworm",
+  "badgeBookwormHint": "Read 4 stories",
+  "badgeStarStudentTitle": "Star Student",
+  "badgeStarStudentHint": "Play 20 family games",
+  "badgeMathWhizTitle": "Math Whiz",
+  "badgeMathWhizHint": "Complete 7 math levels",
+  "badgeFamilyHeroTitle": "Family Hero",
+  "badgeFamilyHeroHint": "Complete 5 family levels",
+  "badgeWritingStarTitle": "Writing Star",
+  "badgeWritingStarHint": "Trace 10 numbers",
+  "badgeSongbirdTitle": "Songbird",
+  "badgeSongbirdHint": "Sing 10 songs",
+  "tapToClaim": "Tap to Claim",
+  "claimBadgeButton": "Claim Badge",
+  "badgeClaimed": "BADGE CLAIMED",
+  "awesome": "Awesome!",
+  "claimBadgeBody": "You earned this badge! Claim it to add it to your collection.",
+  "claimBadge": "Claim {title}",
+  "@claimBadge": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "plusStarsLabel": "+{stars} Stars",
+  "@plusStarsLabel": {
+    "placeholders": {
+      "stars": {
+        "type": "int"
+      }
+    }
+  },
+  "awardsWaiting": "{earned} earned, {remaining} waiting to claim!",
+  "@awardsWaiting": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  }
 }

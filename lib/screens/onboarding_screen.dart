@@ -7,6 +7,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import '../providers/language_provider.dart';
 import '../utils/constants.dart';
 import '../login_screen.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -103,7 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         curve: Curves.easeInOut,
                       );
                     },
-                    icon: const Icon(Icons.arrow_forward_rounded),
+                    icon: const Icon(LucideIcons.arrow_right),
                     style: IconButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -136,7 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(
-            Icons.language_rounded,
+            LucideIcons.languages,
             size: 80,
             color: AppColors.primary,
           ).animate(onPlay: (c) => c.repeat()).shake(delay: 2.seconds),
@@ -193,7 +194,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             const Spacer(),
             if (isSelected)
-              const Icon(Icons.check_circle_rounded, color: AppColors.primary),
+              const Icon(LucideIcons.circle_check, color: AppColors.primary),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class PamilyaContent {
   // ── Main Categories ───────────────────────────────────────────────────
@@ -10,32 +11,32 @@ class PamilyaContent {
     'en': [
       {
         'title': 'About Myself',
-        'icon': Icons.person,
+        'icon': LucideIcons.user,
         'color': Color(0xFFFF6B6B)
       },
       {
         'title': 'My Family',
-        'icon': Icons.family_restroom,
+        'icon': LucideIcons.users,
         'color': Color(0xFF4ECDC4)
       },
     ],
     'fil': [
       {
         'title': 'Ang Aking Sarili',
-        'icon': Icons.person,
+        'icon': LucideIcons.user,
         'color': Color(0xFFFF6B6B)
       },
       {
         'title': 'Ang Aking Pamilya',
-        'icon': Icons.family_restroom,
+        'icon': LucideIcons.users,
         'color': Color(0xFF4ECDC4)
       },
     ],
     'ilo': [
-      {'title': 'Ti Bagik', 'icon': Icons.person, 'color': Color(0xFFFF6B6B)},
+      {'title': 'Ti Bagik', 'icon': LucideIcons.user, 'color': Color(0xFFFF6B6B)},
       {
         'title': 'Ti Pamilyak',
-        'icon': Icons.family_restroom,
+        'icon': LucideIcons.users,
         'color': Color(0xFF4ECDC4)
       },
     ],

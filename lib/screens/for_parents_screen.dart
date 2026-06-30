@@ -2,6 +2,7 @@ import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 /// Keys used by TraceItScreen.
 class _TraceItKeys {
@@ -304,7 +305,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          icon: const Icon(LucideIcons.chevron_left, size: 20),
           color: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
@@ -315,7 +316,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                 fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(LucideIcons.refresh_cw),
             color: AppColors.primary,
             onPressed: () {
               setState(() => _isLoading = true);
@@ -379,7 +380,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              const Icon(Icons.waving_hand_rounded,
+              const Icon(LucideIcons.hand,
                   color: Colors.white, size: 28),
               const SizedBox(width: 10),
               Text(AppLocalizations.of(context)!.hello,
@@ -468,7 +469,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
         // Recent activity
         _sectionHeader(AppLocalizations.of(context)!.recentActivity,
-            Icons.history_rounded),
+            LucideIcons.history),
         const SizedBox(height: 10),
         _recentActivityCard('🎨 ${AppLocalizations.of(context)!.kulaySaya}',
             _kulayLastColored, Colors.orange),
@@ -481,7 +482,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
         // Quick tips
         _sectionHeader(
-            AppLocalizations.of(context)!.parentTipsHeader, Icons.lightbulb_rounded),
+            AppLocalizations.of(context)!.parentTipsHeader, LucideIcons.lightbulb),
         const SizedBox(height: 10),
         _tipCard('🎨', AppLocalizations.of(context)!.tipKulayTitle,
             AppLocalizations.of(context)!.tipKulayBody),
@@ -566,12 +567,12 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         const SizedBox(height: 16),
 
         // Last colored
-        _infoRow(Icons.access_time, AppLocalizations.of(context)!.recentColor,
+        _infoRow(LucideIcons.clock, AppLocalizations.of(context)!.recentColor,
             _kulayLastColored),
         const SizedBox(height: 16),
 
         // Per-category breakdown
-        _sectionHeader(AppLocalizations.of(context)!.categoryProgressHeader, Icons.grid_view_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.categoryProgressHeader, LucideIcons.grid_3x3),
         const SizedBox(height: 12),
 
         ..._kulayDone.keys.map((catName) {
@@ -690,8 +691,8 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                       child: Row(children: [
                         Icon(
                             isDone
-                                ? Icons.check_circle_rounded
-                                : Icons.radio_button_unchecked_rounded,
+                                ? LucideIcons.circle_check
+                                : LucideIcons.circle,
                             color: isDone ? color : Colors.grey.shade400,
                             size: 20),
                         const SizedBox(width: 10),
@@ -743,7 +744,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
         // My Creations section
         const SizedBox(height: 4),
-        _sectionHeader(AppLocalizations.of(context)!.savedArtworksHeader, Icons.collections_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.savedArtworksHeader, LucideIcons.images),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(16),
@@ -900,7 +901,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         const SizedBox(height: 20),
 
         // Tips for parents
-        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, Icons.lightbulb_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, LucideIcons.lightbulb),
         const SizedBox(height: 10),
         _tipCard('✏️', AppLocalizations.of(context)!.tipPencilGripTitle,
             AppLocalizations.of(context)!.tipPencilGripBody),
@@ -972,7 +973,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         ),
         const SizedBox(height: 16),
 
-        _sectionHeader(AppLocalizations.of(context)!.categoryProgressHeader, Icons.grid_view_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.categoryProgressHeader, LucideIcons.grid_3x3),
         const SizedBox(height: 12),
 
         ..._magbasaDone.keys.map((cat) {
@@ -1067,7 +1068,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                                   fontWeight: FontWeight.bold,
                                   color:
                                       isDone ? color : Colors.grey.shade500)),
-                          if (isDone) Icon(Icons.check, size: 8, color: color),
+                          if (isDone) Icon(LucideIcons.check, size: 8, color: color),
                         ])),
                   );
                 }),
@@ -1077,7 +1078,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         }),
 
         const SizedBox(height: 4),
-        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, Icons.lightbulb_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, LucideIcons.lightbulb),
         const SizedBox(height: 10),
         _tipCard('📖', AppLocalizations.of(context)!.tipTulaTitle,
             AppLocalizations.of(context)!.tipTulaBody),
@@ -1155,7 +1156,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         ),
         const SizedBox(height: 16),
 
-        _sectionHeader(AppLocalizations.of(context)!.gameProgressHeader, Icons.grid_view_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.gameProgressHeader, LucideIcons.grid_3x3),
         const SizedBox(height: 12),
 
         ...List.generate(_matLevelTitles.length, (lvl) {
@@ -1252,7 +1253,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                                   fontWeight: FontWeight.bold,
                                   color: color)),
                           if (isDone)
-                            const Icon(Icons.check, size: 8, color: color),
+                            const Icon(LucideIcons.check, size: 8, color: color),
                         ])),
                   );
                 }),
@@ -1262,7 +1263,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         }),
 
         const SizedBox(height: 4),
-        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, Icons.lightbulb_rounded),
+        _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, LucideIcons.lightbulb),
         const SizedBox(height: 10),
         _tipCard('🔢', AppLocalizations.of(context)!.tipCountingTitle,
             AppLocalizations.of(context)!.tipCountingBody),
@@ -1358,7 +1359,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                             fontSize: 10, color: Colors.grey.shade500)),
                   ])),
               const SizedBox(width: 8),
-              Icon(isExpanded ? Icons.expand_less : Icons.expand_more,
+              Icon(isExpanded ? LucideIcons.chevron_up : LucideIcons.chevron_down,
                   color: color),
             ]),
           ),
@@ -1396,7 +1397,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                               fontWeight: FontWeight.bold,
                               color: isDone ? color : Colors.grey.shade500,
                             )),
-                        if (isDone) Icon(Icons.check, size: 8, color: color),
+                        if (isDone) Icon(LucideIcons.check, size: 8, color: color),
                       ])),
                 );
               }).toList(),
@@ -1551,7 +1552,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           Text(detail,
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
         ])),
-        Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 18),
+        Icon(LucideIcons.chevron_right, color: Colors.grey.shade400, size: 18),
       ]),
     );
   }

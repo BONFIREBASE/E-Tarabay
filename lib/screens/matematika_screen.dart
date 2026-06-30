@@ -13,6 +13,7 @@ import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/success_modal.dart';
 import '../widgets/custom_back_button.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 // ─── CustomPainter: draws animated lines between matched nodes ───────────────
 class _Game3LinePainter extends CustomPainter {
@@ -394,12 +395,12 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   final List<IconData> _levelIcons = const [
     Icons.looks_one_rounded,
-    Icons.drag_indicator_rounded,
-    Icons.compare_arrows_rounded,
-    Icons.celebration_rounded,
-    Icons.balance_rounded,
-    Icons.extension_rounded,
-    Icons.format_list_numbered_rounded,
+    LucideIcons.grip_vertical,
+    LucideIcons.arrow_left_right,
+    LucideIcons.party_popper,
+    LucideIcons.scale,
+    LucideIcons.puzzle,
+    LucideIcons.list_ordered,
   ];
 
   static const List<Color> _balloonColors = [
@@ -1110,7 +1111,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.timer_rounded,
+                    Icon(LucideIcons.timer,
                         color: urgent ? Colors.red : AppColors.primary,
                         size: 16),
                     const SizedBox(width: 4),
@@ -1138,7 +1139,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+              const Icon(LucideIcons.star, color: Colors.amber, size: 16),
               const SizedBox(width: 4),
               Text(
                 '$_totalStars',
@@ -1213,7 +1214,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                   children: [
                     Icon(
                         completed && !active
-                            ? Icons.check_circle_rounded
+                            ? LucideIcons.circle_check
                             : _levelIcons[i],
                         size: 14,
                         color: active
@@ -1320,7 +1321,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.check_circle_rounded,
+                  const Icon(LucideIcons.circle_check,
                       color: Colors.white, size: 54),
                   const SizedBox(height: 8),
                   Text(
@@ -1372,7 +1373,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.cancel_rounded,
+                  const Icon(LucideIcons.circle_x,
                       color: Colors.white, size: 54),
                   const SizedBox(height: 8),
                   Text(
@@ -1397,7 +1398,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
   Widget _checkButton(VoidCallback onTap) {
     return ElevatedButton.icon(
       onPressed: onTap,
-      icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
+      icon: const Icon(LucideIcons.circle_check, color: Colors.white),
       label: Text(AppLocalizations.of(context)!.checkAnswer,
           style: TextStyle(
               color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
@@ -1531,7 +1532,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check_circle_rounded,
+                  const Icon(LucideIcons.circle_check,
                       color: Colors.green, size: 50),
                   const SizedBox(height: 10),
                   Text(
@@ -1690,15 +1691,15 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                 ),
                 child: Center(
                   child: _dropCorrect
-                      ? const Icon(Icons.check_circle_rounded,
+                      ? const Icon(LucideIcons.circle_check,
                           color: Colors.green, size: 40)
                       : _dropWrong
-                          ? const Icon(Icons.cancel_rounded,
+                          ? const Icon(LucideIcons.circle_x,
                               color: Colors.red, size: 40)
                           : Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.south_rounded,
+                                Icon(LucideIcons.arrow_down,
                                     color: hovering
                                         ? AppColors.primary
                                         : Colors.grey.shade400,
@@ -1957,7 +1958,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.cancel_rounded,
+                            const Icon(LucideIcons.circle_x,
                                 color: Colors.white, size: 58),
                             const SizedBox(height: 6),
                             Text(
@@ -2008,7 +2009,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.check_circle_rounded,
+                                Icon(LucideIcons.circle_check,
                                     color: Colors.white, size: 22),
                                 SizedBox(width: 8),
                                 Text(
@@ -2120,7 +2121,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
               const Positioned(
                 top: 4,
                 right: -2,
-                child: Icon(Icons.check_circle_rounded,
+                child: Icon(LucideIcons.circle_check,
                     color: Colors.green, size: 14),
               ),
           ],
@@ -2243,8 +2244,8 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                       totalCorrect,
                       (i) => Icon(
                         i < popped
-                            ? Icons.circle_rounded
-                            : Icons.circle_outlined,
+                            ? LucideIcons.circle
+                            : LucideIcons.circle,
                         color: AppColors.primary,
                         size: 14,
                       ),
@@ -2381,7 +2382,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _handleEqualButton,
-                icon: const Icon(Icons.balance_rounded, color: Colors.white),
+                icon: const Icon(LucideIcons.scale, color: Colors.white),
                 label: Text(AppLocalizations.of(context)!.theyAreSame,
                     style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
@@ -2566,7 +2567,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.info_outline_rounded,
+              Icon(LucideIcons.info,
                   size: 14, color: Colors.grey.shade500),
               const SizedBox(width: 6),
               Text(

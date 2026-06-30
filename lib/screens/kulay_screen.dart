@@ -15,6 +15,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class ColoringCategory {
   final String name;
@@ -782,8 +783,8 @@ class _KulayScreenState extends State<KulayScreen>
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       child: Icon(
                         idx <= selectedStars
-                            ? Icons.star_rounded
-                            : Icons.star_border_rounded,
+                            ? LucideIcons.star
+                            : LucideIcons.star,
                         size: 40,
                         color: idx <= selectedStars
                             ? const Color(0xFFFFB800)
@@ -1115,8 +1116,8 @@ class _KulayScreenState extends State<KulayScreen>
                 ),
                 child: Icon(
                     isError
-                        ? Icons.error_outline_rounded
-                        : Icons.check_circle_outline_rounded,
+                        ? LucideIcons.circle_alert
+                        : LucideIcons.circle_check,
                     color: isError ? Colors.red : AppColors.primary,
                     size: 40),
               ),
@@ -1173,8 +1174,8 @@ class _KulayScreenState extends State<KulayScreen>
           color: Colors.white,
           child: Row(children: [
             _tabBtn(
-                0, Icons.brush_rounded, AppLocalizations.of(context)!.color),
-            _tabBtn(1, Icons.folder_open_rounded,
+                0, LucideIcons.brush, AppLocalizations.of(context)!.color),
+            _tabBtn(1, LucideIcons.folder_open,
                 AppLocalizations.of(context)!.myCreations),
           ]),
         ),
@@ -1242,7 +1243,7 @@ class _KulayScreenState extends State<KulayScreen>
             onChanged: (v) => setState(() => _searchQuery = v.toLowerCase()),
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context)!.searchColoringPages,
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              prefixIcon: const Icon(LucideIcons.search, color: Colors.grey),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 13),
             ),
@@ -1371,7 +1372,7 @@ class _KulayScreenState extends State<KulayScreen>
                         color: isCompleted ? Colors.grey.shade400 : null,
                         colorBlendMode:
                             isCompleted ? BlendMode.saturation : null,
-                        errorBuilder: (_, __, ___) => Icon(Icons.color_lens,
+                        errorBuilder: (_, __, ___) => Icon(LucideIcons.palette,
                             size: 52, color: cat.color.withOpacity(0.4)),
                       ),
                     ),
@@ -1383,7 +1384,7 @@ class _KulayScreenState extends State<KulayScreen>
                       child: CircleAvatar(
                         radius: 12,
                         backgroundColor: Colors.green,
-                        child: Icon(Icons.check, size: 16, color: Colors.white),
+                        child: Icon(LucideIcons.check, size: 16, color: Colors.white),
                       ),
                     ),
                 ],
@@ -1401,7 +1402,7 @@ class _KulayScreenState extends State<KulayScreen>
               Row(children: [
                 _diffChip(page.difficulty),
                 const SizedBox(width: 8),
-                Icon(Icons.timer_outlined,
+                Icon(LucideIcons.timer,
                     size: 11, color: Colors.grey.shade500),
                 const SizedBox(width: 2),
                 Text(page.timeEstimate,
@@ -1476,7 +1477,7 @@ class _KulayScreenState extends State<KulayScreen>
       padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
       child: Row(children: [
         IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(LucideIcons.arrow_left),
           color: AppColors.textDark,
           onPressed: () => setState(() {
             _selectedPage = null;
@@ -1581,7 +1582,7 @@ class _KulayScreenState extends State<KulayScreen>
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.broken_image,
+                            Icon(LucideIcons.image_off,
                                 size: 64, color: Colors.grey.shade300),
                             const SizedBox(height: 10),
                             Text(AppLocalizations.of(context)!.imageNotFound,
@@ -1721,7 +1722,7 @@ class _KulayScreenState extends State<KulayScreen>
 
         // Brush size
         Row(children: [
-          Icon(Icons.brush, size: 13, color: Colors.grey.shade400),
+          Icon(LucideIcons.brush, size: 13, color: Colors.grey.shade400),
           Expanded(
             child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
@@ -1768,8 +1769,8 @@ class _KulayScreenState extends State<KulayScreen>
         Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           _tBtn(
             icon: _isZoomMode
-                ? Icons.zoom_out_map_rounded
-                : Icons.zoom_in_map_rounded,
+                ? LucideIcons.maximize
+                : LucideIcons.minimize,
             label: _isZoomMode
                 ? AppLocalizations.of(context)!.zoomOff
                 : AppLocalizations.of(context)!.zoomOn,
@@ -1778,7 +1779,7 @@ class _KulayScreenState extends State<KulayScreen>
           ),
           _tBtn(
             icon:
-                _isEraser ? Icons.brush_rounded : Icons.auto_fix_normal_rounded,
+                _isEraser ? LucideIcons.brush : LucideIcons.wand_sparkles,
             label: _isEraser
                 ? AppLocalizations.of(context)!.brush
                 : AppLocalizations.of(context)!.eraser,
@@ -1786,19 +1787,19 @@ class _KulayScreenState extends State<KulayScreen>
             onTap: () => setState(() => _isEraser = !_isEraser),
           ),
           _tBtn(
-              icon: Icons.undo_rounded,
+              icon: LucideIcons.undo_2,
               label: AppLocalizations.of(context)!.undo,
               active: false,
               disabled: _strokes.isEmpty && _bucketUndoImages.isEmpty,
               onTap: _undo),
           _tBtn(
-              icon: Icons.redo_rounded,
+              icon: LucideIcons.redo_2,
               label: AppLocalizations.of(context)!.redo,
               active: false,
               disabled: _redoStack.isEmpty && _bucketRedoImages.isEmpty,
               onTap: _redo),
           _tBtn(
-            icon: Icons.delete_sweep_rounded,
+            icon: LucideIcons.trash_2,
             label: AppLocalizations.of(context)!.clear,
             active: false,
             onTap: () => showDialog(
@@ -1831,10 +1832,10 @@ class _KulayScreenState extends State<KulayScreen>
           ),
           _tBtn(
               icon: _editingCreation != null
-                  ? Icons.save_rounded
+                  ? LucideIcons.save
                   : (_isCurrentPageSaved()
-                      ? Icons.visibility_rounded
-                      : Icons.save_rounded),
+                      ? LucideIcons.eye
+                      : LucideIcons.save),
               label: _editingCreation != null
                   ? AppLocalizations.of(context)!.update
                   : (_isCurrentPageSaved()
@@ -1959,7 +1960,7 @@ class _KulayScreenState extends State<KulayScreen>
               color: AppColors.primary.withOpacity(0.1),
               shape: BoxShape.circle),
           child:
-              const Icon(Icons.color_lens, size: 44, color: AppColors.primary),
+              const Icon(LucideIcons.palette, size: 44, color: AppColors.primary),
         ),
         const SizedBox(height: 18),
         Text(AppLocalizations.of(context)!.noArtworksYet,
@@ -1977,7 +1978,7 @@ class _KulayScreenState extends State<KulayScreen>
               padding:
                   const EdgeInsets.symmetric(horizontal: 28, vertical: 13)),
           onPressed: () => setState(() => _selectedTab = 0),
-          icon: const Icon(Icons.brush_rounded, color: Colors.white, size: 18),
+          icon: const Icon(LucideIcons.brush, color: Colors.white, size: 18),
           label: Text(AppLocalizations.of(context)!.startColoring,
               style:
                   TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -2014,12 +2015,12 @@ class _KulayScreenState extends State<KulayScreen>
                         ? Image.asset(creation.thumbnailPath,
                             fit: BoxFit.contain,
                             filterQuality: FilterQuality.high,
-                            errorBuilder: (_, __, ___) => Icon(Icons.image,
+                            errorBuilder: (_, __, ___) => Icon(LucideIcons.image,
                                 size: 40, color: Colors.grey.shade300))
                         : Image.file(File(creation.thumbnailPath),
                             fit: BoxFit.contain,
                             filterQuality: FilterQuality.high,
-                            errorBuilder: (_, __, ___) => Icon(Icons.image,
+                            errorBuilder: (_, __, ___) => Icon(LucideIcons.image,
                                 size: 40, color: Colors.grey.shade300)),
                   )),
                 ),
@@ -2038,8 +2039,8 @@ class _KulayScreenState extends State<KulayScreen>
                         color: Colors.white, shape: BoxShape.circle),
                     child: Icon(
                         creation.isFavorite
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
+                            ? LucideIcons.heart
+                            : LucideIcons.heart,
                         color: creation.isFavorite
                             ? Colors.red
                             : Colors.grey.shade400,
@@ -2065,8 +2066,8 @@ class _KulayScreenState extends State<KulayScreen>
                         5,
                         (i) => Icon(
                               i < creation.stars!
-                                  ? Icons.star_rounded
-                                  : Icons.star_border_rounded,
+                                  ? LucideIcons.star
+                                  : LucideIcons.star,
                               size: 14,
                               color: i < creation.stars!
                                   ? const Color(0xFFFFB800)
@@ -2078,7 +2079,7 @@ class _KulayScreenState extends State<KulayScreen>
                 const SizedBox.shrink(),
               const SizedBox(height: 4),
               Row(children: [
-                Icon(Icons.schedule_rounded,
+                Icon(LucideIcons.clock,
                     size: 10, color: Colors.grey.shade400),
                 const SizedBox(width: 3),
                 Text(creation.formattedDuration,
@@ -2119,7 +2120,7 @@ class _KulayScreenState extends State<KulayScreen>
                             fontSize: 17, fontWeight: FontWeight.bold)),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, size: 20),
+                    icon: const Icon(LucideIcons.x, size: 20),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -2134,8 +2135,8 @@ class _KulayScreenState extends State<KulayScreen>
                       5,
                       (i) => Icon(
                             i < creation.stars!
-                                ? Icons.star_rounded
-                                : Icons.star_border_rounded,
+                                ? LucideIcons.star
+                                : LucideIcons.star,
                             size: 28,
                             color: i < creation.stars!
                                 ? const Color(0xFFFFB800)
@@ -2174,7 +2175,7 @@ class _KulayScreenState extends State<KulayScreen>
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      icon: const Icon(Icons.edit, size: 18),
+                      icon: const Icon(LucideIcons.pencil, size: 18),
                       label: Text(AppLocalizations.of(context)!.edit),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
@@ -2211,7 +2212,7 @@ class _KulayScreenState extends State<KulayScreen>
                   Expanded(
                     child: OutlinedButton.icon(
                       icon:
-                          const Icon(Icons.delete, size: 18, color: Colors.red),
+                          const Icon(LucideIcons.trash_2, size: 18, color: Colors.red),
                       label: Text(AppLocalizations.of(context)!.delete,
                           style: const TextStyle(color: Colors.red)),
                       style: OutlinedButton.styleFrom(
@@ -2243,7 +2244,7 @@ class _KulayScreenState extends State<KulayScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
-            const Icon(Icons.warning, color: Colors.red),
+            const Icon(LucideIcons.triangle_alert, color: Colors.red),
             const SizedBox(width: 8),
             Expanded(child: Text(AppLocalizations.of(context)!.deleteArtwork)),
           ],

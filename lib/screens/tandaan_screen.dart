@@ -12,6 +12,7 @@ import '../providers/language_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/success_modal.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  TANDAAN MO! — Memory / Matching Game
@@ -265,10 +266,10 @@ class _TandaanScreenState extends State<TandaanScreen>
   ];
 
   List<IconData> get _categoryIcons => const [
-        Icons.pets,
-        Icons.emoji_food_beverage,
-        Icons.category,
-        Icons.abc,
+        LucideIcons.paw_print,
+        LucideIcons.coffee,
+        LucideIcons.shapes,
+        LucideIcons.whole_word,
       ];
 
   // ── Getters ──────────────────────────────────────────────────────────────
@@ -699,7 +700,7 @@ class _TandaanScreenState extends State<TandaanScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.timer_rounded,
+                    Icon(LucideIcons.timer,
                         color: urgent ? Colors.red : AppColors.primary,
                         size: 16),
                     const SizedBox(width: 4),
@@ -727,7 +728,7 @@ class _TandaanScreenState extends State<TandaanScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+              const Icon(LucideIcons.star, color: Colors.amber, size: 16),
               const SizedBox(width: 4),
               Text(
                 '$_totalStars',
@@ -789,7 +790,7 @@ class _TandaanScreenState extends State<TandaanScreen>
                       children: [
                         Icon(
                           completed && !active
-                              ? Icons.check_circle_rounded
+                              ? LucideIcons.circle_check
                               : _categoryIcons[i],
                           size: 14,
                           color: active
@@ -943,7 +944,7 @@ class _TandaanScreenState extends State<TandaanScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.lightbulb_outline, color: color, size: 18),
+              Icon(LucideIcons.lightbulb, color: color, size: 18),
               const SizedBox(width: 8),
               Text(
                 AppLocalizations.of(context)!.matchThePairs,
@@ -1095,7 +1096,7 @@ class _TandaanScreenState extends State<TandaanScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.check_circle_rounded,
+                  const Icon(LucideIcons.circle_check,
                       color: Colors.white, size: 64),
                   const SizedBox(height: 12),
                   Text(
@@ -1149,7 +1150,7 @@ class _TandaanScreenState extends State<TandaanScreen>
                 ),
                 child: const Center(
                   child:
-                      Icon(Icons.close_rounded, color: Colors.white, size: 72),
+                      Icon(LucideIcons.x, color: Colors.white, size: 72),
                 ),
               ),
             );

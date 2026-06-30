@@ -14,6 +14,7 @@ import '../models/certificate_model.dart';
 import '../providers/user_provider.dart';
 import '../providers/language_provider.dart';
 import '../utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class CertificatesScreen extends StatefulWidget {
   const CertificatesScreen({super.key});
@@ -220,7 +221,7 @@ class _CertificatesScreenState extends State<CertificatesScreen>
             ),
             child: Row(
               children: [
-                const Icon(Icons.emoji_events, color: Colors.amber, size: 28),
+                const Icon(LucideIcons.trophy, color: Colors.amber, size: 28),
                 const SizedBox(width: 10),
                 Text(
                   '$earnedCount / ${allCertificates.length}',
@@ -286,9 +287,8 @@ class _CertificatesScreenState extends State<CertificatesScreen>
         );
       },
       child: GestureDetector(
-        onTap: isEarned
-            ? () => _showCertificateDetail(context, cert, langCode)
-            : null,
+        // TEMP: always open so the certificate design can be previewed.
+        onTap: () => _showCertificateDetail(context, cert, langCode),
         child: Container(
           margin: const EdgeInsets.only(bottom: 16),
           child: Stack(
@@ -390,7 +390,7 @@ class _CertificatesScreenState extends State<CertificatesScreen>
                                         style: const TextStyle(fontSize: 36),
                                       )
                                     : Icon(
-                                        Icons.lock,
+                                        LucideIcons.lock,
                                         color: Colors.grey.shade500,
                                         size: 28,
                                       ),
@@ -445,7 +445,7 @@ class _CertificatesScreenState extends State<CertificatesScreen>
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               const Icon(
-                                                Icons.star,
+                                                LucideIcons.star,
                                                 color: Colors.white,
                                                 size: 14,
                                               ),
@@ -497,7 +497,7 @@ class _CertificatesScreenState extends State<CertificatesScreen>
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               const Icon(
-                                                Icons.check_circle,
+                                                LucideIcons.circle_check,
                                                 color: Colors.white,
                                                 size: 14,
                                               ),
@@ -524,7 +524,7 @@ class _CertificatesScreenState extends State<CertificatesScreen>
                             // Arrow for earned
                             if (isEarned)
                               const Icon(
-                                Icons.chevron_right,
+                                LucideIcons.chevron_right,
                                 color: Colors.white,
                                 size: 28,
                               ),
@@ -701,7 +701,7 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen>
     final profile = userProvider.userProfile;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: const Color(0xFF36306B),
       body: Stack(
         children: [
           Center(
@@ -740,7 +740,7 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen>
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.close,
+                    LucideIcons.x,
                     color: Colors.white,
                     size: 22,
                   ),
@@ -761,16 +761,16 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen>
                       heroTag: 'shareBtn',
                       onPressed: _shareCertificate,
                       backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFFB8860B),
-                      child: const Icon(Icons.share),
+                      foregroundColor: const Color(0xFF6C63FF),
+                      child: const Icon(LucideIcons.share),
                     ),
                     const SizedBox(width: 12),
                     FloatingActionButton.small(
                       heroTag: 'downloadBtn',
                       onPressed: _downloadCertificate,
-                      backgroundColor: const Color(0xFFB8860B),
+                      backgroundColor: const Color(0xFF6C63FF),
                       foregroundColor: Colors.white,
-                      child: const Icon(Icons.download),
+                      child: const Icon(LucideIcons.download),
                     ),
                   ],
                 ),
@@ -785,6 +785,29 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen>
     final name = profile?.name ?? 'Student';
     final lrn = profile?.lrn ?? '';
     final date = DateTime.now();
+
+    // ── Template layout (fractions of the 2000 x 1414 background image) ──
+    // Adjust these if a field doesn't sit perfectly over the Canva design.
+    const designW = 2000.0;
+    const designH = 1414.0;
+
+    // NAME — red Fuzzy Bubbles, sits on the underline under "GIVEN TO".
+    const nameCenterX = 0.50; // 0..1 across width
+    const nameCenterY = 0.475; // 0..1 down height
+    const nameBoxWidthFrac = 0.60; // clear band width for the name
+    const nameBoxHeight = 150.0;
+    const nameFontSize = 110.0;
+
+    // LRN value — printed right after the baked-in "LRN:" label.
+    const lrnLeftX = 0.46; // left edge of the value
+    const lrnCenterY = 0.538;
+    const lrnFontSize = 30.0;
+
+    // DATE — above the bottom-left "DATE" label.
+    const dateCenterX = 0.27;
+    const dateCenterY = 0.84;
+    const dateBoxWidthFrac = 0.30;
+    const dateFontSize = 28.0;
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -803,331 +826,87 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen>
           );
         },
         child: AspectRatio(
-          aspectRatio: 1.414, // A4 landscape ratio
+          aspectRatio: designW / designH,
           child: RepaintBoundary(
             key: _certificateKey,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFDF5), // Ivory bond paper
-              borderRadius: BorderRadius.circular(4),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  blurRadius: 30,
-                  offset: const Offset(0, 12),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                // Outer gold border
-                Positioned.fill(
-                  child: Container(
-                    margin: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color(0xFFB8860B), // Dark goldenrod
-                        width: 2.5,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Inner gold border (double-line effect)
-                Positioned.fill(
-                  child: Container(
-                    margin: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color(0xFFDAA520), // Goldenrod
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Corner ornaments (top-left)
-                Positioned(
-                  left: 18,
-                  top: 18,
-                  child: _buildCornerOrnament(),
-                ),
-                // Corner ornaments (top-right)
-                Positioned(
-                  right: 18,
-                  top: 18,
-                  child: Transform.flip(
-                    flipX: true,
-                    child: _buildCornerOrnament(),
-                  ),
-                ),
-                // Corner ornaments (bottom-left)
-                Positioned(
-                  left: 18,
-                  bottom: 18,
-                  child: Transform.flip(
-                    flipY: true,
-                    child: _buildCornerOrnament(),
-                  ),
-                ),
-                // Corner ornaments (bottom-right)
-                Positioned(
-                  right: 18,
-                  bottom: 18,
-                  child: Transform.flip(
-                    flipX: true,
-                    flipY: true,
-                    child: _buildCornerOrnament(),
-                  ),
-                ),
-
-                // Certificate content
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 18,
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: SizedBox(
-                        width: 500, // Design width for layout
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Header: "CERTIFICATE"
-                            const Text(
-                              'CERTIFICATE',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w300,
-                                letterSpacing: 14,
-                                color: Color(0xFFB8860B),
-                                fontFamily: 'serif',
-                              ),
-                            ),
-
-                            const SizedBox(height: 1),
-
-                            // Subheader: "OF COMPLETION"
-                            const Text(
-                              'OF COMPLETION',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 6,
-                                color: Color(0xFF555555),
-                              ),
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            // Decorative line
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 50,
-                                  height: 1,
-                                  color: const Color(0xFFDAA520),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Color(0xFFDAA520),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  width: 50,
-                                  height: 1,
-                                  color: const Color(0xFFDAA520),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            // "This is presented to"
-                            const Text(
-                              'This is proudly presented to',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontStyle: FontStyle.italic,
-                                color: Color(0xFF666666),
-                              ),
-                            ),
-
-                            const SizedBox(height: 8),
-
-                            // Student name
-                            Column(
-                              children: [
-                                Text(
-                                  name.toUpperCase(),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 3,
-                                    color: Color(0xFF2D2D2D),
-                                    fontFamily: 'serif',
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Container(
-                                  width: 200,
-                                  height: 1.5,
-                                  color: const Color(0xFFB8860B),
-                                ),
-                              ],
-                            ),
-
-                            // LRN
-                            if (lrn.isNotEmpty) ...[
-                              const SizedBox(height: 3),
-                              Text(
-                                'LRN: $lrn',
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFF888888),
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
-                            ],
-
-                            const SizedBox(height: 8),
-
-                            // Description
-                            const Text(
-                              'for successfully completing all learning modules\nand earning all achievements in',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF555555),
-                                height: 1.5,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            // Program name
-                            const Text(
-                              'E-TARABAY',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 5,
-                                color: Color(0xFFB8860B),
-                                fontFamily: 'serif',
-                              ),
-                            ),
-
-                            const SizedBox(height: 2),
-
-                            const Text(
-                              'Interactive Learning Application',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontStyle: FontStyle.italic,
-                                color: Color(0xFF888888),
-                                letterSpacing: 1,
-                              ),
-                            ),
-
-                            const SizedBox(height: 14),
-
-                            // Date and Signature row
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 30),
-                              child: Row(
-                                children: [
-                                  // Date
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          width: 120,
-                                          height: 1,
-                                          color: const Color(0xFF999999),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          _formatDate(date),
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Color(0xFF555555),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        const Text(
-                                          'Date',
-                                          style: TextStyle(
-                                            fontSize: 8,
-                                            color: Color(0xFF999999),
-                                            letterSpacing: 1,
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                  ),
-
-
-
-                                  // Signature
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          width: 120,
-                                          height: 1,
-                                          color: const Color(0xFF999999),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        const Text(
-                                          'Daycare Teacher',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontStyle: FontStyle.italic,
-                                            color: Color(0xFF555555),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  width: designW,
+                  height: designH,
+                  child: Stack(
+                    children: [
+                      // Canva certificate background
+                      Positioned.fill(
+                        child: Image.asset(
+                          'assets/images/E-TarabayCertificate.png',
+                          fit: BoxFit.fill,
                         ),
                       ),
-                    ),
+
+                      // NAME
+                      Positioned(
+                        left: (nameCenterX - nameBoxWidthFrac / 2) * designW,
+                        width: nameBoxWidthFrac * designW,
+                        top: nameCenterY * designH - nameBoxHeight / 2,
+                        height: nameBoxHeight,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            name.toUpperCase(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontFamily: 'FuzzyBubbles',
+                              fontWeight: FontWeight.w700,
+                              fontSize: nameFontSize,
+                              color: Color(0xFF19416B),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // LRN value
+                      if (lrn.isNotEmpty)
+                        Positioned(
+                          left: lrnLeftX * designW,
+                          top: lrnCenterY * designH - lrnFontSize,
+                          child: Text(
+                            lrn,
+                            style: const TextStyle(
+                              fontFamily: 'ABeeZee',
+                              fontSize: lrnFontSize,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF333333),
+                            ),
+                          ),
+                        ),
+
+                      // DATE
+                      Positioned(
+                        left: (dateCenterX - dateBoxWidthFrac / 2) * designW,
+                        width: dateBoxWidthFrac * designW,
+                        top: dateCenterY * designH - dateFontSize,
+                        child: Text(
+                          _formatDate(date).toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: 'ABeeZee',
+                            fontSize: dateFontSize,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                            color: Color(0xFF19416B),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCornerOrnament() {
-    return SizedBox(
-      width: 20,
-      height: 20,
-      child: CustomPaint(
-        painter: _CornerOrnamentPainter(),
       ),
     );
   }
@@ -1149,41 +928,4 @@ class _CertificateDetailScreenState extends State<CertificateDetailScreen>
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
-}
-
-class _CornerOrnamentPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFDAA520)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    // Horizontal line
-    canvas.drawLine(
-      const Offset(0, 0),
-      Offset(size.width, 0),
-      paint,
-    );
-    // Vertical line
-    canvas.drawLine(
-      const Offset(0, 0),
-      Offset(0, size.height),
-      paint,
-    );
-    // Small inner diagonal
-    canvas.drawLine(
-      const Offset(4, 4),
-      Offset(size.width * 0.6, 4),
-      paint..strokeWidth = 1,
-    );
-    canvas.drawLine(
-      const Offset(4, 4),
-      Offset(4, size.height * 0.6),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

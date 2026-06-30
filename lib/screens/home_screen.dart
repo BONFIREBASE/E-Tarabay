@@ -1,13 +1,15 @@
 import 'package:e_tarabay/l10n/app_localizations.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
-import 'package:confetti/confetti.dart';
 import '../main.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/floating_bottom_nav_bar.dart';
 import '../widgets/staggered_entrance.dart';
 import '../widgets/cached_avatar.dart';
+import '../widgets/birthday_celebration.dart';
 import '../utils/page_transitions.dart';
 import 'matematika_screen.dart';
 import 'pamilya_screen.dart';
@@ -31,14 +33,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  late ConfettiController _confettiController;
   bool _isLogginOut = false;
 
   @override
   void initState() {
     super.initState();
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 10));
     // Start background music safely
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AudioManager>(context, listen: false)
@@ -59,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Icon(Icons.warning_amber_rounded,
+          title: const Icon(LucideIcons.triangle_alert,
               color: Colors.orange, size: 60),
           content: Text(
             AppLocalizations.of(context)!.accessExpired,
@@ -96,7 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _confettiController.dispose();
     super.dispose();
   }
 
@@ -108,47 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final now = DateTime.now();
     if (profile.birthday!.month == now.month &&
         profile.birthday!.day == now.day) {
-      _confettiController.play();
-      showDialog(
-        context: context,
-        builder: (dialogContext) => Stack(
-          alignment: Alignment.center,
-          children: [
-            ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
-              shouldLoop: true,
-              colors: const [
-                Colors.green,
-                Colors.blue,
-                Colors.pink,
-                Colors.orange,
-                Colors.purple
-              ],
-              numberOfParticles: 20,
-              gravity: 0.1,
-            ),
-            AlertDialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.cake, color: Colors.pink, size: 64),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context)!
-                        .birthdayGreeting(profile.name),
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ).then((_) => _confettiController.stop());
+      if (!mounted) return;
+      showBirthdayCelebration(context, name: profile.name);
     }
   }
 
@@ -218,29 +177,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       extendBody: true,
-      body: Container(
-        color: const Color(0xFFF5F7FA),
-        child: SafeArea(
+      body: Stack(
+        children: [
+          const Positioned.fill(child: _PlayfulBackground()),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.white.withOpacity(0.08)),
+            ),
+          ),
+          SafeArea(
           child: Column(
             children: [
               // Header Section
               Container(
-                height: safeHeight * 0.22,
+                height: safeHeight * 0.16,
+                margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+                  horizontal: 16,
+                  vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
+                  color: Colors.white.withOpacity(0.92),
+                  borderRadius: BorderRadius.circular(26),
+                  border: Border.all(color: Colors.white, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
+                      color: const Color(0xFF6C63FF).withOpacity(0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
@@ -347,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.workspace_premium,
+                                  LucideIcons.award,
                                   color: AppColors.success,
                                   size: 20,
                                 ),
@@ -377,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           },
                           icon: const Icon(
-                            Icons.family_restroom,
+                            LucideIcons.users,
                             color: AppColors.primary,
                           ),
                           style: IconButton.styleFrom(
@@ -396,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildStatItem(
                           '${stats['lessons']}',
                           AppLocalizations.of(context)!.lessons,
-                          Icons.menu_book,
+                          LucideIcons.book_open,
                           AppColors.primary,
                         ),
                         Container(
@@ -407,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildStatItem(
                           '${stats['stars']}',
                           AppLocalizations.of(context)!.stars,
-                          Icons.star,
+                          LucideIcons.star,
                           Colors.amber,
                         ),
                         Container(
@@ -418,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildStatItem(
                           '${stats['awards']}',
                           AppLocalizations.of(context)!.awards,
-                          Icons.emoji_events,
+                          LucideIcons.trophy,
                           AppColors.success,
                         ),
                       ],
@@ -592,6 +557,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+        ],
       ),
 
       // Modern Bottom Navigation Bar
@@ -600,19 +566,19 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onNavItemTapped,
         items: [
           NavItemData(
-            icon: Icons.home_rounded,
+            icon: LucideIcons.house,
             label: AppLocalizations.of(context)!.home,
           ),
           NavItemData(
-            icon: Icons.auto_stories_rounded,
+            icon: LucideIcons.book_open,
             label: AppLocalizations.of(context)!.lessons,
           ),
           NavItemData(
-            icon: Icons.emoji_events_rounded,
+            icon: LucideIcons.trophy,
             label: AppLocalizations.of(context)!.awards,
           ),
           NavItemData(
-            icon: Icons.settings_rounded,
+            icon: LucideIcons.settings,
             label: AppLocalizations.of(context)!.settings,
           ),
         ],
@@ -663,78 +629,61 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         width: double.infinity,
         height: double.infinity,
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: color.withOpacity(0.6), width: 3),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
+              color: color.withOpacity(0.28),
+              blurRadius: 14,
+              offset: const Offset(0, 7),
             ),
           ],
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.2),
-              BlendMode.darken,
-            ),
-          ),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.transparent, color.withOpacity(0.7)],
+        child: Column(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Container(color: color.withOpacity(0.12)),
+                    Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Image.asset(imagePath, fit: BoxFit.contain),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Text(
-                    title.isNotEmpty ? title : '',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: [Shadow(blurRadius: 5, color: Colors.black26)],
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+            const SizedBox(height: 6),
+            Text(
+              title.isNotEmpty ? title : '',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: _darken(color),
               ),
-              const SizedBox(height: 4),
-              Flexible(
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    subtitle.isNotEmpty ? subtitle : '',
-                    style: TextStyle(
-                      fontSize: 8,
-                      color: color,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (subtitle.isNotEmpty)
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 8.5,
+                  color: _darken(color, 0.15),
+                  fontWeight: FontWeight.w600,
                 ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -752,80 +701,40 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         width: double.infinity,
         height: double.infinity,
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: color.withOpacity(0.6), width: 3),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
+              color: color.withOpacity(0.28),
+              blurRadius: 14,
+              offset: const Offset(0, 7),
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              child,
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, color.withOpacity(0.7)],
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: Text(
-                          title.isNotEmpty ? title : '',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(blurRadius: 5, color: Colors.black26)
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Flexible(
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          subtitle.isNotEmpty ? subtitle : '',
-                          style: TextStyle(
-                            fontSize: 8,
-                            color: color,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: child,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title.isNotEmpty ? title : '',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+                color: _darken(color),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
@@ -889,7 +798,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: _thumbCard(
               color: AppColors.shapes,
               child:
-                  const Icon(Icons.help_outline, color: Colors.white, size: 20),
+                  const Icon(LucideIcons.circle_question_mark, color: Colors.white, size: 20),
             ),
           ),
         ),
@@ -938,7 +847,7 @@ class _HomeScreenState extends State<HomeScreen> {
             angle: -0.1,
             child: _thumbCard(
               color: AppColors.primary.withOpacity(0.7),
-              child: const Icon(Icons.question_mark_rounded,
+              child: const Icon(LucideIcons.circle_question_mark,
                   color: Colors.white, size: 18),
             ),
           ),
@@ -978,7 +887,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _sparkle(Color color) {
-    return Icon(Icons.auto_awesome_rounded,
+    return Icon(LucideIcons.sparkles,
         color: color.withOpacity(0.5), size: 14);
   }
 
@@ -1025,23 +934,28 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Color _darken(Color c, [double amount = 0.3]) {
+    final hsl = HSLColor.fromColor(c);
+    return hsl
+        .withLightness((hsl.lightness - amount).clamp(0.0, 1.0))
+        .withSaturation((hsl.saturation + 0.1).clamp(0.0, 1.0))
+        .toColor();
+  }
+
   Widget _buildHomeAvatar(String avatar, String userName) {
     if (avatar.startsWith('http')) {
       return CachedAvatar(imageUrl: avatar, size: 50);
     }
     if (avatar.isNotEmpty) {
-      final presets = <String, IconData>{
-        'boy1': Icons.face,
-        'boy2': Icons.sentiment_satisfied,
-        'boy3': Icons.child_care,
-        'girl1': Icons.face_2,
-        'girl2': Icons.face_3,
-        'girl3': Icons.face_4,
-        'neutral1': Icons.person,
-        'neutral2': Icons.sentiment_very_satisfied,
-      };
-      final icon = presets[avatar] ?? Icons.person;
-      return Center(child: Icon(icon, size: 24, color: Colors.white));
+      return ClipOval(
+        child: Image.asset(
+          avatarAssetForPreset(avatar),
+          width: 50,
+          height: 50,
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+        ),
+      );
     }
     final initial = userName.isNotEmpty ? userName[0].toUpperCase() : 'N';
     return Center(
@@ -1053,6 +967,23 @@ class _HomeScreenState extends State<HomeScreen> {
           color: Colors.white,
         ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  PLAYFUL BEACH-STYLE BACKGROUND
+// ─────────────────────────────────────────────────────────────────────────────
+class _PlayfulBackground extends StatelessWidget {
+  const _PlayfulBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/images/bg_home.jpg',
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
     );
   }
 }

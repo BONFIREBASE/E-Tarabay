@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,6 +11,11 @@ import 'providers/language_provider.dart';
 import 'providers/user_provider.dart';
 import 'utils/constants.dart';
 import 'screens/splash_screen.dart';
+
+/// Global route observer so screens can auto-refresh when they become visible
+/// again (e.g. returning to the Lessons page after playing a game).
+final RouteObserver<PageRoute<dynamic>> routeObserver =
+    RouteObserver<PageRoute<dynamic>>();
 
 // ========== AUDIO MANAGER (FOR BACKGROUND MUSIC) ==========
 class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
@@ -249,9 +253,32 @@ class ETarabayApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Base readable font (ABeeZee) for all text, with the playful Chelsea
+    // Market used for large display/headline/title styles.
+    final baseText = ThemeData(useMaterial3: true).textTheme;
+    final bodyText = baseText.apply(
+      fontFamily: 'ABeeZee',
+      bodyColor: AppColors.textDark,
+      displayColor: AppColors.textDark,
+    );
+    final appTextTheme = bodyText.copyWith(
+      displayLarge: bodyText.displayLarge?.copyWith(fontFamily: 'ChelseaMarket'),
+      displayMedium:
+          bodyText.displayMedium?.copyWith(fontFamily: 'ChelseaMarket'),
+      displaySmall: bodyText.displaySmall?.copyWith(fontFamily: 'ChelseaMarket'),
+      headlineLarge:
+          bodyText.headlineLarge?.copyWith(fontFamily: 'ChelseaMarket'),
+      headlineMedium:
+          bodyText.headlineMedium?.copyWith(fontFamily: 'ChelseaMarket'),
+      headlineSmall:
+          bodyText.headlineSmall?.copyWith(fontFamily: 'ChelseaMarket'),
+      titleLarge: bodyText.titleLarge?.copyWith(fontFamily: 'ChelseaMarket'),
+    );
+
     return MaterialApp(
       title: 'E-Tarabay',
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [routeObserver],
       locale:
           Locale(Provider.of<LanguageProvider>(context).currentLanguageCode),
       localizationsDelegates: const [
@@ -270,7 +297,7 @@ class ETarabayApp extends StatelessWidget {
         useMaterial3: true,
         primaryColor: AppColors.primary,
         scaffoldBackgroundColor: Colors.white,
-        textTheme: GoogleFonts.poppinsTextTheme(),
+        textTheme: appTextTheme,
         appBarTheme: const AppBarTheme(
           elevation: 0,
           centerTitle: false,

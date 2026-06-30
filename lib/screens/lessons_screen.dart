@@ -1,7 +1,10 @@
 import 'package:e_tarabay/l10n/app_localizations.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../main.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import 'matematika_screen.dart';
@@ -45,7 +48,7 @@ class LessonsScreen extends StatefulWidget {
   State<LessonsScreen> createState() => _LessonsScreenState();
 }
 
-class _LessonsScreenState extends State<LessonsScreen> {
+class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
   bool _isLoading = true;
 
   // ── Trace It progress ──────────────────────────────────────────────────────
@@ -163,6 +166,22 @@ class _LessonsScreenState extends State<LessonsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
+    }
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  // Called automatically when returning to this page from a pushed route.
+  @override
+  void didPopNext() {
+    _loadProgress();
   }
 
   Future<void> _loadProgress() async {
@@ -277,16 +296,6 @@ class _LessonsScreenState extends State<LessonsScreen> {
         title: AppLocalizations.of(context)!.lessons,
         baseColor: AppColors.primary,
         showBackButton: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-            tooltip: AppLocalizations.of(context)!.refresh,
-            onPressed: () {
-              setState(() => _isLoading = true);
-              _loadProgress();
-            },
-          ),
-        ],
       ),
       bottomNavigationBar: FloatingBottomNavBar(
         selectedIndex: 1,
@@ -305,13 +314,27 @@ class _LessonsScreenState extends State<LessonsScreen> {
           }
         },
         items: const [
-          NavItemData(icon: Icons.home_rounded, label: 'Home'),
-          NavItemData(icon: Icons.auto_stories_rounded, label: 'Lessons'),
-          NavItemData(icon: Icons.emoji_events_rounded, label: 'Awards'),
-          NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
+          NavItemData(icon: LucideIcons.house, label: 'Home'),
+          NavItemData(icon: LucideIcons.book_open, label: 'Lessons'),
+          NavItemData(icon: LucideIcons.trophy, label: 'Awards'),
+          NavItemData(icon: LucideIcons.settings, label: 'Settings'),
         ],
       ),
-      body: SingleChildScrollView(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/bg_lesson.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.white.withOpacity(0.08)),
+            ),
+          ),
+          SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,6 +418,8 @@ class _LessonsScreenState extends State<LessonsScreen> {
           ],
         ),
       ),
+        ],
+      ),
     );
   }
 
@@ -470,7 +495,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
       title: AppLocalizations.of(context)!.matematika,
       subtitle:
           '$_matDone/$_matTotal ${AppLocalizations.of(context)!.activities}',
-      icon: Icons.calculate,
+      icon: LucideIcons.calculator,
       color: AppColors.numbers,
       progress: _matTotal > 0 ? _matDone / _matTotal : 0.0,
       onTap: () async {
@@ -491,7 +516,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
       title: AppLocalizations.of(context)!.angAkingSariliTitle,
       subtitle:
           '$_pamilyaDone/$_pamilyaTotal ${AppLocalizations.of(context)!.levels}',
-      icon: Icons.person,
+      icon: LucideIcons.user,
       color: AppColors.family,
       progress: _pamilyaTotal > 0 ? _pamilyaDone / _pamilyaTotal : 0.0,
       onTap: () async {
@@ -511,7 +536,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
       title: AppLocalizations.of(context)!.kulaySaya,
       subtitle:
           '$_kulayDone/$_kulayTotal ${AppLocalizations.of(context)!.activities}',
-      icon: Icons.palette,
+      icon: LucideIcons.palette,
       color: AppColors.colors,
       progress: _kulayTotal > 0 ? _kulayDone / _kulayTotal : 0.0,
       onTap: () async {
@@ -531,7 +556,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
       title: AppLocalizations.of(context)!.traceItTitle,
       subtitle:
           '$_traceItDone/$_traceItTotal ${AppLocalizations.of(context)!.activities}',
-      icon: Icons.edit_note,
+      icon: LucideIcons.square_pen,
       color: AppColors.success,
       progress: _traceItTotal > 0 ? _traceItDone / _traceItTotal : 0.0,
       onTap: () async {
@@ -551,7 +576,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
       title: AppLocalizations.of(context)!.magbasaTitle,
       subtitle:
           '$_magbasaDone/$_magbasaTotal ${AppLocalizations.of(context)!.activities}',
-      icon: Icons.menu_book,
+      icon: LucideIcons.book_open,
       color: AppColors.alphabet,
       progress: _magbasaTotal > 0 ? _magbasaDone / _magbasaTotal : 0.0,
       onTap: () async {
@@ -571,7 +596,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
       title: AppLocalizations.of(context)!.tandaanTitle,
       subtitle:
           '$_tandaanDone/$_tandaanTotal ${AppLocalizations.of(context)!.activities}',
-      icon: Icons.psychology,
+      icon: LucideIcons.brain,
       color: AppColors.shapes,
       progress: _tandaanTotal > 0 ? _tandaanDone / _tandaanTotal : 0.0,
       onTap: () async {
@@ -638,7 +663,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                           : color.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(isCompleted ? Icons.check_circle : icon,
+                    child: Icon(isCompleted ? LucideIcons.circle_check : icon,
                         color: isCompleted ? Colors.green : color, size: 28),
                   ),
                   const SizedBox(width: 16),
@@ -674,7 +699,7 @@ class _LessonsScreenState extends State<LessonsScreen> {
                   ),
                   const SizedBox(width: 8),
                   Icon(
-                    isCompleted ? Icons.lock : Icons.arrow_forward_ios,
+                    isCompleted ? LucideIcons.lock : LucideIcons.chevron_right,
                     color: isCompleted ? Colors.green : Colors.grey.shade400,
                     size: 16,
                   ),

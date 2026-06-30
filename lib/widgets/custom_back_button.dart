@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class CustomBackButton extends StatelessWidget {
   final Color iconColor;
@@ -29,7 +30,7 @@ class CustomBackButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
-            Icons.arrow_back,
+            LucideIcons.arrow_left,
             color: iconColor,
             size: 24,
           ),

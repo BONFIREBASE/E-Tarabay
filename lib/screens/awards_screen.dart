@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
+import 'package:e_tarabay/l10n/app_localizations.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/floating_bottom_nav_bar.dart';
@@ -16,6 +19,7 @@ class AwardsScreen extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
     final achievements = userProvider.userProfile?.achievements ?? {};
     final claimed = userProvider.userProfile?.claimedBadges ?? [];
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FF),
@@ -36,14 +40,28 @@ class AwardsScreen extends StatelessWidget {
               break;
           }
         },
-        items: const [
-          NavItemData(icon: Icons.home_rounded, label: 'Home'),
-          NavItemData(icon: Icons.auto_stories_rounded, label: 'Lessons'),
-          NavItemData(icon: Icons.emoji_events_rounded, label: 'Awards'),
-          NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
+        items: [
+          NavItemData(icon: LucideIcons.house, label: loc.home),
+          NavItemData(icon: LucideIcons.book_open, label: loc.lessons),
+          NavItemData(icon: LucideIcons.trophy, label: loc.awards),
+          NavItemData(icon: LucideIcons.settings, label: loc.settingsTitle),
         ],
       ),
-      body: CustomScrollView(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/bg_awards.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(color: Colors.white.withOpacity(0.08)),
+            ),
+          ),
+          CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: StaggeredEntrance(
@@ -81,6 +99,8 @@ class AwardsScreen extends StatelessWidget {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
+        ],
+      ),
         ],
       ),
     );
@@ -185,7 +205,72 @@ class AwardsScreen extends StatelessWidget {
     },
   ];
 
+  String _badgeTitle(BuildContext context, String id) {
+    final loc = AppLocalizations.of(context)!;
+    switch (id) {
+      case 'firstSteps':
+        return loc.badgeFirstStepsTitle;
+      case 'alphabet':
+        return loc.badgeAlphabetTitle;
+      case 'numbers':
+        return loc.badgeNumbersTitle;
+      case 'colors':
+        return loc.badgeColorsTitle;
+      case 'shapes':
+        return loc.badgeShapesTitle;
+      case 'animals':
+        return loc.badgeAnimalsTitle;
+      case 'bookworm':
+        return loc.badgeBookwormTitle;
+      case 'starStudent':
+        return loc.badgeStarStudentTitle;
+      case 'mathWhiz':
+        return loc.badgeMathWhizTitle;
+      case 'familyHero':
+        return loc.badgeFamilyHeroTitle;
+      case 'writingStar':
+        return loc.badgeWritingStarTitle;
+      case 'songbird':
+        return loc.badgeSongbirdTitle;
+      default:
+        return '';
+    }
+  }
+
+  String _badgeHint(BuildContext context, String id) {
+    final loc = AppLocalizations.of(context)!;
+    switch (id) {
+      case 'firstSteps':
+        return loc.badgeFirstStepsHint;
+      case 'alphabet':
+        return loc.badgeAlphabetHint;
+      case 'numbers':
+        return loc.badgeNumbersHint;
+      case 'colors':
+        return loc.badgeColorsHint;
+      case 'shapes':
+        return loc.badgeShapesHint;
+      case 'animals':
+        return loc.badgeAnimalsHint;
+      case 'bookworm':
+        return loc.badgeBookwormHint;
+      case 'starStudent':
+        return loc.badgeStarStudentHint;
+      case 'mathWhiz':
+        return loc.badgeMathWhizHint;
+      case 'familyHero':
+        return loc.badgeFamilyHeroHint;
+      case 'writingStar':
+        return loc.badgeWritingStarHint;
+      case 'songbird':
+        return loc.badgeSongbirdHint;
+      default:
+        return '';
+    }
+  }
+
   Widget _buildHeader(BuildContext context, int earned, int claimed) {
+    final loc = AppLocalizations.of(context)!;
     final headerContent = Container(
       padding: const EdgeInsets.fromLTRB(20, 50, 20, 24),
       decoration: BoxDecoration(
@@ -210,10 +295,10 @@ class AwardsScreen extends StatelessWidget {
         bottom: false,
         child: Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Text(
-                'Awards',
-                style: TextStyle(
+                loc.awards,
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -245,7 +330,7 @@ class AwardsScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.emoji_events, color: Colors.amber, size: 28),
+                const Icon(LucideIcons.trophy, color: Colors.amber, size: 28),
                 const SizedBox(width: 10),
                 Text(
                   '$claimed / ${_allBadges.length}',
@@ -283,7 +368,7 @@ class AwardsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8, left: 24),
             child: Text(
-              '$earned earned, ${earned - claimed} waiting to claim!',
+              loc.awardsWaiting(earned, earned - claimed),
               style: TextStyle(
                   fontSize: 12, color: AppColors.textDark.withOpacity(0.8)),
             ),
@@ -300,6 +385,7 @@ class AwardsScreen extends StatelessWidget {
     required UserProvider userProvider,
   }) {
     final color = Color(badge['color'] as int);
+    final loc = AppLocalizations.of(context)!;
 
     if (!isEarned) {
       return Container(
@@ -326,12 +412,12 @@ class AwardsScreen extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Center(
-                child: Icon(Icons.lock, color: Colors.grey, size: 28),
+                child: Icon(LucideIcons.lock, color: Colors.grey, size: 28),
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              badge['title'] as String,
+              _badgeTitle(context, badge['id'] as String),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
@@ -342,7 +428,7 @@ class AwardsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Text(
-                badge['hint'] as String? ?? '???',
+                _badgeHint(context, badge['id'] as String),
                 style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
                 textAlign: TextAlign.center,
               ),
@@ -396,14 +482,14 @@ class AwardsScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child:
-                          const Icon(Icons.star, color: Colors.white, size: 14),
+                          const Icon(LucideIcons.star, color: Colors.white, size: 14),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
-                badge['title'] as String,
+                _badgeTitle(context, badge['id'] as String),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -420,7 +506,7 @@ class AwardsScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Tap to Claim',
+                  loc.tapToClaim,
                   style: TextStyle(
                       fontSize: 11, fontWeight: FontWeight.bold, color: color),
                 ),
@@ -483,7 +569,7 @@ class AwardsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    badge['title'] as String,
+                    _badgeTitle(context, badge['id'] as String),
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -502,7 +588,7 @@ class AwardsScreen extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, color: Colors.white, size: 14),
+                        const Icon(LucideIcons.star, color: Colors.white, size: 14),
                         const SizedBox(width: 4),
                         Text(
                           '+${badge['stars']}',
@@ -527,6 +613,7 @@ class AwardsScreen extends StatelessWidget {
   void _showClaimDialog(BuildContext context, Map<String, dynamic> badge,
       UserProvider userProvider) {
     final color = Color(badge['color'] as int);
+    final loc = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -550,12 +637,12 @@ class AwardsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Claim ${badge['title']}',
+              loc.claimBadge(_badgeTitle(context, badge['id'] as String)),
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              'You earned this badge! Claim it to add it to your collection.',
+              loc.claimBadgeBody,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
             ),
@@ -569,10 +656,10 @@ class AwardsScreen extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 20),
+                  const Icon(LucideIcons.star, color: Colors.amber, size: 20),
                   const SizedBox(width: 6),
                   Text(
-                    '+${badge['stars']} Stars',
+                    loc.plusStarsLabel(badge['stars'] as int),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -599,7 +686,7 @@ class AwardsScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Claim Badge'),
+            child: Text(loc.claimBadgeButton),
           ),
         ],
       ),
@@ -608,6 +695,7 @@ class AwardsScreen extends StatelessWidget {
 
   void _showViewBadgeModal(BuildContext context, Map<String, dynamic> badge) {
     final color = Color(badge['color'] as int);
+    final loc = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -641,9 +729,9 @@ class AwardsScreen extends StatelessWidget {
                     color: Colors.amber,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    'BADGE CLAIMED',
-                    style: TextStyle(
+                  child: Text(
+                    loc.badgeClaimed,
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -674,7 +762,7 @@ class AwardsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  badge['title'] as String,
+                  _badgeTitle(context, badge['id'] as String),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 24,
@@ -693,7 +781,7 @@ class AwardsScreen extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star, color: Colors.white, size: 20),
+                      const Icon(LucideIcons.star, color: Colors.white, size: 20),
                       const SizedBox(width: 6),
                       Text(
                         '+${badge['stars']}',
@@ -720,9 +808,9 @@ class AwardsScreen extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Awesome!',
-                      style: TextStyle(
+                    child: Text(
+                      loc.awesome,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),

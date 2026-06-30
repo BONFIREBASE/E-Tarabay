@@ -2,6 +2,7 @@ import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import '../widgets/custom_back_button.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class MagbasaTulaScreen extends StatefulWidget {
   final int activityIndex;
@@ -63,7 +64,7 @@ class _MagbasaTulaScreenState extends State<MagbasaTulaScreen> {
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 48),
+                        Icon(LucideIcons.circle_check, color: Colors.green, size: 48),
                         SizedBox(height: 16),
                         Text(AppLocalizations.of(context)!.poemFinishedGreatJob, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
                       ],

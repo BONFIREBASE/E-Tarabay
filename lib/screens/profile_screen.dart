@@ -7,6 +7,7 @@ import 'package:confetti/confetti.dart';
 import '../widgets/custom_header_app_bar.dart';
 import '../widgets/cached_avatar.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -105,20 +106,20 @@ class ProfileScreen extends StatelessWidget {
                         _buildProfileField(
                           AppLocalizations.of(context)!.fullName,
                           userProfile.name,
-                          Icons.person_outline,
+                          LucideIcons.user,
                         ),
                         const Divider(height: 20),
                         _buildProfileField(
                           AppLocalizations.of(context)!.birthday,
                           _formatBirthday(context, userProfile.birthday),
-                          Icons.cake_outlined,
+                          LucideIcons.cake,
                         ),
                         const Divider(height: 20),
                         _buildProfileField(
                           AppLocalizations.of(context)!.profileAge,
                           AppLocalizations.of(context)!
                               .yearsOld(userProfile.age),
-                          Icons.calendar_today_outlined,
+                          LucideIcons.calendar,
                         ),
                         const Divider(height: 20),
                         _buildProfileField(
@@ -126,7 +127,7 @@ class ProfileScreen extends StatelessWidget {
                           userProfile.gender.toLowerCase() == 'male'
                               ? AppLocalizations.of(context)!.male
                               : AppLocalizations.of(context)!.female,
-                          Icons.wc_outlined,
+                          LucideIcons.toilet,
                         ),
                         const Divider(height: 20),
 
@@ -137,7 +138,7 @@ class ProfileScreen extends StatelessWidget {
                             userProfile.parentName.isNotEmpty
                                 ? userProfile.parentName
                                 : AppLocalizations.of(context)!.notSet,
-                            Icons.family_restroom_outlined,
+                            LucideIcons.users,
                           ),
                           const Divider(height: 20),
                           _buildProfileField(
@@ -145,7 +146,7 @@ class ProfileScreen extends StatelessWidget {
                             userProfile.parentContact.isNotEmpty
                                 ? userProfile.parentContact
                                 : AppLocalizations.of(context)!.notSet,
-                            Icons.phone_outlined,
+                            LucideIcons.phone,
                           ),
                           const Divider(height: 20),
                         ],
@@ -154,7 +155,7 @@ class ProfileScreen extends StatelessWidget {
                         _buildProfileField(
                           AppLocalizations.of(context)!.memberSince,
                           AppLocalizations.of(context)!.notSet,
-                          Icons.calendar_today,
+                          LucideIcons.calendar,
                         ),
                       ],
                     ),
@@ -184,17 +185,17 @@ class ProfileScreen extends StatelessWidget {
                         _buildStatItem(
                           '${userProfile.stars}',
                           AppLocalizations.of(context)!.stars,
-                          Icons.star,
+                          LucideIcons.star,
                         ),
                         _buildStatItem(
                           '${userProfile.lessonsCompleted}',
                           AppLocalizations.of(context)!.lessons,
-                          Icons.menu_book,
+                          LucideIcons.book_open,
                         ),
                         _buildStatItem(
                           '${userProfile.achievements.length}',
                           AppLocalizations.of(context)!.badges,
-                          Icons.emoji_events,
+                          LucideIcons.trophy,
                         ),
                       ],
                     ),
@@ -207,7 +208,7 @@ class ProfileScreen extends StatelessWidget {
                     OutlinedButton.icon(
                       onPressed: () =>
                           _showEditProfileDialog(context, userProvider),
-                      icon: const Icon(Icons.edit),
+                      icon: const Icon(LucideIcons.pencil),
                       label: Text(AppLocalizations.of(context)!.editProfile),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
@@ -228,7 +229,7 @@ class ProfileScreen extends StatelessWidget {
                   // Logout Button
                   TextButton.icon(
                     onPressed: () => _logout(context),
-                    icon: const Icon(Icons.logout, color: Colors.red),
+                    icon: const Icon(LucideIcons.log_out, color: Colors.red),
                     label: Text(AppLocalizations.of(context)!.logout,
                         style: const TextStyle(
                             color: Colors.red,
@@ -327,7 +328,7 @@ class ProfileScreen extends StatelessWidget {
                   labelText: AppLocalizations.of(context)!.fullName,
                   hintText: AppLocalizations.of(context)!.enterName,
                   prefixIcon:
-                      const Icon(Icons.person, color: AppColors.primary),
+                      const Icon(LucideIcons.user, color: AppColors.primary),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -342,7 +343,7 @@ class ProfileScreen extends StatelessWidget {
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.cake, color: AppColors.primary),
+                  child: const Icon(LucideIcons.cake, color: AppColors.primary),
                 ),
                 title: Text(AppLocalizations.of(context)!.birthday,
                     style: const TextStyle(fontSize: 12, color: Colors.grey)),
@@ -351,7 +352,7 @@ class ProfileScreen extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark)),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(LucideIcons.chevron_right),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -372,7 +373,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   _GenderOption(
                     label: AppLocalizations.of(context)!.male,
-                    icon: Icons.male,
+                    icon: LucideIcons.mars,
                     isSelected:
                         selectedGender == AppLocalizations.of(context)!.male,
                     onTap: () => setModalState(() =>
@@ -381,7 +382,7 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(width: 12),
                   _GenderOption(
                     label: AppLocalizations.of(context)!.female,
-                    icon: Icons.female,
+                    icon: LucideIcons.venus,
                     isSelected:
                         selectedGender == AppLocalizations.of(context)!.female,
                     onTap: () => setModalState(() =>
@@ -540,21 +541,16 @@ class _BirthdayAvatarState extends State<_BirthdayAvatar> {
       return CachedAvatar(imageUrl: avatar, size: 120);
     }
 
-    // Preset icon
+    // Preset character image (male / female)
     if (avatar.isNotEmpty) {
-      final presets = <String, IconData>{
-        'boy1': Icons.face,
-        'boy2': Icons.sentiment_satisfied,
-        'boy3': Icons.child_care,
-        'girl1': Icons.face_2,
-        'girl2': Icons.face_3,
-        'girl3': Icons.face_4,
-        'neutral1': Icons.person,
-        'neutral2': Icons.sentiment_very_satisfied,
-      };
-      final icon = presets[avatar] ?? Icons.person;
-      return Center(
-        child: Icon(icon, size: 56, color: Colors.white),
+      return ClipOval(
+        child: Image.asset(
+          avatarAssetForPreset(avatar),
+          width: 120,
+          height: 120,
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+        ),
       );
     }
 

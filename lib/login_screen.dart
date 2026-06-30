@@ -6,6 +6,7 @@ import 'services/auth_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/teacher_login_screen.dart';
 import 'utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -101,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.white),
+            const Icon(LucideIcons.circle_alert, color: Colors.white),
             const SizedBox(width: 8),
             Expanded(
                 child: Text(message,
@@ -266,7 +267,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         decoration: _modernInputDecoration(
                                           label: AppLocalizations.of(context)!
                                               .username,
-                                          icon: Icons.person_outline,
+                                          icon: LucideIcons.user,
                                         ),
                                         textInputAction: TextInputAction.next,
                                         style: const TextStyle(fontSize: 15),
@@ -281,12 +282,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                         decoration: _modernInputDecoration(
                                           label:
                                               '${AppLocalizations.of(context)!.password} (LRN)',
-                                          icon: Icons.lock_outline,
+                                          icon: LucideIcons.lock,
                                           suffix: IconButton(
                                             icon: Icon(
                                               _obscurePassword
-                                                  ? Icons.visibility_off
-                                                  : Icons.visibility,
+                                                  ? LucideIcons.eye_off
+                                                  : LucideIcons.eye,
                                               color: Colors.grey.shade400,
                                               size: 20,
                                             ),
@@ -352,7 +353,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   );
                                 },
                                 icon: const Icon(
-                                  Icons.school_outlined,
+                                  LucideIcons.graduation_cap,
                                   size: 18,
                                   color: AppColors.primary,
                                 ),

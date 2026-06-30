@@ -523,7 +523,7 @@
   "iKnowIt": "Nalaman ko!",
   "familyTreeTitle": "Family Tree",
   "familyTreeDesc": "Ang puno ng pamilya ay nagpapakita ng mga miyembro ng iyong pamilya mula sa pinakamatanda hanggang sa pinakabata.",
-  "familyTreeTapHint": "\ud83d\udca1 Pindutin ang mga miyembro upang malaman ang kanilang relasyon!",
+  "familyTreeTapHint": "💡 Pindutin ang mga miyembro upang malaman ang kanilang relasyon!",
   "iLearnedFamilyTree": "Nalaman ko ang Family Tree!",
   "ourHomeTitle": "Aming Tahanan",
   "tapEachRoomPrompt": "Pindutin ang bawat kwarto para malaman ang ginagawa ninyo dito!",
@@ -587,7 +587,9 @@
   "levelComplete": "Nakumpleto ang Level {level}!",
   "@levelComplete": {
     "placeholders": {
-      "level": {"type": "int"}
+      "level": {
+        "type": "int"
+      }
     }
   },
   "achievementFirstStepsDesc": "Kumpletuhin ang unang aktibidad",
@@ -623,8 +625,12 @@
   "familyRoleSentence": "Si {member} ay {roles}.",
   "@familyRoleSentence": {
     "placeholders": {
-      "member": {"type": "String"},
-      "roles": {"type": "String"}
+      "member": {
+        "type": "String"
+      },
+      "roles": {
+        "type": "String"
+      }
     }
   },
   "resetAllStudents": "I-reset Lahat ng Mag-aaral",
@@ -658,14 +664,20 @@
   "progressPages": "{done} / {total} pahina",
   "@progressPages": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "percentComplete": "{percent}% kumpleto",
   "@percentComplete": {
     "placeholders": {
-      "percent": {"type": "int"}
+      "percent": {
+        "type": "int"
+      }
     }
   },
   "obraLabel": "Obra",
@@ -686,22 +698,34 @@
   "progressCompleted": "{done} / {total} natatapos",
   "@progressCompleted": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "progressActivities": "{done} / {total} aktibidad",
   "@progressActivities": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "progressGames": "{done} / {total} laro",
   "@progressGames": {
     "placeholders": {
-      "done": {"type": "int"},
-      "total": {"type": "int"}
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "pointsStatLabel": "Puntos",
@@ -724,5 +748,37 @@
   "tipPraiseMatTitle": "Papuri",
   "tipPraiseMatBody": "Purihin ang inyong anak sa bawat tamang sagot para mapalakas ang kanilang kumpiyansa sa matematika.",
   "tipGameFunTitle": "Laro",
-  "tipGameFunBody": "Ang mga laro ay dinisenyo para maging masaya — hayaan ang inyong anak na mag-enjoy sa pag-aaral."
+  "tipGameFunBody": "Ang mga laro ay dinisenyo para maging masaya — hayaan ang inyong anak na mag-enjoy sa pag-aaral.",
+  "badgeFirstStepsTitle": "Unang Hakbang",
+  "badgeFirstStepsHint": "Tapusin ang 1 gawain",
+  "badgeAlphabetTitle": "Master ng Alpabeto",
+  "badgeAlphabetHint": "Tapusin ang 12 gawain sa pagbasa",
+  "badgeNumbersTitle": "Salamangkero ng Numero",
+  "badgeNumbersHint": "Maglaro ng 20 laro sa matematika",
+  "badgeColorsTitle": "Artista ng Kulay",
+  "badgeColorsHint": "Tapusin ang 4 gawain sa pagkukulay",
+  "badgeShapesTitle": "Tagalikha ng Hugis",
+  "badgeShapesHint": "Bakatin ang 26 malalaking titik",
+  "badgeAnimalsTitle": "Kaibigan ng Hayop",
+  "badgeAnimalsHint": "Bakatin ang 26 maliliit na titik",
+  "badgeBookwormTitle": "Mahilig Magbasa",
+  "badgeBookwormHint": "Magbasa ng 4 kwento",
+  "badgeStarStudentTitle": "Bituing Mag-aaral",
+  "badgeStarStudentHint": "Maglaro ng 20 laro tungkol sa pamilya",
+  "badgeMathWhizTitle": "Henyo sa Matematika",
+  "badgeMathWhizHint": "Tapusin ang 7 antas sa matematika",
+  "badgeFamilyHeroTitle": "Bayani ng Pamilya",
+  "badgeFamilyHeroHint": "Tapusin ang 5 antas ng pamilya",
+  "badgeWritingStarTitle": "Bituin sa Pagsulat",
+  "badgeWritingStarHint": "Bakatin ang 10 numero",
+  "badgeSongbirdTitle": "Mang-aawit",
+  "badgeSongbirdHint": "Kumanta ng 10 kanta",
+  "tapToClaim": "I-tap para Angkinin",
+  "claimBadgeButton": "Angkinin ang Badge",
+  "badgeClaimed": "NAANGKIN NA",
+  "awesome": "Galing!",
+  "claimBadgeBody": "Nakuha mo ang badge na ito! Angkinin ito para idagdag sa iyong koleksyon.",
+  "claimBadge": "Angkinin ang {title}",
+  "plusStarsLabel": "+{stars} Bituin",
+  "awardsWaiting": "{earned} ang nakuha, {remaining} ang naghihintay na angkinin!"
 }

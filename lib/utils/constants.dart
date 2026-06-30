@@ -17,3 +17,22 @@ class AppColors {
   static const Color family = Color(0xFFFF99C8);
   static const Color body = Color(0xFFA0D6B4);
 }
+
+/// Maps an avatar preset key (e.g. 'boy1', 'girl2', 'female') to the matching
+/// character image so kids can easily tell male from female.
+String avatarAssetForPreset(String preset) {
+  final p = preset.toLowerCase();
+  if (p.startsWith('girl') || p == 'female') {
+    return 'assets/images/female.png';
+  }
+  return 'assets/images/male.png';
+}
+
+/// Soft background tint behind a character avatar, based on gender.
+Color avatarTintForPreset(String preset) {
+  final p = preset.toLowerCase();
+  if (p.startsWith('girl') || p == 'female') {
+    return const Color(0xFFFFE1EC);
+  }
+  return const Color(0xFFDCEBFF);
+}

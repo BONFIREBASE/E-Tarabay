@@ -1,5 +1,7 @@
 import 'package:e_tarabay/l10n/app_localizations.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/language_provider.dart';
@@ -84,13 +86,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
           }
         },
         items: const [
-          NavItemData(icon: Icons.home_rounded, label: 'Home'),
-          NavItemData(icon: Icons.auto_stories_rounded, label: 'Lessons'),
-          NavItemData(icon: Icons.emoji_events_rounded, label: 'Awards'),
-          NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
+          NavItemData(icon: LucideIcons.house, label: 'Home'),
+          NavItemData(icon: LucideIcons.book_open, label: 'Lessons'),
+          NavItemData(icon: LucideIcons.trophy, label: 'Awards'),
+          NavItemData(icon: LucideIcons.settings, label: 'Settings'),
         ],
       ),
-      body: ListView(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/bg_settings.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                color: Colors.white.withOpacity(0.08),
+              ),
+            ),
+          ),
+          ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
           StaggeredEntrance(
@@ -104,7 +122,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     children: [
                       _LanguageTile(
-                        flag: '🇺🇸',
                         label: 'English',
                         code: 'en',
                         isSelected:
@@ -113,7 +130,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const Divider(height: 0, indent: 72),
                       _LanguageTile(
-                        flag: '🇵🇭',
                         label: 'Filipino',
                         code: 'fil',
                         isSelected:
@@ -122,7 +138,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const Divider(height: 0, indent: 72),
                       _LanguageTile(
-                        flag: '🇵🇭',
                         label: 'Ilokano',
                         code: 'ilo',
                         isSelected:
@@ -147,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     children: [
                       SwitchListTile(
-                        secondary: _IconBadge(icon: Icons.volume_up_rounded),
+                        secondary: _IconBadge(icon: LucideIcons.volume_2),
                         title: Text(loc.sound),
                         value: _soundEnabled,
                         onChanged: (value) {
@@ -159,7 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const Divider(height: 0, indent: 72),
                       SwitchListTile(
-                        secondary: _IconBadge(icon: Icons.music_note_rounded),
+                        secondary: _IconBadge(icon: LucideIcons.music),
                         title: Text(loc.music),
                         value: _musicEnabled,
                         onChanged: _toggleMusic,
@@ -180,7 +195,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Card.filled(
                   clipBehavior: Clip.antiAlias,
                   child: SwitchListTile(
-                    secondary: _IconBadge(icon: Icons.notifications_rounded),
+                    secondary: _IconBadge(icon: LucideIcons.bell),
                     title: Text(loc.notifications),
                     value: _notificationsEnabled,
                     onChanged: (value) {
@@ -238,6 +253,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
         ],
       ),
+        ],
+      ),
     );
   }
 
@@ -266,36 +283,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
 //  LANGUAGE TILE
 // ─────────────────────────────────────────────────────────────────────────────
 class _LanguageTile extends StatelessWidget {
-  final String flag;
   final String label;
   final String code;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _LanguageTile({
-    required this.flag,
     required this.label,
     required this.code,
     required this.isSelected,
     required this.onTap,
   });
 
+  ({String short, Color color}) get _meta {
+    switch (code) {
+      case 'fil':
+        return (short: 'FIL', color: const Color(0xFFFF6584));
+      case 'ilo':
+        return (short: 'ILO', color: const Color(0xFFFFB347));
+      default:
+        return (short: 'EN', color: const Color(0xFF4A90D9));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final meta = _meta;
 
     return ListTile(
       onTap: onTap,
       leading: Container(
-        width: 40,
-        height: 40,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
-          color: isSelected
-              ? colorScheme.primaryContainer
-              : colorScheme.surfaceContainerHighest,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              meta.color,
+              meta.color.withOpacity(0.75),
+            ],
+          ),
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: meta.color.withOpacity(0.35),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
-        child: Center(child: Text(flag, style: const TextStyle(fontSize: 20))),
+        child: Center(
+          child: Text(
+            meta.short,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 12,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
       ),
       title: Text(
         label,
@@ -308,7 +357,7 @@ class _LanguageTile extends StatelessWidget {
       trailing: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         child: isSelected
-            ? Icon(Icons.check_circle_rounded,
+            ? Icon(LucideIcons.circle_check,
                 key: const ValueKey('selected'), color: colorScheme.primary)
             : const SizedBox(key: ValueKey('empty'), width: 24),
       ),
@@ -359,7 +408,7 @@ class _MusicPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.music_note_rounded, size: 14, color: colorScheme.primary),
+          Icon(LucideIcons.music, size: 14, color: colorScheme.primary),
           const SizedBox(width: 6),
           Text(
             text,

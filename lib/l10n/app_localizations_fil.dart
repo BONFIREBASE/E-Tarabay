@@ -1724,4 +1724,107 @@ class AppLocalizationsFil extends AppLocalizations {
   @override
   String get tipGameFunBody =>
       'Ang mga laro ay dinisenyo para maging masaya — hayaan ang inyong anak na mag-enjoy sa pag-aaral.';
+
+  @override
+  String get badgeFirstStepsTitle => 'Unang Hakbang';
+
+  @override
+  String get badgeFirstStepsHint => 'Tapusin ang 1 gawain';
+
+  @override
+  String get badgeAlphabetTitle => 'Master ng Alpabeto';
+
+  @override
+  String get badgeAlphabetHint => 'Tapusin ang 12 gawain sa pagbasa';
+
+  @override
+  String get badgeNumbersTitle => 'Salamangkero ng Numero';
+
+  @override
+  String get badgeNumbersHint => 'Maglaro ng 20 laro sa matematika';
+
+  @override
+  String get badgeColorsTitle => 'Artista ng Kulay';
+
+  @override
+  String get badgeColorsHint => 'Tapusin ang 4 gawain sa pagkukulay';
+
+  @override
+  String get badgeShapesTitle => 'Tagalikha ng Hugis';
+
+  @override
+  String get badgeShapesHint => 'Bakatin ang 26 malalaking titik';
+
+  @override
+  String get badgeAnimalsTitle => 'Kaibigan ng Hayop';
+
+  @override
+  String get badgeAnimalsHint => 'Bakatin ang 26 maliliit na titik';
+
+  @override
+  String get badgeBookwormTitle => 'Mahilig Magbasa';
+
+  @override
+  String get badgeBookwormHint => 'Magbasa ng 4 kwento';
+
+  @override
+  String get badgeStarStudentTitle => 'Bituing Mag-aaral';
+
+  @override
+  String get badgeStarStudentHint => 'Maglaro ng 20 laro tungkol sa pamilya';
+
+  @override
+  String get badgeMathWhizTitle => 'Henyo sa Matematika';
+
+  @override
+  String get badgeMathWhizHint => 'Tapusin ang 7 antas sa matematika';
+
+  @override
+  String get badgeFamilyHeroTitle => 'Bayani ng Pamilya';
+
+  @override
+  String get badgeFamilyHeroHint => 'Tapusin ang 5 antas ng pamilya';
+
+  @override
+  String get badgeWritingStarTitle => 'Bituin sa Pagsulat';
+
+  @override
+  String get badgeWritingStarHint => 'Bakatin ang 10 numero';
+
+  @override
+  String get badgeSongbirdTitle => 'Mang-aawit';
+
+  @override
+  String get badgeSongbirdHint => 'Kumanta ng 10 kanta';
+
+  @override
+  String get tapToClaim => 'I-tap para Angkinin';
+
+  @override
+  String get claimBadgeButton => 'Angkinin ang Badge';
+
+  @override
+  String get badgeClaimed => 'NAANGKIN NA';
+
+  @override
+  String get awesome => 'Galing!';
+
+  @override
+  String get claimBadgeBody =>
+      'Nakuha mo ang badge na ito! Angkinin ito para idagdag sa iyong koleksyon.';
+
+  @override
+  String claimBadge(String title) {
+    return 'Angkinin ang $title';
+  }
+
+  @override
+  String plusStarsLabel(int stars) {
+    return '+$stars Bituin';
+  }
+
+  @override
+  String awardsWaiting(int earned, int remaining) {
+    return '$earned ang nakuha, $remaining ang naghihintay na angkinin!';
+  }
 }

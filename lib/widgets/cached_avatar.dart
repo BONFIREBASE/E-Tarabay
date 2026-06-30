@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 /// A circular avatar that caches network images for offline use.
 /// Falls back to a placeholder while loading and an error icon on failure.
@@ -43,7 +44,7 @@ class CachedAvatar extends StatelessWidget {
           height: size,
           color: Colors.grey.shade200,
           child: Icon(
-            Icons.person,
+            LucideIcons.user,
             size: size * 0.5,
             color: Colors.grey.shade500,
           ),

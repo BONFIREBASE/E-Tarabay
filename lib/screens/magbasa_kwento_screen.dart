@@ -1,6 +1,7 @@
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class MagbasaKwentoScreen extends StatefulWidget {
   final int activityIndex;
@@ -29,7 +30,7 @@ class _MagbasaKwentoScreenState extends State<MagbasaKwentoScreen> {
           style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(LucideIcons.arrow_left, color: Colors.white),
           onPressed: () => Navigator.pop(context, _isCompleted),
         ),
       ),

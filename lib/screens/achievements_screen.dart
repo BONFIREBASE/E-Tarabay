@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class AchievementsScreen extends StatelessWidget {
   const AchievementsScreen({super.key});
@@ -75,7 +76,7 @@ class AchievementsScreen extends StatelessWidget {
         ),
         backgroundColor: AppColors.success,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(LucideIcons.arrow_left, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -110,7 +111,7 @@ class AchievementsScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.star, size: 40, color: Colors.amber),
+                  const Icon(LucideIcons.star, size: 40, color: Colors.amber),
                   const SizedBox(width: 10),
                   Text(
                     '${userProvider.userProfile?.stars ?? 0}',
@@ -329,7 +330,7 @@ class AchievementsScreen extends StatelessWidget {
                         right: 0,
                         top: 0,
                         child: Icon(
-                          Icons.check_circle,
+                          LucideIcons.circle_check,
                           color: Colors.green,
                           size: 16,
                         ),
@@ -362,7 +363,7 @@ class AchievementsScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      isCompleted ? Icons.star : Icons.star_border,
+                      isCompleted ? LucideIcons.star : LucideIcons.star,
                       color: Colors.amber,
                       size: 16,
                     ),

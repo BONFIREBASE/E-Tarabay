@@ -55,6 +55,7 @@ class CustomHeaderAppBar extends StatelessWidget
             child: Text(
               title,
               style: const TextStyle(
+                fontFamily: 'ChelseaMarket',
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,

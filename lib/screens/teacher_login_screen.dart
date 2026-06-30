@@ -5,6 +5,7 @@ import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/custom_back_button.dart';
 import 'teacher_dashboard_screen.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 /// Hardcoded teacher credentials — persists across installs.
 /// Username: Daycare Teacher
@@ -76,7 +77,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.white),
+            const Icon(LucideIcons.circle_alert, color: Colors.white),
             const SizedBox(width: 8),
             Expanded(
                 child: Text(message,
@@ -206,7 +207,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
-                                      Icons.school,
+                                      LucideIcons.graduation_cap,
                                       size: 36,
                                       color: Colors.white,
                                     ),
@@ -275,7 +276,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                                         decoration: _modernInputDecoration(
                                           label: AppLocalizations.of(context)!
                                               .username,
-                                          icon: Icons.person_outline,
+                                          icon: LucideIcons.user,
                                           disabled: true,
                                         ),
                                         style: const TextStyle(
@@ -294,12 +295,12 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                                         decoration: _modernInputDecoration(
                                           label: AppLocalizations.of(context)!
                                               .password,
-                                          icon: Icons.lock_outline,
+                                          icon: LucideIcons.lock,
                                           suffix: IconButton(
                                             icon: Icon(
                                               _obscurePassword
-                                                  ? Icons.visibility_off
-                                                  : Icons.visibility,
+                                                  ? LucideIcons.eye_off
+                                                  : LucideIcons.eye,
                                               color: Colors.grey.shade400,
                                               size: 20,
                                             ),

@@ -15,6 +15,7 @@ import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/success_modal.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  KARAOKE GAME SCREEN  — Song selection + Karaoke player
@@ -170,7 +171,7 @@ class KaraokeGameScreenState extends State<KaraokeGameScreen> {
                       image,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => const Icon(
-                        Icons.music_note,
+                        LucideIcons.music,
                         color: AppColors.secondary,
                         size: 32,
                       ),
@@ -204,7 +205,7 @@ class KaraokeGameScreenState extends State<KaraokeGameScreen> {
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            Icon(Icons.star, color: Colors.amber, size: 14),
+                            Icon(LucideIcons.star, color: Colors.amber, size: 14),
                             SizedBox(width: 4),
                             Text(
                               AppLocalizations.of(context)!.completed,
@@ -228,7 +229,7 @@ class KaraokeGameScreenState extends State<KaraokeGameScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    completed ? Icons.replay : Icons.play_arrow,
+                    completed ? LucideIcons.rotate_ccw : LucideIcons.play,
                     color: AppColors.secondary,
                     size: 24,
                   ),
@@ -248,7 +249,7 @@ class KaraokeGameScreenState extends State<KaraokeGameScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.star, color: Colors.amber),
+            const Icon(LucideIcons.star, color: Colors.amber),
             const SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.mathPoints(3)),
           ],
@@ -640,7 +641,7 @@ class _KaraokePlayerScreenState extends State<KaraokePlayerScreen>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.directions_run,
+                          const Icon(LucideIcons.footprints,
                               color: _karaokeAccent, size: 18),
                           const SizedBox(width: 8),
                           Flexible(
@@ -745,7 +746,7 @@ class _KaraokePlayerScreenState extends State<KaraokePlayerScreen>
         // Previous line
         IconButton(
           onPressed: () => _seekToLine(_currentLineIndex - 1),
-          icon: const Icon(Icons.skip_previous, size: 36),
+          icon: const Icon(LucideIcons.skip_back, size: 36),
           color: Colors.white.withOpacity(0.7),
         ),
         const SizedBox(width: 20),
@@ -771,7 +772,7 @@ class _KaraokePlayerScreenState extends State<KaraokePlayerScreen>
               ],
             ),
             child: Icon(
-              _isPlaying ? Icons.pause : Icons.play_arrow,
+              _isPlaying ? LucideIcons.pause : LucideIcons.play,
               color: Colors.white,
               size: 40,
             ),
@@ -782,7 +783,7 @@ class _KaraokePlayerScreenState extends State<KaraokePlayerScreen>
         // Next line
         IconButton(
           onPressed: () => _seekToLine(_currentLineIndex + 1),
-          icon: const Icon(Icons.skip_next, size: 36),
+          icon: const Icon(LucideIcons.skip_forward, size: 36),
           color: Colors.white.withOpacity(0.7),
         ),
       ],

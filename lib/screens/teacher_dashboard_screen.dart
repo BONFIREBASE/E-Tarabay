@@ -10,7 +10,10 @@ import '../login_screen.dart';
 import '../utils/constants.dart';
 import '../widgets/staggered_entrance.dart';
 import '../widgets/cached_avatar.dart';
+import '../widgets/birthday_celebration.dart';
 import 'student_detail_screen.dart';
+import 'teacher_settings_screen.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({super.key});
@@ -21,6 +24,7 @@ class TeacherDashboardScreen extends StatefulWidget {
 
 class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   final AuthService _authService = AuthService();
+  bool _birthdayCelebrationShown = false;
 
   void _showStatusDialog(String message, IconData icon, Color color) {
     if (!mounted) return;
@@ -88,7 +92,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            const Icon(Icons.warning, color: Colors.red),
+            const Icon(LucideIcons.triangle_alert, color: Colors.red),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -122,13 +126,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       if (result['status'] == 'Success') {
         _showStatusDialog(
           result['message'] as String,
-          Icons.check_circle,
+          LucideIcons.circle_check,
           AppColors.success,
         );
       } else {
         _showStatusDialog(
           result['message'] as String,
-          Icons.error,
+          LucideIcons.circle_alert,
           Colors.red,
         );
       }
@@ -218,7 +222,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(LucideIcons.x),
                       onPressed: () => Navigator.pop(sheetContext),
                     ),
                   ],
@@ -253,13 +257,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         _buildTextField(
                           controller: firstNameController,
                           label: AppLocalizations.of(context)!.firstName,
-                          icon: Icons.person_outline,
+                          icon: LucideIcons.user,
                         ),
                         const SizedBox(height: 14),
                         _buildTextField(
                           controller: lastNameController,
                           label: AppLocalizations.of(context)!.lastName,
-                          icon: Icons.person_outline,
+                          icon: LucideIcons.user,
                         ),
                         const SizedBox(height: 14),
                         InkWell(
@@ -278,7 +282,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           child: InputDecorator(
                             decoration: _inputDecoration(
                               label: AppLocalizations.of(context)!.birthday,
-                              icon: Icons.cake_outlined,
+                              icon: LucideIcons.cake,
                             ),
                             child: Text(
                               selectedBirthday == null
@@ -296,7 +300,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         _buildTextField(
                           controller: lrnController,
                           label: AppLocalizations.of(context)!.lRN,
-                          icon: Icons.badge_outlined,
+                          icon: LucideIcons.badge,
                           keyboardType: TextInputType.number,
                         ),
                         const SizedBox(height: 14),
@@ -339,14 +343,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         _buildTextField(
                           controller: parentNameController,
                           label: AppLocalizations.of(context)!.parentNameLabel,
-                          icon: Icons.family_restroom_outlined,
+                          icon: LucideIcons.users,
                         ),
                         const SizedBox(height: 14),
                         _buildTextField(
                           controller: parentContactController,
                           label:
                               AppLocalizations.of(context)!.parentContactLabel,
-                          icon: Icons.phone_outlined,
+                          icon: LucideIcons.phone,
                           hintText: '09XXXXXXXXX',
                           keyboardType: TextInputType.phone,
                           maxLength: 11,
@@ -366,7 +370,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           value: usernameController.text.isEmpty
                               ? 'Auto-generated'
                               : usernameController.text,
-                          icon: Icons.person_outline,
+                          icon: LucideIcons.user,
                           color: AppColors.primary,
                         ),
                         Divider(
@@ -379,7 +383,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           value: lrnController.text.isEmpty
                               ? 'Enter LRN above'
                               : lrnController.text,
-                          icon: Icons.lock_outline,
+                          icon: LucideIcons.lock,
                           color: AppColors.textDark,
                         ),
                       ]),
@@ -396,7 +400,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                                 parentContactController.text.trim().isEmpty) {
                               _showStatusDialog(
                                 AppLocalizations.of(context)!.fillAllFields,
-                                Icons.warning_amber_rounded,
+                                LucideIcons.triangle_alert,
                                 Colors.orange,
                               );
                               return;
@@ -406,7 +410,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                               _showStatusDialog(
                                 AppLocalizations.of(context)!
                                     .contactLengthError,
-                                Icons.warning_amber_rounded,
+                                LucideIcons.triangle_alert,
                                 Colors.orange,
                               );
                               return;
@@ -472,7 +476,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           ),
           title: Row(
             children: [
-              const Icon(Icons.check_circle,
+              const Icon(LucideIcons.circle_check,
                   color: AppColors.success, size: 28),
               const SizedBox(width: 8),
               Expanded(
@@ -518,7 +522,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       const Divider(height: 24),
                       Row(
                         children: [
-                          const Icon(Icons.person,
+                          const Icon(LucideIcons.user,
                               size: 16, color: AppColors.textLight),
                           const SizedBox(width: 12),
                           SizedBox(
@@ -540,13 +544,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           IconButton(
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
-                            icon: const Icon(Icons.copy,
+                            icon: const Icon(LucideIcons.copy,
                                 size: 16, color: AppColors.primary),
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: username));
                               _showStatusDialog(
                                 AppLocalizations.of(context)!.usernameCopied,
-                                Icons.copy,
+                                LucideIcons.copy,
                                 AppColors.primary,
                               );
                             },
@@ -556,7 +560,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          const Icon(Icons.lock,
+                          const Icon(LucideIcons.lock,
                               size: 16, color: AppColors.textLight),
                           const SizedBox(width: 12),
                           SizedBox(
@@ -579,13 +583,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           IconButton(
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
-                            icon: const Icon(Icons.copy,
+                            icon: const Icon(LucideIcons.copy,
                                 size: 16, color: AppColors.primary),
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: lrn));
                               _showStatusDialog(
                                 AppLocalizations.of(context)!.passwordCopied,
-                                Icons.copy,
+                                LucideIcons.copy,
                                 AppColors.primary,
                               );
                             },
@@ -697,7 +701,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(LucideIcons.x),
                       onPressed: () => Navigator.pop(sheetContext),
                     ),
                   ],
@@ -729,13 +733,13 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         _buildTextField(
                           controller: nameController,
                           label: AppLocalizations.of(context)!.fullName,
-                          icon: Icons.badge_outlined,
+                          icon: LucideIcons.badge,
                         ),
                         const SizedBox(height: 14),
                         _buildTextField(
                           controller: lrnController,
                           label: AppLocalizations.of(context)!.lRNPassword,
-                          icon: Icons.password_outlined,
+                          icon: LucideIcons.key_round,
                         ),
                         const SizedBox(height: 14),
                         InkWell(
@@ -754,7 +758,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           child: InputDecorator(
                             decoration: _inputDecoration(
                               label: AppLocalizations.of(context)!.birthday,
-                              icon: Icons.cake_outlined,
+                              icon: LucideIcons.cake,
                             ),
                             child: Text(
                               selectedBirthday == null
@@ -800,14 +804,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         _buildTextField(
                           controller: parentNameController,
                           label: AppLocalizations.of(context)!.parentNameLabel,
-                          icon: Icons.family_restroom_outlined,
+                          icon: LucideIcons.users,
                         ),
                         const SizedBox(height: 14),
                         _buildTextField(
                           controller: parentContactController,
                           label:
                               AppLocalizations.of(context)!.parentContactLabel,
-                          icon: Icons.phone_outlined,
+                          icon: LucideIcons.phone,
                           hintText: '09XXXXXXXXX',
                           keyboardType: TextInputType.phone,
                           maxLength: 11,
@@ -825,7 +829,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         _buildCredentialRow(
                           label: AppLocalizations.of(context)!.userLabel,
                           value: username,
-                          icon: Icons.person_outline,
+                          icon: LucideIcons.user,
                           color: AppColors.primary,
                         ),
                         Divider(
@@ -836,7 +840,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         _buildCredentialRow(
                           label: AppLocalizations.of(context)!.passwordLabel,
                           value: lrnController.text,
-                          icon: Icons.lock_outline,
+                          icon: LucideIcons.lock,
                           color: AppColors.textDark,
                         ),
                       ]),
@@ -849,7 +853,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           Expanded(
                             child: _buildActionButton(
                               label: AppLocalizations.of(context)!.remove,
-                              icon: Icons.delete_outline,
+                              icon: LucideIcons.trash_2,
                               color: Colors.red,
                               isFilled: false,
                               onPressed: () async {
@@ -889,7 +893,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                                   Navigator.of(context).pop();
                                   _showStatusDialog(
                                     AppLocalizations.of(context)!.remove,
-                                    Icons.delete_outline,
+                                    LucideIcons.trash_2,
                                     Colors.red,
                                   );
                                 }
@@ -900,7 +904,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           Expanded(
                             child: _buildActionButton(
                               label: 'Progress',
-                              icon: Icons.bar_chart_outlined,
+                              icon: LucideIcons.chart_column,
                               color: AppColors.secondary,
                               isFilled: true,
                               onPressed: () {
@@ -930,7 +934,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                                 parentContactController.text.trim().isEmpty) {
                               _showStatusDialog(
                                 AppLocalizations.of(context)!.fillAllFields,
-                                Icons.warning_amber_rounded,
+                                LucideIcons.triangle_alert,
                                 Colors.orange,
                               );
                               return;
@@ -940,7 +944,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                               _showStatusDialog(
                                 AppLocalizations.of(context)!
                                     .contactLengthError,
-                                Icons.warning_amber_rounded,
+                                LucideIcons.triangle_alert,
                                 Colors.orange,
                               );
                               return;
@@ -963,19 +967,19 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                               Navigator.of(context).pop();
                               _showStatusDialog(
                                 updateMsg,
-                                Icons.check_circle_outline,
+                                LucideIcons.circle_check,
                                 AppColors.success,
                               );
                             } catch (e) {
                               if (!mounted) return;
                               _showStatusDialog(
                                 "${AppLocalizations.of(context)!.error}: ${e.toString()}",
-                                Icons.error_outline,
+                                LucideIcons.circle_alert,
                                 Colors.red,
                               );
                             }
                           },
-                          icon: const Icon(Icons.save_outlined, size: 20),
+                          icon: const Icon(LucideIcons.save, size: 20),
                           label: Text(
                             AppLocalizations.of(context)!.update,
                             style: const TextStyle(
@@ -1143,7 +1147,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               Clipboard.setData(ClipboardData(text: value));
               _showStatusDialog(
                 AppLocalizations.of(context)!.copied,
-                Icons.copy,
+                LucideIcons.copy,
                 AppColors.primary,
               );
             },
@@ -1154,7 +1158,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 color: AppColors.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.copy, size: 16, color: AppColors.primary),
+              child: const Icon(LucideIcons.copy, size: 16, color: AppColors.primary),
             ),
           ),
         ),
@@ -1174,7 +1178,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              label.toLowerCase() == 'male' ? Icons.face : Icons.face_2,
+              label.toLowerCase() == 'male' ? LucideIcons.smile : LucideIcons.smile,
               size: 18,
               color: isSelected ? AppColors.primary : Colors.grey.shade500,
             ),
@@ -1247,42 +1251,19 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       return CachedAvatar(imageUrl: preset, size: size);
     }
 
-    final Map<String, Map<String, dynamic>> presets = {
-      'boy1': {'icon': Icons.face, 'color': const Color(0xFF4A90D9)},
-      'boy2': {
-        'icon': Icons.sentiment_satisfied,
-        'color': const Color(0xFF26A69A)
-      },
-      'boy3': {'icon': Icons.child_care, 'color': const Color(0xFFEF6C00)},
-      'girl1': {'icon': Icons.face_2, 'color': const Color(0xFFE91E63)},
-      'girl2': {'icon': Icons.face_3, 'color': const Color(0xFF9C27B0)},
-      'girl3': {'icon': Icons.face_4, 'color': const Color(0xFF00BCD4)},
-      'neutral1': {'icon': Icons.person, 'color': const Color(0xFF607D8B)},
-      'neutral2': {
-        'icon': Icons.sentiment_very_satisfied,
-        'color': const Color(0xFF8BC34A)
-      },
-    };
-
-    final config = presets[preset] ?? presets['boy1']!;
-    final color = config['color'] as Color;
-    final icon = config['icon'] as IconData;
-
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            color.withOpacity(0.2),
-            color.withOpacity(0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: avatarTintForPreset(preset),
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, color: color, size: iconSize),
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(
+        avatarAssetForPreset(preset),
+        fit: BoxFit.cover,
+        alignment: Alignment.topCenter,
+      ),
     );
   }
 
@@ -1290,15 +1271,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     required String selectedAvatar,
     required Function(String) onSelect,
   }) {
-    final presets = [
-      'boy1',
-      'boy2',
-      'boy3',
-      'girl1',
-      'girl2',
-      'girl3',
-      'neutral1',
-      'neutral2',
+    final options = [
+      {'key': 'boy1', 'label': 'Male'},
+      {'key': 'girl1', 'label': 'Female'},
     ];
 
     return Container(
@@ -1315,28 +1290,121 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         ],
       ),
       child: Wrap(
-        spacing: 10,
+        spacing: 24,
         runSpacing: 10,
         alignment: WrapAlignment.center,
-        children: presets.map((preset) {
-          final isSelected = selectedAvatar == preset;
+        children: options.map((option) {
+          final preset = option['key']!;
+          final isSelected = _isSameGenderAvatar(selectedAvatar, preset);
           return GestureDetector(
             onTap: () => onSelect(preset),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
-                  width: 2.5,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color:
+                          isSelected ? AppColors.primary : Colors.transparent,
+                      width: 3,
+                    ),
+                  ),
+                  padding: const EdgeInsets.all(3),
+                  child: _buildPresetAvatar(preset, size: 64, iconSize: 32),
                 ),
-              ),
-              padding: const EdgeInsets.all(3),
-              child: _buildPresetAvatar(preset, size: 48, iconSize: 26),
+                const SizedBox(height: 6),
+                Text(
+                  option['label']!,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
+                    color:
+                        isSelected ? AppColors.primary : AppColors.textLight,
+                  ),
+                ),
+              ],
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+
+  // Treats any boy*/girl* avatar as the same gender selection.
+  bool _isSameGenderAvatar(String selected, String preset) {
+    final s = selected.toLowerCase();
+    if (preset.startsWith('girl')) {
+      return s.startsWith('girl') || s == 'female';
+    }
+    return !(s.startsWith('girl') || s == 'female');
+  }
+
+  Widget _buildBirthdayBanner(List<String> names) {
+    final label = names.length == 1
+        ? names.first
+        : '${names.take(2).join(', ')}${names.length > 2 ? ' +${names.length - 2}' : ''}';
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF99C8), Color(0xFFFFB347)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF99C8).withValues(alpha: 0.4),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Text('🎂', style: TextStyle(fontSize: 28)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  names.length == 1
+                      ? 'Birthday today!'
+                      : '${names.length} birthdays today!',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '🎉 $label',
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () =>
+                showBirthdayCelebration(context, name: names.first),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFFFF6584),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text('Celebrate',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }
@@ -1391,20 +1459,38 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                     ),
                     PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Colors.white),
+                      icon: const Icon(LucideIcons.ellipsis_vertical, color: Colors.white),
                       onSelected: (value) {
                         if (value == 'reset') {
                           _confirmResetAllStudents();
+                        } else if (value == 'settings') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const TeacherSettingsScreen(),
+                            ),
+                          );
                         } else if (value == 'logout') {
                           _logout();
                         }
                       },
                       itemBuilder: (context) => [
                         PopupMenuItem(
+                          value: 'settings',
+                          child: Row(
+                            children: [
+                              const Icon(LucideIcons.settings,
+                                  color: AppColors.primary),
+                              const SizedBox(width: 8),
+                              Text(AppLocalizations.of(context)!.settingsTitle),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
                           value: 'reset',
                           child: Row(
                             children: [
-                              const Icon(Icons.delete_forever,
+                              const Icon(LucideIcons.trash_2,
                                   color: Colors.red),
                               const SizedBox(width: 8),
                               Text(AppLocalizations.of(context)!
@@ -1416,7 +1502,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           value: 'logout',
                           child: Row(
                             children: [
-                              const Icon(Icons.logout,
+                              const Icon(LucideIcons.log_out,
                                   color: AppColors.primary),
                               const SizedBox(width: 8),
                               Text(AppLocalizations.of(context)!.logout),
@@ -1444,7 +1530,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         onPressed: _showEnrollSheet,
         elevation: 4,
         backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.person_add, color: Colors.white),
+        icon: const Icon(LucideIcons.user_plus, color: Colors.white),
         label: Text(
           AppLocalizations.of(context)!.enrollStudent,
           style: const TextStyle(
@@ -1453,8 +1539,16 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           ),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: _authService.getStudentsStream(),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFEFF3FF), Color(0xFFFDEFF5)],
+          ),
+        ),
+        child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: _authService.getStudentsStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
@@ -1468,6 +1562,34 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           }
 
           final studentDocs = snapshot.data!.docs;
+
+          // Detect students celebrating their birthday today.
+          final now = DateTime.now();
+          final birthdayStudents = <String>[];
+          for (final doc in studentDocs) {
+            final data = doc.data();
+            final bdayRaw = data['birthday'] ??
+                (data['profile'] as Map<String, dynamic>?)?['birthday'];
+            if (bdayRaw is String && bdayRaw.isNotEmpty) {
+              final bday = DateTime.tryParse(bdayRaw);
+              if (bday != null &&
+                  bday.month == now.month &&
+                  bday.day == now.day) {
+                final name = data['name']?.toString();
+                if (name != null && name.isNotEmpty) birthdayStudents.add(name);
+              }
+            }
+          }
+
+          // Auto-show the celebration once when a student has a birthday today.
+          if (birthdayStudents.isNotEmpty && !_birthdayCelebrationShown) {
+            _birthdayCelebrationShown = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                showBirthdayCelebration(context, name: birthdayStudents.first);
+              }
+            });
+          }
 
           // Calculate stats
           double totalProgress = 0;
@@ -1494,7 +1616,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   children: [
                     Expanded(
                       child: _buildStatCard(
-                        icon: Icons.people_rounded,
+                        icon: LucideIcons.users,
                         value: '${studentDocs.length}',
                         label: 'Students',
                         color: AppColors.primary,
@@ -1504,7 +1626,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildStatCard(
-                        icon: Icons.trending_up_rounded,
+                        icon: LucideIcons.trending_up,
                         value: '${(avgProgress * 100).toInt()}%',
                         label: 'Avg Progress',
                         color: AppColors.success,
@@ -1514,7 +1636,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildStatCard(
-                        icon: Icons.star_rounded,
+                        icon: LucideIcons.star,
                         value: '$totalStars',
                         label: 'Stars',
                         color: Colors.amber,
@@ -1525,13 +1647,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 ),
               ),
 
+              // Birthday notification banner
+              if (birthdayStudents.isNotEmpty)
+                _buildBirthdayBanner(birthdayStudents),
+
               // Swipe hint
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                 child: Row(
                   children: [
-                    Icon(Icons.swipe_left,
+                    Icon(LucideIcons.pointer,
                         size: 14, color: Colors.grey.shade400),
                     const SizedBox(width: 6),
                     Text(
@@ -1610,7 +1736,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           if (!mounted) return;
                           _showStatusDialog(
                             removeMsg,
-                            Icons.delete_outline,
+                            LucideIcons.trash_2,
                             Colors.red,
                           );
                         },
@@ -1630,7 +1756,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           child: const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.delete_outline,
+                              Icon(LucideIcons.trash_2,
                                   color: Colors.white, size: 28),
                               SizedBox(height: 4),
                               Text(
@@ -1675,6 +1801,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           );
         },
       ),
+      ),
     );
   }
 
@@ -1710,7 +1837,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.people_outline,
+                LucideIcons.users,
                 size: 48,
                 color: AppColors.primary.withOpacity(0.4),
               ),
@@ -1914,7 +2041,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star_rounded,
+                      const Icon(LucideIcons.star,
                           color: Colors.amber, size: 16),
                       const SizedBox(width: 4),
                       Text(

@@ -7,6 +7,7 @@ import 'for_parents_screen.dart';
 import '../utils/constants.dart';
 import '../providers/user_provider.dart';
 import '../widgets/custom_back_button.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class ParentsLockScreen extends StatefulWidget {
   const ParentsLockScreen({super.key});
@@ -107,7 +108,7 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.lock_person_rounded,
+                  LucideIcons.lock,
                   size: 60,
                   color: AppColors.primary,
                 ),
@@ -145,7 +146,7 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
                   errorText: _showError
                       ? AppLocalizations.of(context)!.invalidLRN
                       : null,
-                  prefixIcon: const Icon(Icons.key_rounded),
+                  prefixIcon: const Icon(LucideIcons.key_round),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),

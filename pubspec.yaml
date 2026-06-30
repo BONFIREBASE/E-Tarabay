@@ -35,6 +35,7 @@ dependencies:
   image: ^4.5.2
   share_plus: ^13.1.0
   gal: ^2.3.2
+  flutter_lucide: ^1.11.0
   
 
 dev_dependencies:
@@ -49,6 +50,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/splash_logo.png
+    - assets/images/bg_home.jpg
+    - assets/images/bg_lesson.jpg
+    - assets/images/bg_awards.jpg
+    - assets/images/bg_settings.jpg
+    - assets/images/E-TarabayCertificate.png
     - assets/images/male.png
     - assets/images/female.png
     - assets/images/intro1.png
@@ -91,6 +97,20 @@ flutter:
     - assets/images/logo.png
     - assets/audio/tunog.mp3
     - assets/audio/Ania ti Nagan Mo by Kurtjam Kyle Silva Nono.mp3
+  fonts:
+    - family: ABeeZee
+      fonts:
+        - asset: assets/fonts/ABeeZee/ABeeZee-Regular.ttf
+        - asset: assets/fonts/ABeeZee/ABeeZee-Italic.ttf
+          style: italic
+    - family: ChelseaMarket
+      fonts:
+        - asset: assets/fonts/Chelsea_Market/ChelseaMarket-Regular.ttf
+    - family: FuzzyBubbles
+      fonts:
+        - asset: assets/fonts/Fuzzy_Bubbles/FuzzyBubbles-Regular.ttf
+        - asset: assets/fonts/Fuzzy_Bubbles/FuzzyBubbles-Bold.ttf
+          weight: 700
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true

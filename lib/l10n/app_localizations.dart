@@ -3315,6 +3315,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The games are designed to be fun — let your child enjoy learning.'**
   String get tipGameFunBody;
+
+  /// No description provided for @badgeFirstStepsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First Steps'**
+  String get badgeFirstStepsTitle;
+
+  /// No description provided for @badgeFirstStepsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 1 activity'**
+  String get badgeFirstStepsHint;
+
+  /// No description provided for @badgeAlphabetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabet Master'**
+  String get badgeAlphabetTitle;
+
+  /// No description provided for @badgeAlphabetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 12 reading activities'**
+  String get badgeAlphabetHint;
+
+  /// No description provided for @badgeNumbersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Number Wizard'**
+  String get badgeNumbersTitle;
+
+  /// No description provided for @badgeNumbersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Play 20 math games'**
+  String get badgeNumbersHint;
+
+  /// No description provided for @badgeColorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Color Artist'**
+  String get badgeColorsTitle;
+
+  /// No description provided for @badgeColorsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 4 coloring activities'**
+  String get badgeColorsHint;
+
+  /// No description provided for @badgeShapesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape Creator'**
+  String get badgeShapesTitle;
+
+  /// No description provided for @badgeShapesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace 26 uppercase letters'**
+  String get badgeShapesHint;
+
+  /// No description provided for @badgeAnimalsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Animal Friend'**
+  String get badgeAnimalsTitle;
+
+  /// No description provided for @badgeAnimalsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace 26 lowercase letters'**
+  String get badgeAnimalsHint;
+
+  /// No description provided for @badgeBookwormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookworm'**
+  String get badgeBookwormTitle;
+
+  /// No description provided for @badgeBookwormHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Read 4 stories'**
+  String get badgeBookwormHint;
+
+  /// No description provided for @badgeStarStudentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Star Student'**
+  String get badgeStarStudentTitle;
+
+  /// No description provided for @badgeStarStudentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Play 20 family games'**
+  String get badgeStarStudentHint;
+
+  /// No description provided for @badgeMathWhizTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Math Whiz'**
+  String get badgeMathWhizTitle;
+
+  /// No description provided for @badgeMathWhizHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 7 math levels'**
+  String get badgeMathWhizHint;
+
+  /// No description provided for @badgeFamilyHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family Hero'**
+  String get badgeFamilyHeroTitle;
+
+  /// No description provided for @badgeFamilyHeroHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 5 family levels'**
+  String get badgeFamilyHeroHint;
+
+  /// No description provided for @badgeWritingStarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing Star'**
+  String get badgeWritingStarTitle;
+
+  /// No description provided for @badgeWritingStarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace 10 numbers'**
+  String get badgeWritingStarHint;
+
+  /// No description provided for @badgeSongbirdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Songbird'**
+  String get badgeSongbirdTitle;
+
+  /// No description provided for @badgeSongbirdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sing 10 songs'**
+  String get badgeSongbirdHint;
+
+  /// No description provided for @tapToClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to Claim'**
+  String get tapToClaim;
+
+  /// No description provided for @claimBadgeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim Badge'**
+  String get claimBadgeButton;
+
+  /// No description provided for @badgeClaimed.
+  ///
+  /// In en, this message translates to:
+  /// **'BADGE CLAIMED'**
+  String get badgeClaimed;
+
+  /// No description provided for @awesome.
+  ///
+  /// In en, this message translates to:
+  /// **'Awesome!'**
+  String get awesome;
+
+  /// No description provided for @claimBadgeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You earned this badge! Claim it to add it to your collection.'**
+  String get claimBadgeBody;
+
+  /// No description provided for @claimBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim {title}'**
+  String claimBadge(String title);
+
+  /// No description provided for @plusStarsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'+{stars} Stars'**
+  String plusStarsLabel(int stars);
+
+  /// No description provided for @awardsWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{earned} earned, {remaining} waiting to claim!'**
+  String awardsWaiting(int earned, int remaining);
 }
 
 class _AppLocalizationsDelegate

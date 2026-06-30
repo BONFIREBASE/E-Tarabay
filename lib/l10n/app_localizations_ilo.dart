@@ -1721,4 +1721,107 @@ class AppLocalizationsIlo extends AppLocalizations {
   @override
   String get tipGameFunBody =>
       'Dagiti ay-ayam ket naaramid tapno naragsak — palubosan ti anakyo a mag-enjoy iti panagadal.';
+
+  @override
+  String get badgeFirstStepsTitle => 'Umuna a Addang';
+
+  @override
+  String get badgeFirstStepsHint => 'Lippasen ti 1 nga aktibidad';
+
+  @override
+  String get badgeAlphabetTitle => 'Maestro ti Alpabeto';
+
+  @override
+  String get badgeAlphabetHint => 'Lippasen ti 12 nga aktibidad ti panagbasa';
+
+  @override
+  String get badgeNumbersTitle => 'Salamangkero ti Numero';
+
+  @override
+  String get badgeNumbersHint => 'Agay-ayam ti 20 a math games';
+
+  @override
+  String get badgeColorsTitle => 'Artista ti Kolor';
+
+  @override
+  String get badgeColorsHint => 'Lippasen ti 4 nga aktibidad ti panagkolor';
+
+  @override
+  String get badgeShapesTitle => 'Manangparsua ti Sukog';
+
+  @override
+  String get badgeShapesHint => 'Suroten ti 26 a dadakkel a letra';
+
+  @override
+  String get badgeAnimalsTitle => 'Gayyem dagiti Ayup';
+
+  @override
+  String get badgeAnimalsHint => 'Suroten ti 26 a babassit a letra';
+
+  @override
+  String get badgeBookwormTitle => 'Mannakabasa';
+
+  @override
+  String get badgeBookwormHint => 'Agbasa ti 4 a sarita';
+
+  @override
+  String get badgeStarStudentTitle => 'Bituen nga Estudiante';
+
+  @override
+  String get badgeStarStudentHint => 'Agay-ayam ti 20 a pamilya games';
+
+  @override
+  String get badgeMathWhizTitle => 'Henyo iti Matematika';
+
+  @override
+  String get badgeMathWhizHint => 'Lippasen ti 7 a level ti matematika';
+
+  @override
+  String get badgeFamilyHeroTitle => 'Bannuar ti Pamilia';
+
+  @override
+  String get badgeFamilyHeroHint => 'Lippasen ti 5 a level ti pamilia';
+
+  @override
+  String get badgeWritingStarTitle => 'Bituen iti Panagsurat';
+
+  @override
+  String get badgeWritingStarHint => 'Suroten ti 10 a numero';
+
+  @override
+  String get badgeSongbirdTitle => 'Mannakakanta';
+
+  @override
+  String get badgeSongbirdHint => 'Agkanta ti 10 a kanta';
+
+  @override
+  String get tapToClaim => 'I-tap tapno Alaen';
+
+  @override
+  String get claimBadgeButton => 'Alaen ti Badge';
+
+  @override
+  String get badgeClaimed => 'NAALAN';
+
+  @override
+  String get awesome => 'Nagsayaat!';
+
+  @override
+  String get claimBadgeBody =>
+      'Nagun-odmo daytoy a badge! Alaem tapno mainayon iti koleksionmo.';
+
+  @override
+  String claimBadge(String title) {
+    return 'Alaen ti $title';
+  }
+
+  @override
+  String plusStarsLabel(int stars) {
+    return '+$stars a Bituen';
+  }
+
+  @override
+  String awardsWaiting(int earned, int remaining) {
+    return '$earned ti nagun-od, $remaining ti aguray a maala!';
+  }
 }

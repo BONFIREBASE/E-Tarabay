@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 /// Metadata for each certificate/badgex
 class CertificateInfo {
@@ -46,7 +47,7 @@ final Map<String, CertificateInfo> allCertificates = {
         'Nakumpleto mo ang LAHAT sa E-Tarabay! Isa kang tunay na bituin!',
     descriptionIlo: 'Nakumpletom amin iti E-Tarabay! Pudno a sikat ka!',
     emoji: '🎓',
-    icon: Icons.school,
+    icon: LucideIcons.graduation_cap,
     primaryColor: Color(0xFF2D3436),
     secondaryColor: Color(0xFF636E72),
     accentColor: Color(0xFFFFD700),

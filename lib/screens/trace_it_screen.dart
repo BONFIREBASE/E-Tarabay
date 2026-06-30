@@ -8,6 +8,7 @@ import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/success_modal.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  HIDDEN-GUIDE TRACING PAINTER
@@ -745,7 +746,7 @@ class _TraceItScreenState extends State<TraceItScreen>
                 fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, size: 20),
+            icon: const Icon(LucideIcons.refresh_cw, size: 20),
             color: Colors.grey.shade400,
             tooltip: 'Reset (test)',
             onPressed: _resetAllProgress,
@@ -758,7 +759,7 @@ class _TraceItScreenState extends State<TraceItScreen>
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(children: [
-              const Icon(Icons.star, color: Colors.amber, size: 16),
+              const Icon(LucideIcons.star, color: Colors.amber, size: 16),
               const SizedBox(width: 4),
               Text('$_stars',
                   style: const TextStyle(
@@ -952,7 +953,7 @@ class _TraceItScreenState extends State<TraceItScreen>
                                           MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.check_circle,
+                                        const Icon(LucideIcons.circle_check,
                                             color: Colors.white, size: 28),
                                         const SizedBox(width: 10),
                                         Flexible(
@@ -1004,7 +1005,7 @@ class _TraceItScreenState extends State<TraceItScreen>
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _resetTracing,
-                  icon: const Icon(Icons.refresh, size: 18),
+                  icon: const Icon(LucideIcons.refresh_cw, size: 18),
                   label: Text(loc.clear),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.grey.shade600,
@@ -1027,7 +1028,7 @@ class _TraceItScreenState extends State<TraceItScreen>
                           height: 18,
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white))
-                      : const Icon(Icons.check, size: 20),
+                      : const Icon(LucideIcons.check, size: 20),
                   label: Text(loc.checkTracing),
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
