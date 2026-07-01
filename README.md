@@ -1,4 +1,4 @@
-# E-Tarabay Project Overview
+# E-Tarabay Project Overview (v 1.0.4)
 
 E-Tarabay is a modern, interactive Flutter-based educational mobile application designed for early childhood learning, primarily focused on Filipino learners (Tagalog/English). The app’s tagline, **"Ang Kabataan ay Pag-asa ng Bayan"** (The Youth are the Hope of the Nation), reflects its core mission of fostering foundational knowledge in young students.
 
@@ -41,7 +41,7 @@ E-Tarabay is a modern, interactive Flutter-based educational mobile application 
 
 ## Credits
 
-Maintained by [**BONFIRE BASE**](https://bonfire.base69.studio).
+Maintained by [**BONFIRE BASE Studio**](https://bonfire.base69.studio).
 
 ## License
 
