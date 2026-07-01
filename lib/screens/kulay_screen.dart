@@ -6,6 +6,7 @@ import '../widgets/custom_back_button.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
+import '../main.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
@@ -350,6 +351,7 @@ class _KulayScreenState extends State<KulayScreen>
   @override
   void initState() {
     super.initState();
+    AudioManager.instance.playModuleMusic(ModuleMusic.kulay);
     _loadCreations();
 
     _audioPlayer = AudioPlayer();
@@ -366,6 +368,7 @@ class _KulayScreenState extends State<KulayScreen>
     _audioPlayer.dispose();
     _rippleController.dispose();
     _transformationController.dispose();
+    AudioManager.instance.resumeHomeMusic();
     super.dispose();
   }
 

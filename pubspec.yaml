@@ -97,6 +97,7 @@ flutter:
     - assets/images/logo.png
     - assets/audio/tunog.mp3
     - assets/audio/Ania ti Nagan Mo by Kurtjam Kyle Silva Nono.mp3
+    - assets/audio/modules_bg/
   fonts:
     - family: ABeeZee
       fonts:

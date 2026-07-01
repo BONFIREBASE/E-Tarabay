@@ -260,6 +260,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
   @override
   void initState() {
     super.initState();
+    AudioManager.instance.playModuleMusic(ModuleMusic.magbasa);
     _tabController = TabController(length: 3, vsync: this);
     _loadProgress();
     _initSmartResume();
@@ -371,6 +372,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    AudioManager.instance.resumeHomeMusic();
     super.dispose();
   }
 

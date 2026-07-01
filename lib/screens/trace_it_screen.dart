@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import '../main.dart';
 import 'package:provider/provider.dart';
 import '../data/letter_tracing_data.dart';
 import '../l10n/app_localizations.dart';
@@ -23,6 +25,7 @@ class _TracePainter extends CustomPainter {
   final double scale;
   final Offset offset;
   final double? guideProgress;
+  final String _letter;
 
   _TracePainter({
     required this.guidePoints,
@@ -32,19 +35,17 @@ class _TracePainter extends CustomPainter {
     required this.visitedPoints,
     required this.scale,
     required this.offset,
+    required String letter,
     this.guideProgress,
-  });
-
-  Offset _toScreen(Offset design) => Offset(
-        design.dx * scale + offset.dx,
-        design.dy * scale + offset.dy,
-      );
+  }) : _letter = letter;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const userStroke = 24.0;
+    const userStroke = 22.0;
 
-    // 1. User stroke
+    _drawLetter(canvas, size);
+
+    // User stroke on top
     if (tracedPoints.length >= 2) {
       canvas.drawPath(
         _buildPath(tracedPoints),
@@ -56,63 +57,153 @@ class _TracePainter extends CustomPainter {
           ..strokeJoin = StrokeJoin.round,
       );
     }
-
-    // 2. Guide animation & faint letter outline
-    // (drawn from the same points so dot and reference match perfectly)
-    if (guideProgress != null &&
-        guideProgress! >= 0 &&
-        !isCompleted &&
-        tracedPoints.isEmpty) {
-      _drawGuide(canvas);
-    }
   }
 
-  void _drawGuide(Canvas canvas) {
-    if (guidePoints.isEmpty) return;
-
-    final screenPoints = _densifyPoints(guidePoints.map(_toScreen).toList(), 6);
-    final movingPt = _getPointOnPath(screenPoints, guideProgress!);
-    final pulse = 1.0 + math.sin(guideProgress! * math.pi * 4) * 0.3;
-
-    // Animated dot tracing the letter path
-    canvas.drawCircle(
-      movingPt,
-      10 * pulse,
-      Paint()..color = color.withOpacity(0.22),
-    );
-    canvas.drawCircle(
-      movingPt,
-      5,
-      Paint()..color = color.withOpacity(0.95),
-    );
-    canvas.drawCircle(
-      movingPt,
-      2,
-      Paint()..color = Colors.white.withOpacity(0.95),
-    );
+  /// Builds a laid-out paragraph for the current glyph with the given paint.
+  ui.Paragraph _glyph(double fontSize, Paint paint, double maxWidth) {
+    final pb = ui.ParagraphBuilder(ui.ParagraphStyle(
+      textAlign: TextAlign.center,
+      fontSize: fontSize,
+      fontWeight: FontWeight.w900,
+    ))
+      ..pushStyle(ui.TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w900,
+        foreground: paint,
+      ))
+      ..addText(_letter);
+    final p = pb.build();
+    p.layout(ui.ParagraphConstraints(width: maxWidth));
+    return p;
   }
 
-  Offset _getPointOnPath(List<Offset> points, double t) {
-    if (points.isEmpty) return Offset.zero;
-    if (points.length == 1) return points[0];
+  void _drawLetter(Canvas canvas, Size size) {
+    final fontSize = 210 * scale;
+    final full = Rect.fromLTWH(0, 0, size.width, size.height);
 
-    double totalLength = 0;
-    final lengths = <double>[0.0];
-    for (int i = 1; i < points.length; i++) {
-      totalLength += (points[i] - points[i - 1]).distance;
-      lengths.add(totalLength);
+    // Filled glyph used as a mask so the dashes stay inside the letter.
+    final fillPara =
+        _glyph(fontSize, Paint()..color = const Color(0xFFFFFFFF), size.width);
+    final textOffsetY = (size.height - fillPara.height) / 2;
+    final glyphWidth = fillPara.maxIntrinsicWidth;
+    final glyphLeft = (size.width - glyphWidth) / 2;
+
+    if (isCompleted) {
+      // Celebration: solid filled letter in green.
+      final greenPara = _glyph(
+          fontSize, Paint()..color = const Color(0xFF4CAF50), size.width);
+      canvas.drawParagraph(greenPara, Offset(0, textOffsetY));
+      return;
     }
 
-    if (totalLength == 0) return points[0];
-
-    double target = t * totalLength;
-    for (int i = 1; i < lengths.length; i++) {
-      if (target <= lengths[i]) {
-        double segT = (target - lengths[i - 1]) / (lengths[i] - lengths[i - 1]);
-        return Offset.lerp(points[i - 1], points[i], segT)!;
+    // 1. Dashed fill clipped to the letter body.
+    canvas.saveLayer(full, Paint());
+    canvas.drawParagraph(fillPara, Offset(0, textOffsetY));
+    canvas.saveLayer(full, Paint()..blendMode = BlendMode.srcIn);
+    final dashPaint = Paint()
+      ..color = color.withOpacity(0.45)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.round;
+    const lineSpacing = 15.0;
+    const dashLen = 11.0;
+    const gapLen = 8.0;
+    for (double y = 0; y < size.height; y += lineSpacing) {
+      double x = 0;
+      while (x < size.width) {
+        canvas.drawLine(Offset(x, y),
+            Offset(math.min(x + dashLen, size.width), y), dashPaint);
+        x += dashLen + gapLen;
       }
     }
-    return points.last;
+    canvas.restore(); // dash layer
+    canvas.restore(); // mask layer
+
+    // 2. Hollow outline of the letter on top.
+    final outlinePara = _glyph(
+      fontSize,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5.0
+        ..strokeJoin = StrokeJoin.round
+        ..color = color,
+      size.width,
+    );
+    canvas.drawParagraph(outlinePara, Offset(0, textOffsetY));
+
+    // 3. Per-letter start marker: map the letter's real stroke-start (and
+    //    direction) from the guide data onto the rendered glyph box.
+    final valid =
+        guidePoints.where((p) => !p.dx.isNaN && !p.dy.isNaN).toList();
+    if (valid.isNotEmpty) {
+      double minX = valid.first.dx, maxX = valid.first.dx;
+      double minY = valid.first.dy, maxY = valid.first.dy;
+      for (final p in valid) {
+        if (p.dx < minX) minX = p.dx;
+        if (p.dx > maxX) maxX = p.dx;
+        if (p.dy < minY) minY = p.dy;
+        if (p.dy > maxY) maxY = p.dy;
+      }
+      final gw = (maxX - minX).abs() < 1 ? 1.0 : (maxX - minX);
+      final gh = (maxY - minY).abs() < 1 ? 1.0 : (maxY - minY);
+      final p0 = valid.first;
+      final nx = ((p0.dx - minX) / gw).clamp(0.0, 1.0);
+      final ny = ((p0.dy - minY) / gh).clamp(0.0, 1.0);
+
+      // Approximate the glyph's visual box within the paragraph.
+      final glyphTop = textOffsetY + fillPara.height * 0.16;
+      final glyphH = fillPara.height * 0.70;
+      final at = Offset(glyphLeft + nx * glyphWidth, glyphTop + ny * glyphH);
+
+      // Stroke direction from the first segment.
+      double angle = math.pi / 2; // default: downward
+      if (valid.length > 1) {
+        final p1 = valid[1];
+        angle = math.atan2(p1.dy - p0.dy, p1.dx - p0.dx);
+      }
+      _drawStartMarker(canvas, at, angle);
+    }
+  }
+
+  void _drawStartMarker(Canvas canvas, Offset at, double angle) {
+    final pulse = guideProgress != null && guideProgress! >= 0
+        ? (0.85 + 0.15 * math.sin(guideProgress! * math.pi * 2))
+        : 1.0;
+
+    final arrowPaint = Paint()
+      ..color = const Color(0xFF2E7D32)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    // Direction arrow pointing the way the first stroke goes.
+    final dir = Offset(math.cos(angle), math.sin(angle));
+    final base = at + dir * 15;
+    final tip = at + dir * 30;
+    canvas.drawLine(base, tip, arrowPaint);
+    final head1 =
+        tip + Offset(math.cos(angle + 2.5), math.sin(angle + 2.5)) * 8;
+    final head2 =
+        tip + Offset(math.cos(angle - 2.5), math.sin(angle - 2.5)) * 8;
+    canvas.drawLine(tip, head1, arrowPaint);
+    canvas.drawLine(tip, head2, arrowPaint);
+
+    // Start dot with a "1".
+    canvas.drawCircle(
+        at, 14 * pulse, Paint()..color = Colors.green.withOpacity(0.25));
+    canvas.drawCircle(at, 9, Paint()..color = const Color(0xFF2E7D32));
+    final tp = TextPainter(
+      text: const TextSpan(
+        text: '1',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, at - Offset(tp.width / 2, tp.height / 2));
   }
 
   Path _buildPath(List<Offset> pts) {
@@ -233,6 +324,7 @@ class _TraceItScreenState extends State<TraceItScreen>
   @override
   void initState() {
     super.initState();
+    AudioManager.instance.playModuleMusic(ModuleMusic.traceIt);
 
     _successController = AnimationController(
         duration: const Duration(milliseconds: 600), vsync: this);
@@ -327,6 +419,7 @@ class _TraceItScreenState extends State<TraceItScreen>
     _warningController.dispose();
     _pageController.dispose();
     _guideController.dispose();
+    AudioManager.instance.resumeHomeMusic();
     super.dispose();
   }
 
@@ -378,15 +471,22 @@ class _TraceItScreenState extends State<TraceItScreen>
   void _computeTransform(Size canvasSize) {
     if (_canvasSize == canvasSize) return;
     _canvasSize = canvasSize;
+    // The letter point data was authored in a ~300×260 design space where
+    // glyphs occupy roughly x: 110–190, y: 60–180 (a ~80×120 active area).
+    // The background Text is rendered at fontSize 260*scale, centered.
+    // We scale the design space UP so the dashed guide fills the same area
+    // as the background glyph.
     const designW = 300.0;
     const designH = 260.0;
-    const padding = 4.0;
+    // Use nearly the full canvas (less padding) so the guide matches the large text.
+    const padding = 12.0;
     final scaleX = (canvasSize.width - padding * 2) / designW;
     final scaleY = (canvasSize.height - padding * 2) / designH;
     _canvasScale = scaleX < scaleY ? scaleX : scaleY;
+    // Center horizontally, shift down slightly to match font baseline.
     _canvasOffset = Offset(
       (canvasSize.width - designW * _canvasScale) / 2,
-      (canvasSize.height - designH * _canvasScale) / 2,
+      (canvasSize.height - designH * _canvasScale) / 2 + 8 * _canvasScale,
     );
   }
 
@@ -739,11 +839,16 @@ class _TraceItScreenState extends State<TraceItScreen>
           iconColor: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(loc.traceItTitle,
-            style: const TextStyle(
-                color: AppColors.textDark,
-                fontSize: 20,
-                fontWeight: FontWeight.bold)),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(loc.traceItTitle,
+              maxLines: 1,
+              style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold)),
+        ),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.refresh_cw, size: 20),
@@ -899,16 +1004,7 @@ class _TraceItScreenState extends State<TraceItScreen>
                         onPanUpdate: _onPanUpdate,
                         onPanEnd: _onPanEnd,
                         child: Stack(fit: StackFit.expand, children: [
-                          // Accurate letter reference (font glyph)
-                          Center(
-                              child: Opacity(
-                                  opacity: 0.18,
-                                  child: Text(letter.letter,
-                                      style: TextStyle(
-                                          fontSize: 260 * _canvasScale,
-                                          fontWeight: FontWeight.bold,
-                                          color: letter.color)))),
-                          // Tracing painter
+                          // Tracing painter draws the outline letter + dashes
                           CustomPaint(
                             painter: _TracePainter(
                               guidePoints: letter.points,
@@ -920,6 +1016,7 @@ class _TraceItScreenState extends State<TraceItScreen>
                                   _selectedIndex == index ? _visitedPoints : {},
                               scale: _canvasScale,
                               offset: _canvasOffset,
+                              letter: letter.letter,
                               guideProgress: _selectedIndex == index
                                   ? _guideProgress
                                   : null,

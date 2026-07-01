@@ -25,6 +25,14 @@ class TeacherDashboardScreen extends StatefulWidget {
 class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   final AuthService _authService = AuthService();
   bool _birthdayCelebrationShown = false;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _showStatusDialog(String message, IconData icon, Color color) {
     if (!mounted) return;
@@ -1448,14 +1456,36 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               children: [
                 Row(
                   children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(LucideIcons.graduation_cap,
+                          color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        AppLocalizations.of(context)!.teacherDashboard,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.teacherDashboard,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const Text(
+                            'Manage your classroom',
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 12),
+                          ),
+                        ],
                       ),
                     ),
                     PopupMenuButton<String>(
@@ -1512,14 +1542,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ],
                     ),
                   ],
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Manage your classroom',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
                 ),
               ],
             ),
@@ -1604,10 +1626,26 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           final avgProgress =
               studentDocs.isNotEmpty ? totalProgress / studentDocs.length : 0.0;
 
+          final q = _searchQuery.trim().toLowerCase();
+          final filteredDocs = q.isEmpty
+              ? studentDocs
+              : studentDocs.where((d) {
+                  final data = d.data();
+                  final n = (data['name'] ?? '').toString().toLowerCase();
+                  final u = (data['username'] ?? '').toString().toLowerCase();
+                  return n.contains(q) || u.contains(q);
+                }).toList();
+
           return Column(
             children: [
               // Space below gradient header
               const SizedBox(height: 140),
+
+              // Search bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                child: _buildSearchBar(),
+              ),
 
               // Stats Summary Cards
               Padding(
@@ -1671,13 +1709,28 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
               // Student List
               Expanded(
-                child: ListView.separated(
+                child: filteredDocs.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(LucideIcons.search,
+                                size: 40, color: Colors.grey.shade300),
+                            const SizedBox(height: 10),
+                            Text(
+                              'No students match "$_searchQuery"',
+                              style: TextStyle(color: Colors.grey.shade500),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.separated(
                   padding: const EdgeInsets.all(16),
-                  itemCount: studentDocs.length,
+                  itemCount: filteredDocs.length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 12),
                   itemBuilder: (context, index) {
-                    final studentDoc = studentDocs[index];
+                    final studentDoc = filteredDocs[index];
                     final studentId = studentDoc.id;
                     final studentData = studentDoc.data();
                     final name = studentData['name'] ??
@@ -1865,6 +1918,46 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
+  Widget _buildSearchBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (v) => setState(() => _searchQuery = v),
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          hintText: 'Search students...',
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          prefixIcon:
+              Icon(LucideIcons.search, size: 20, color: Colors.grey.shade400),
+          suffixIcon: _searchQuery.isEmpty
+              ? null
+              : IconButton(
+                  icon: Icon(LucideIcons.x, size: 18, color: Colors.grey.shade500),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                    FocusScope.of(context).unfocus();
+                  },
+                ),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
+      ),
+    );
+  }
+
   Widget _buildStatCard({
     required IconData icon,
     required String value,
@@ -1879,40 +1972,54 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: color.withOpacity(0.12),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [color, color.withOpacity(0.7)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-              child: Icon(icon, color: color, size: 18),
+              child: Icon(icon, color: Colors.white, size: 18),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               value,
+              textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
                 color: AppColors.textDark,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
+                fontWeight: FontWeight.w500,
                 color: Colors.grey.shade500,
               ),
             ),
@@ -1956,7 +2063,17 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 // Avatar
                 GestureDetector(
                   onTap: onAvatarTap,
-                  child: _buildPresetAvatar(avatar, size: 52, iconSize: 26),
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primary.withOpacity(0.25),
+                        width: 2,
+                      ),
+                    ),
+                    child: _buildPresetAvatar(avatar, size: 48, iconSize: 24),
+                  ),
                 ),
                 const SizedBox(width: 14),
 
@@ -2055,6 +2172,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(width: 6),
+                Icon(LucideIcons.chevron_right,
+                    color: Colors.grey.shade300, size: 20),
               ],
             ),
           ),

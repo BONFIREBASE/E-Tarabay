@@ -323,6 +323,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   @override
   void initState() {
     super.initState();
+    AudioManager.instance.playModuleMusic(ModuleMusic.pamilya);
 
     _badges = [
       FamilyBadge(
@@ -508,6 +509,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AudioManager.instance.resumeMusic();
     });
+    AudioManager.instance.resumeHomeMusic();
     super.dispose();
   }
 

@@ -287,8 +287,9 @@ class _CertificatesScreenState extends State<CertificatesScreen>
         );
       },
       child: GestureDetector(
-        // TEMP: always open so the certificate design can be previewed.
-        onTap: () => _showCertificateDetail(context, cert, langCode),
+        onTap: isEarned
+            ? () => _showCertificateDetail(context, cert, langCode)
+            : null,
         child: Container(
           margin: const EdgeInsets.only(bottom: 16),
           child: Stack(

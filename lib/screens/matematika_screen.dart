@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../main.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -453,6 +454,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
   @override
   void initState() {
     super.initState();
+    AudioManager.instance.playModuleMusic(ModuleMusic.matematika);
 
     _starBurstController = AnimationController(
       duration: const Duration(milliseconds: 700),
@@ -523,6 +525,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     _starBurstController.dispose();
     _timerPulseController.dispose();
     _shakeController.dispose();
+    AudioManager.instance.resumeHomeMusic();
     super.dispose();
   }
 

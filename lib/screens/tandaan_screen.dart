@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import '../main.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -283,6 +284,7 @@ class _TandaanScreenState extends State<TandaanScreen>
   @override
   void initState() {
     super.initState();
+    AudioManager.instance.playModuleMusic(ModuleMusic.tandaan);
     _starBurstController = AnimationController(
       duration: const Duration(milliseconds: 700),
       vsync: this,
@@ -352,6 +354,7 @@ class _TandaanScreenState extends State<TandaanScreen>
     _starBurstController.dispose();
     _shakeController.dispose();
     _timerPulseController.dispose();
+    AudioManager.instance.resumeHomeMusic();
     super.dispose();
   }
 

@@ -17,6 +17,21 @@ import 'screens/splash_screen.dart';
 final RouteObserver<PageRoute<dynamic>> routeObserver =
     RouteObserver<PageRoute<dynamic>>();
 
+// ========== MODULE BACKGROUND MUSIC MAP ==========
+class ModuleMusic {
+  static const matematika =
+      'audio/modules_bg/Aylex - Fun and Catchy (freetouse.com).mp3';
+  static const pamilya =
+      'audio/modules_bg/Aetheric - Coconut Kind of Love (freetouse.com).mp3';
+  static const kulay =
+      'audio/modules_bg/Aylex - Happy Day (freetouse.com).mp3';
+  static const traceIt =
+      'audio/modules_bg/Aylex - Fun is Fun (freetouse.com).mp3';
+  static const magbasa =
+      'audio/modules_bg/Lukrembo - Storybook (freetouse.com).mp3';
+  static const tandaan = 'audio/modules_bg/Piki - Kitty (freetouse.com).mp3';
+}
+
 // ========== AUDIO MANAGER (FOR BACKGROUND MUSIC) ==========
 class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
   static final AudioManager _instance = AudioManager._internal();
@@ -34,6 +49,9 @@ class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
   bool _wasPlayingBeforePause = false;
   int _retryCount = 0;
   static const int _maxRetries = 3;
+  // Remembers each track's last playback position so switching tracks and
+  // returning resumes instead of restarting from the top.
+  final Map<String, Duration> _positions = {};
 
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -45,6 +63,12 @@ class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
       if (_isMusicEnabled && _currentAssetPath != null && _isPlaying) {
         _restartMusic();
       }
+    });
+
+    // Continuously remember the current track's position so we can resume it.
+    _player.onPositionChanged.listen((pos) {
+      final path = _currentAssetPath;
+      if (path != null) _positions[path] = pos;
     });
 
     // Load saved preference
@@ -85,12 +109,25 @@ class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
     await _playWithRetry(assetPath);
   }
 
+  // ── Module music helpers ───────────────────────────────────────────────
+  // The main/home track. Modules switch to their own track on entry and
+  // this resumes when returning home. Because startBackgroundMusic ignores
+  // a request for the track that's already playing, navigating within the
+  // same module (or re-entering it) never restarts the music.
+  static const String homeMusicAsset = 'audio/tunog.mp3';
+
+  Future<void> playModuleMusic(String assetPath) =>
+      startBackgroundMusic(assetPath);
+
+  Future<void> resumeHomeMusic() => startBackgroundMusic(homeMusicAsset);
+
   Future<void> _playWithRetry(String assetPath) async {
     try {
+      final resumeAt = _positions[assetPath] ?? Duration.zero;
       _currentAssetPath = assetPath;
       await _player.setReleaseMode(ReleaseMode.loop);
       await _player.setVolume(0.3);
-      await _player.play(AssetSource(assetPath));
+      await _player.play(AssetSource(assetPath), position: resumeAt);
       _isPlaying = true;
       _wasPlayingBeforePause = false;
       _retryCount = 0;
