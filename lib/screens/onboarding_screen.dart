@@ -49,19 +49,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               _buildIntroStep(
                 title: AppLocalizations.of(context)!.nextLevelLearningTitle,
                 description: AppLocalizations.of(context)!.nextLevelLearningDesc,
-                imagePath: 'assets/images/intro1.png',
+                icon: LucideIcons.rocket,
                 color: AppColors.primary,
               ),
               _buildIntroStep(
                 title: AppLocalizations.of(context)!.learnAnywhereTitle,
                 description: AppLocalizations.of(context)!.learnAnywhereDesc,
-                imagePath: 'assets/images/intro2.png',
+                icon: LucideIcons.globe,
                 color: AppColors.secondary,
               ),
               _buildIntroStep(
                 title: AppLocalizations.of(context)!.trackProgressTitle,
                 description: AppLocalizations.of(context)!.trackProgressDesc,
-                imagePath: 'assets/images/intro3.png',
+                icon: LucideIcons.chart_column,
                 color: AppColors.success,
               ),
               _buildLanguageStep(),
@@ -203,7 +203,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildIntroStep({
     required String title,
     required String description,
-    required String imagePath,
+    required IconData icon,
     required Color color,
   }) {
     return Padding(
@@ -212,10 +212,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.contain,
-            ).animate().scale(duration: 500.ms).fadeIn(),
+            child: Center(
+              child: Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: color.withOpacity(0.3), width: 3),
+                ),
+                child: Icon(icon, size: 80, color: color),
+              ).animate().scale(duration: 500.ms).fadeIn(),
+            ),
           ),
           const SizedBox(height: 40),
           Text(

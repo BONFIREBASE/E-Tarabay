@@ -268,6 +268,10 @@ class _TraceItScreenState extends State<TraceItScreen>
   List<Offset> _tracedPoints = [];
   bool _isCompleted = false;
   Set<int> _visitedPoints = {};
+
+  // Grid-based overlap detection – each cell counts stroke pass-throughs
+  Map<int, int> _overlapGrid = {};
+  static const double _gridCellSize = 12.0;
   bool _checking = false;
 
   // Store kid's drawing per letter so they can review it later
@@ -541,6 +545,12 @@ class _TraceItScreenState extends State<TraceItScreen>
       }
     }
 
+    // Track which grid cell is being drawn on for overlap detection
+    final cellX = (designPt.dx / _gridCellSize).floor();
+    final cellY = (designPt.dy / _gridCellSize).floor();
+    final cellKey = cellX * 10000 + cellY;
+    _overlapGrid[cellKey] = (_overlapGrid[cellKey] ?? 0) + 1;
+
     setState(() {
       _outOfBounds = false;
 
@@ -562,6 +572,7 @@ class _TraceItScreenState extends State<TraceItScreen>
       _tracedPoints = [];
       _isCompleted = completed;
       _visitedPoints = {};
+      _overlapGrid = {};
       _outOfBounds = false;
       _checking = false;
       _canvasSize = Size.zero;
@@ -588,8 +599,8 @@ class _TraceItScreenState extends State<TraceItScreen>
     final designPts = validPoints.map(_toDesign).toList();
     // Densify guide points so ALL letters have smooth path validation
     final densePts = _TracePainter._densifyPoints(pts, 6);
-    final outerRadius = _hitRadius * 3.0; // penalty beyond this
-    final nearRadius = _hitRadius * 2.0;
+    final outerRadius = _hitRadius * 2.0; // penalty beyond this
+    final nearRadius = _hitRadius * 1.5;
 
     int nearCount = 0;
     int outOfBoundsCount = 0;
@@ -624,10 +635,10 @@ class _TraceItScreenState extends State<TraceItScreen>
     double lengthRatio = guideLength > 0 ? drawnLength / guideLength : 0;
     // Kids draw at different sizes — be lenient
     double lengthScore = 1.0;
-    if (lengthRatio < 0.2 || lengthRatio > 3.5) {
+    if (lengthRatio < 0.3 || lengthRatio > 3.0) {
       lengthScore = 0.0; // way off
-    } else if (lengthRatio < 0.4 || lengthRatio > 2.5) {
-      lengthScore = 0.6; // somewhat off
+    } else if (lengthRatio < 0.5 || lengthRatio > 2.0) {
+      lengthScore = 0.5; // somewhat off
     }
 
     // 5. Prefer the child touches start and end, but don't require both
@@ -648,7 +659,22 @@ class _TraceItScreenState extends State<TraceItScreen>
         (startEndScore * 0.15);
 
     // Moderate penalty for wild scribbling outside the letter
-    rawScore -= outOfBoundsPenalty * 0.35;
+    rawScore -= outOfBoundsPenalty * 0.45;
+
+    // ── Overlap penalty ──────────────────────────────────────────────────
+    // Cells visited more than the threshold are considered "over-drawn".
+    // A high ratio of over-drawn cells means the student is scribbling
+    // or drawing over the same area repeatedly instead of tracing.
+    const overlapThreshold = 3;
+    int overlappedCells = 0;
+    int totalDrawnCells = 0;
+    for (final entry in _overlapGrid.entries) {
+      if (entry.value > 1) totalDrawnCells++;
+      if (entry.value > overlapThreshold) overlappedCells++;
+    }
+    final overlapRatio =
+        totalDrawnCells > 0 ? overlappedCells / totalDrawnCells : 0.0;
+    rawScore -= overlapRatio * 0.70; // heavy penalty for overlap
 
     return rawScore.clamp(0.0, 1.0);
   }
@@ -659,7 +685,7 @@ class _TraceItScreenState extends State<TraceItScreen>
     setState(() => _checking = true);
 
     final score = _computeSmartScore();
-    if (score >= 0.60) {
+    if (score >= 0.65) {
       _completeTracing();
     } else {
       _triggerWarning(AppLocalizations.of(context)!.almostThere);

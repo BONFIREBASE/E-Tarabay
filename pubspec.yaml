@@ -1,7 +1,7 @@
 name: e_tarabay
 description: "Ang Kabataan ay Pagasa ng Bayan"
 publish_to: 'none'
-version: 1.0.4+5
+version: 1.0.4
 
 environment:
   sdk: ^3.5.4
@@ -57,11 +57,6 @@ flutter:
     - assets/images/E-TarabayCertificate.png
     - assets/images/male.png
     - assets/images/female.png
-    - assets/images/intro1.png
-    - assets/images/intro2.png
-    - assets/images/intro3.png
-    - assets/images/intro4.png
-    - assets/images/intro5.png
     - assets/images/card1.png
     - assets/images/card2.png
     - assets/images/card3.png
