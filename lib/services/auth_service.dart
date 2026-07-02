@@ -1,8 +1,172 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class AuthService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  // Application "pepper" mixed into the LRN before hashing. The LRN (password)
+  // is never stored in plaintext — only this one-way SHA-256 hash is saved,
+  // so the raw password can't be read straight out of the database.
+  static const String _lrnPepper = 'e_tarabay_v1_lrn_pepper';
+
+  /// One-way hash of an LRN/password for storage and verification.
+  static String hashLrn(String lrn) {
+    final bytes = utf8.encode('$_lrnPepper:${lrn.trim()}');
+    return sha256.convert(bytes).toString();
+  }
+
+  // ── Teacher credentials (config/teacher) ──────────────────────────────────
+
+  /// Fetch the current teacher username from `config/teacher`.
+  Future<String?> getTeacherUsername() async {
+    try {
+      final snap = await _db
+          .collection('config')
+          .doc('teacher')
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(const Duration(seconds: 5));
+      final u = (snap.data()?['username'] ?? '').toString();
+      return u.isEmpty ? null : u;
+    } catch (e) {
+      debugPrint('getTeacherUsername error: $e');
+      return null;
+    }
+  }
+
+  /// Verify a teacher password against the hash stored in `config/teacher`.
+  /// Uses serverAndCache so it works offline after the first online login.
+  Future<bool> verifyTeacherPassword(String password) async {
+    try {
+      final snap = await _db
+          .collection('config')
+          .doc('teacher')
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(const Duration(seconds: 5));
+      final storedHash = (snap.data()?['passwordHash'] ?? '').toString();
+      return storedHash.isNotEmpty && storedHash == hashLrn(password);
+    } catch (e) {
+      debugPrint('verifyTeacherPassword error: $e');
+      return false;
+    }
+  }
+
+  /// Update the teacher's stored credentials. The password is written only as a
+  /// one-way hash — plaintext never touches Firestore. Pass a new [username]
+  /// and/or [newPassword] (omit/empty to leave a field unchanged).
+  Future<Map<String, dynamic>> updateTeacherCredentials({
+    String? username,
+    String? newPassword,
+  }) async {
+    try {
+      final updates = <String, dynamic>{};
+      if (username != null && username.trim().isNotEmpty) {
+        updates['username'] = username.trim();
+      }
+      if (newPassword != null && newPassword.trim().isNotEmpty) {
+        updates['passwordHash'] = hashLrn(newPassword);
+      }
+      if (updates.isEmpty) {
+        return {'status': 'Error', 'message': 'Nothing to update.'};
+      }
+      await _db
+          .collection('config')
+          .doc('teacher')
+          .set(updates, SetOptions(merge: true));
+      return {'status': 'Success'};
+    } catch (e) {
+      debugPrint('updateTeacherCredentials error: $e');
+      return {
+        'status': 'Error',
+        'message': 'Could not save changes. Please check your connection.',
+      };
+    }
+  }
+
+  /// Update a student's login credentials (parent-controlled). The password
+  /// (LRN) is stored only as a hash. Username is optional and, when provided,
+  /// checked for uniqueness so it stays a valid roster identity.
+  Future<Map<String, dynamic>> updateStudentCredentials({
+    required String studentId,
+    String? username,
+    String? newPassword,
+  }) async {
+    try {
+      final updates = <String, dynamic>{};
+
+      if (username != null && username.trim().isNotEmpty) {
+        final uname = username.trim();
+        final clash = await _db
+            .collection('students')
+            .where('username', isEqualTo: uname)
+            .get();
+        final takenByOther =
+            clash.docs.any((d) => d.id != studentId);
+        if (takenByOther) {
+          return {
+            'status': 'Error',
+            'message': 'That username is already taken. Please pick another.',
+          };
+        }
+        updates['username'] = uname;
+      }
+
+      if (newPassword != null && newPassword.trim().isNotEmpty) {
+        updates['lrnHash'] = hashLrn(newPassword);
+        updates['lrn'] = FieldValue.delete();
+      }
+
+      if (updates.isEmpty) {
+        return {'status': 'Error', 'message': 'Nothing to update.'};
+      }
+
+      await _db.collection('students').doc(studentId).update(updates);
+      return {'status': 'Success'};
+    } catch (e) {
+      debugPrint('updateStudentCredentials error: $e');
+      return {
+        'status': 'Error',
+        'message': 'Could not save changes. Please check your connection.',
+      };
+    }
+  }
+
+  /// Verify a student's password (LRN) against the stored hash. Used by the
+  /// parent portal before enabling biometric or changing credentials.
+  Future<bool> verifyStudentPassword(String studentId, String password) async {
+    try {
+      final snap = await _db
+          .collection('students')
+          .doc(studentId)
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(const Duration(seconds: 5));
+      final storedHash = (snap.data()?['lrnHash'] ?? '').toString();
+      final legacyLrn = (snap.data()?['lrn'] ?? '').toString().trim();
+      if (storedHash.isNotEmpty) return storedHash == hashLrn(password);
+      return legacyLrn.isNotEmpty && legacyLrn == password.trim();
+    } catch (e) {
+      debugPrint('verifyStudentPassword error: $e');
+      return false;
+    }
+  }
+
+  /// Fetch a student's current username (for pre-filling parent forms / storing
+  /// biometric credentials).
+  Future<String?> getStudentUsername(String studentId) async {
+    try {
+      final snap = await _db
+          .collection('students')
+          .doc(studentId)
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(const Duration(seconds: 5));
+      final u = (snap.data()?['username'] ?? '').toString();
+      return u.isEmpty ? null : u;
+    } catch (e) {
+      debugPrint('getStudentUsername error: $e');
+      return null;
+    }
+  }
 
   /// Login a student/parent using credentials enrolled by the teacher.
   /// Looks up `students` collection in Firestore.
@@ -35,9 +199,28 @@ class AuthService {
 
       final doc = querySnapshot.docs.first;
       final studentData = doc.data();
-      final storedLrn = (studentData['lrn'] ?? '').toString().trim();
+      final storedHash = (studentData['lrnHash'] ?? '').toString();
+      final legacyLrn = (studentData['lrn'] ?? '').toString().trim();
 
-      if (storedLrn == password.trim()) {
+      bool matches = false;
+      if (storedHash.isNotEmpty) {
+        // Preferred path: compare against the stored one-way hash.
+        matches = storedHash == hashLrn(password);
+      } else if (legacyLrn.isNotEmpty) {
+        // Legacy records still hold a plaintext LRN — verify, then migrate
+        // them to a hash and strip the plaintext.
+        matches = legacyLrn == password.trim();
+        if (matches) {
+          try {
+            await doc.reference.update({
+              'lrnHash': hashLrn(password),
+              'lrn': FieldValue.delete(),
+            });
+          } catch (_) {}
+        }
+      }
+
+      if (matches) {
         return {
           'status': 'Success',
           'studentId': doc.id,
@@ -72,10 +255,11 @@ class AuthService {
     String? avatar,
   }) async {
     try {
-      // Check if LRN already exists to prevent duplicates
+      // Check if LRN already exists to prevent duplicates (compare hashes)
+      final lrnHash = hashLrn(lrn);
       final existingCheck = await _db
           .collection('students')
-          .where('lrn', isEqualTo: lrn.trim())
+          .where('lrnHash', isEqualTo: lrnHash)
           .get();
 
       if (existingCheck.docs.isNotEmpty) {
@@ -102,7 +286,7 @@ class AuthService {
       final docRef = _db.collection('students').doc();
       final studentData = {
         'name': name,
-        'lrn': lrn.trim(),
+        'lrnHash': lrnHash,
         'gender': gender,
         'username': username.trim(),
         'birthday': birthday?.toIso8601String(),
@@ -166,8 +350,14 @@ class AuthService {
     try {
       final updates = <String, dynamic>{
         'name': name,
-        'lrn': lrn,
       };
+
+      // Only change the password hash when a new LRN is actually provided;
+      // never overwrite it with an empty value. Also strip any legacy plaintext.
+      if (lrn.trim().isNotEmpty) {
+        updates['lrnHash'] = hashLrn(lrn);
+        updates['lrn'] = FieldValue.delete();
+      }
 
       final profileUpdates = <String, dynamic>{
         'profile.name': name,

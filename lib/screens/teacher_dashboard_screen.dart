@@ -4,13 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/user_provider.dart';
 import '../services/auth_service.dart';
-import '../login_screen.dart';
 import '../utils/constants.dart';
 import '../widgets/staggered_entrance.dart';
 import '../widgets/cached_avatar.dart';
 import '../widgets/birthday_celebration.dart';
+import '../login_screen.dart';
+import '../utils/page_transitions.dart';
 import 'student_detail_screen.dart';
 import 'teacher_settings_screen.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -25,8 +27,67 @@ class TeacherDashboardScreen extends StatefulWidget {
 class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   final AuthService _authService = AuthService();
   bool _birthdayCelebrationShown = false;
+  bool _notificationsEnabled = true;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationPref();
+  }
+
+  Future<void> _loadNotificationPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+    });
+  }
+
+  /// Back button on the dashboard prompts to log out (there is no previous
+  /// route since the dashboard replaced the login screen).
+  Future<void> _confirmLogout() async {
+    final loc = AppLocalizations.of(context)!;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: Row(
+          children: [
+            const Icon(LucideIcons.log_out, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(loc.logout,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text(loc.confirmLogout),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(loc.cancel, style: const TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(loc.logout,
+                style: const TextStyle(
+                    color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await userProvider.logout();
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        PremiumPageRoute(child: const LoginScreen()),
+        (route) => false,
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -57,96 +118,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
-  void _logout() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.logout,
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Text(AppLocalizations.of(context)!.confirmLogout),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context)!.cancel,
-                style: TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppLocalizations.of(context)!.logout,
-                style:
-                    TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await userProvider.logout();
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-    }
-  }
-
-  void _confirmResetAllStudents() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            const Icon(LucideIcons.triangle_alert, color: Colors.red),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                AppLocalizations.of(context)!.resetAllStudents,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-        content: Text(AppLocalizations.of(context)!.confirmResetAllStudents),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context)!.cancel,
-                style: const TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppLocalizations.of(context)!.confirm,
-                style: const TextStyle(
-                    color: Colors.red, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      final result = await _authService.deleteAllStudents();
-      if (!mounted) return;
-      if (result['status'] == 'Success') {
-        _showStatusDialog(
-          result['message'] as String,
-          LucideIcons.circle_check,
-          AppColors.success,
-        );
-      } else {
-        _showStatusDialog(
-          result['message'] as String,
-          LucideIcons.circle_alert,
-          Colors.red,
-        );
-      }
-    }
-  }
-
   void _showEnrollSheet() {
     final firstNameController = TextEditingController();
     final lastNameController = TextEditingController();
@@ -158,6 +129,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     String selectedGender = 'Male';
     String selectedAvatar = 'boy1';
     bool avatarExplicitlySelected = false;
+    int currentStep = 0;
+    const stepLabels = ['Profile', 'Parent', 'Account'];
 
     String? randomSuffix;
     void updateUsername() {
@@ -179,297 +152,354 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => StatefulBuilder(
-        builder: (sheetStateContext, setSheetState) => Container(
-          margin: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + 20,
-          ),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF5F7FA),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 4),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              // Header
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Row(
+        builder: (sheetStateContext, setSheetState) {
+          // Per-step content.
+          Widget stepContent() {
+            switch (currentStep) {
+              case 0:
+                return Column(
+                  key: const ValueKey(0),
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context)!.enrollStudent,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textDark,
+                    _buildSectionHeader('Avatar'),
+                    _buildAvatarPicker(
+                      selectedAvatar: selectedAvatar,
+                      onSelect: (preset) {
+                        setSheetState(() {
+                          selectedAvatar = preset;
+                          avatarExplicitlySelected = true;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    _buildSectionHeader('Student Information'),
+                    _buildCard([
+                      _buildTextField(
+                        controller: firstNameController,
+                        label: AppLocalizations.of(context)!.firstName,
+                        icon: LucideIcons.user,
+                      ),
+                      const SizedBox(height: 14),
+                      _buildTextField(
+                        controller: lastNameController,
+                        label: AppLocalizations.of(context)!.lastName,
+                        icon: LucideIcons.user,
+                      ),
+                      const SizedBox(height: 14),
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: sheetStateContext,
+                            initialDate: DateTime.now()
+                                .subtract(const Duration(days: 365 * 4)),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now(),
+                          );
+                          if (picked != null) {
+                            setSheetState(() => selectedBirthday = picked);
+                          }
+                        },
+                        child: InputDecorator(
+                          decoration: _inputDecoration(
+                            label: AppLocalizations.of(context)!.birthday,
+                            icon: LucideIcons.cake,
+                          ),
+                          child: Text(
+                            selectedBirthday == null
+                                ? AppLocalizations.of(context)!.notSet
+                                : "${selectedBirthday!.month}/${selectedBirthday!.day}/${selectedBirthday!.year}",
+                            style: TextStyle(
+                              color: selectedBirthday == null
+                                  ? Colors.grey.shade500
+                                  : AppColors.textDark,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Create a new student account',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade500,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildModernChoiceChip(
+                              label: AppLocalizations.of(context)!.male,
+                              isSelected: selectedGender == 'Male',
+                              onSelected: (s) => setSheetState(() {
+                                selectedGender = 'Male';
+                                if (!avatarExplicitlySelected) {
+                                  selectedAvatar = 'boy1';
+                                }
+                              }),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _buildModernChoiceChip(
+                              label: AppLocalizations.of(context)!.female,
+                              isSelected: selectedGender == 'Female',
+                              onSelected: (s) => setSheetState(() {
+                                selectedGender = 'Female';
+                                if (!avatarExplicitlySelected) {
+                                  selectedAvatar = 'girl1';
+                                }
+                              }),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(LucideIcons.x),
-                      onPressed: () => Navigator.pop(sheetContext),
-                    ),
+                    ]),
                   ],
-                ),
-              ),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-                    left: 16,
-                    right: 16,
+                );
+              case 1:
+                return Column(
+                  key: const ValueKey(1),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('Parent Information'),
+                    _buildCard([
+                      _buildTextField(
+                        controller: parentNameController,
+                        label: AppLocalizations.of(context)!.parentNameLabel,
+                        icon: LucideIcons.users,
+                      ),
+                      const SizedBox(height: 14),
+                      _buildTextField(
+                        controller: parentContactController,
+                        label: AppLocalizations.of(context)!.parentContactLabel,
+                        icon: LucideIcons.phone,
+                        hintText: '09XXXXXXXXX',
+                        keyboardType: TextInputType.phone,
+                        maxLength: 11,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                      ),
+                    ]),
+                  ],
+                );
+              default:
+                return Column(
+                  key: const ValueKey(2),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('Login Credentials'),
+                    _buildCard([
+                      _buildTextField(
+                        controller: lrnController,
+                        label: AppLocalizations.of(context)!.lRN,
+                        icon: LucideIcons.badge,
+                        keyboardType: TextInputType.number,
+                        onChanged: (_) => setSheetState(() {}),
+                      ),
+                    ]),
+                    const SizedBox(height: 16),
+                    _buildSectionHeader('Account Preview'),
+                    _buildCard([
+                      _buildCredentialRow(
+                        label: AppLocalizations.of(context)!.userLabel,
+                        value: usernameController.text.isEmpty
+                            ? 'Auto-generated'
+                            : usernameController.text,
+                        icon: LucideIcons.user,
+                        color: AppColors.primary,
+                      ),
+                      Divider(
+                        height: 24,
+                        indent: 40,
+                        color: Colors.grey.shade200,
+                      ),
+                      _buildCredentialRow(
+                        label: AppLocalizations.of(context)!.passwordLabel,
+                        value: lrnController.text.isEmpty
+                            ? 'Enter LRN above'
+                            : lrnController.text,
+                        icon: LucideIcons.lock,
+                        color: AppColors.textDark,
+                      ),
+                    ]),
+                  ],
+                );
+            }
+          }
+
+          Future<void> submit() async {
+            if (lrnController.text.trim().isEmpty) {
+              _showStatusDialog(
+                AppLocalizations.of(context)!.fillAllFields,
+                LucideIcons.triangle_alert,
+                Colors.orange,
+              );
+              return;
+            }
+            Navigator.pop(sheetContext);
+            final fullName =
+                '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
+            final result = await _authService.enrollStudent(
+              name: fullName,
+              lrn: lrnController.text.trim(),
+              gender: selectedGender,
+              username: usernameController.text,
+              birthday: selectedBirthday,
+              parentName: parentNameController.text.trim(),
+              parentContact: parentContactController.text.trim(),
+              avatar: selectedAvatar,
+            );
+            if (!context.mounted) return;
+            if (result['status'] == 'Success') {
+              _showEnrollmentSuccess(
+                usernameController.text,
+                lrnController.text.trim(),
+                fullName,
+              );
+            }
+          }
+
+          void goNext() {
+            // Validate the current step before advancing.
+            if (currentStep == 0) {
+              if (firstNameController.text.trim().isEmpty ||
+                  lastNameController.text.trim().isEmpty) {
+                _showStatusDialog(
+                  AppLocalizations.of(context)!.fillAllFields,
+                  LucideIcons.triangle_alert,
+                  Colors.orange,
+                );
+                return;
+              }
+            } else if (currentStep == 1) {
+              if (parentNameController.text.trim().isEmpty ||
+                  parentContactController.text.trim().isEmpty) {
+                _showStatusDialog(
+                  AppLocalizations.of(context)!.fillAllFields,
+                  LucideIcons.triangle_alert,
+                  Colors.orange,
+                );
+                return;
+              }
+              if (parentContactController.text.trim().length != 11) {
+                _showStatusDialog(
+                  AppLocalizations.of(context)!.contactLengthError,
+                  LucideIcons.triangle_alert,
+                  Colors.orange,
+                );
+                return;
+              }
+            }
+            FocusScope.of(sheetStateContext).unfocus();
+            setSheetState(() => currentStep++);
+          }
+
+          final isLast = currentStep == stepLabels.length - 1;
+
+          return Container(
+            margin: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 20,
+            ),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F7FA),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 4),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
                     children: [
-                      // ── Avatar ──
-                      _buildSectionHeader('Avatar'),
-                      _buildAvatarPicker(
-                        selectedAvatar: selectedAvatar,
-                        onSelect: (preset) {
-                          setSheetState(() {
-                            selectedAvatar = preset;
-                            avatarExplicitlySelected = true;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ── Student Information ──
-                      _buildSectionHeader('Student Information'),
-                      _buildCard([
-                        _buildTextField(
-                          controller: firstNameController,
-                          label: AppLocalizations.of(context)!.firstName,
-                          icon: LucideIcons.user,
-                        ),
-                        const SizedBox(height: 14),
-                        _buildTextField(
-                          controller: lastNameController,
-                          label: AppLocalizations.of(context)!.lastName,
-                          icon: LucideIcons.user,
-                        ),
-                        const SizedBox(height: 14),
-                        InkWell(
-                          onTap: () async {
-                            final picked = await showDatePicker(
-                              context: sheetStateContext,
-                              initialDate: DateTime.now()
-                                  .subtract(const Duration(days: 365 * 4)),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime.now(),
-                            );
-                            if (picked != null) {
-                              setSheetState(() => selectedBirthday = picked);
-                            }
-                          },
-                          child: InputDecorator(
-                            decoration: _inputDecoration(
-                              label: AppLocalizations.of(context)!.birthday,
-                              icon: LucideIcons.cake,
-                            ),
-                            child: Text(
-                              selectedBirthday == null
-                                  ? AppLocalizations.of(context)!.notSet
-                                  : "${selectedBirthday!.month}/${selectedBirthday!.day}/${selectedBirthday!.year}",
-                              style: TextStyle(
-                                color: selectedBirthday == null
-                                    ? Colors.grey.shade500
-                                    : AppColors.textDark,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        _buildTextField(
-                          controller: lrnController,
-                          label: AppLocalizations.of(context)!.lRN,
-                          icon: LucideIcons.badge,
-                          keyboardType: TextInputType.number,
-                        ),
-                        const SizedBox(height: 14),
-                        Row(
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: _buildModernChoiceChip(
-                                label: AppLocalizations.of(context)!.male,
-                                isSelected: selectedGender == 'Male',
-                                onSelected: (s) => setSheetState(() {
-                                  selectedGender = 'Male';
-                                  if (!avatarExplicitlySelected) {
-                                    selectedAvatar = 'boy1';
-                                  }
-                                }),
+                            Text(
+                              AppLocalizations.of(context)!.enrollStudent,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _buildModernChoiceChip(
-                                label: AppLocalizations.of(context)!.female,
-                                isSelected: selectedGender == 'Female',
-                                onSelected: (s) => setSheetState(() {
-                                  selectedGender = 'Female';
-                                  if (!avatarExplicitlySelected) {
-                                    selectedAvatar = 'girl1';
-                                  }
-                                }),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Step ${currentStep + 1} of ${stepLabels.length} · ${stepLabels[currentStep]}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade500,
                               ),
                             ),
                           ],
-                        ),
-                      ]),
-
-                      const SizedBox(height: 20),
-
-                      // ── Parent Information ──
-                      _buildSectionHeader('Parent Information'),
-                      _buildCard([
-                        _buildTextField(
-                          controller: parentNameController,
-                          label: AppLocalizations.of(context)!.parentNameLabel,
-                          icon: LucideIcons.users,
-                        ),
-                        const SizedBox(height: 14),
-                        _buildTextField(
-                          controller: parentContactController,
-                          label:
-                              AppLocalizations.of(context)!.parentContactLabel,
-                          icon: LucideIcons.phone,
-                          hintText: '09XXXXXXXXX',
-                          keyboardType: TextInputType.phone,
-                          maxLength: 11,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                        ),
-                      ]),
-
-                      const SizedBox(height: 20),
-
-                      // ── Account Credentials ──
-                      _buildSectionHeader('Account Credentials'),
-                      _buildCard([
-                        _buildCredentialRow(
-                          label: AppLocalizations.of(context)!.userLabel,
-                          value: usernameController.text.isEmpty
-                              ? 'Auto-generated'
-                              : usernameController.text,
-                          icon: LucideIcons.user,
-                          color: AppColors.primary,
-                        ),
-                        Divider(
-                          height: 24,
-                          indent: 40,
-                          color: Colors.grey.shade200,
-                        ),
-                        _buildCredentialRow(
-                          label: AppLocalizations.of(context)!.passwordLabel,
-                          value: lrnController.text.isEmpty
-                              ? 'Enter LRN above'
-                              : lrnController.text,
-                          icon: LucideIcons.lock,
-                          color: AppColors.textDark,
-                        ),
-                      ]),
-
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (firstNameController.text.trim().isEmpty ||
-                                lastNameController.text.trim().isEmpty ||
-                                lrnController.text.trim().isEmpty ||
-                                parentNameController.text.trim().isEmpty ||
-                                parentContactController.text.trim().isEmpty) {
-                              _showStatusDialog(
-                                AppLocalizations.of(context)!.fillAllFields,
-                                LucideIcons.triangle_alert,
-                                Colors.orange,
-                              );
-                              return;
-                            }
-                            if (parentContactController.text.trim().length !=
-                                11) {
-                              _showStatusDialog(
-                                AppLocalizations.of(context)!
-                                    .contactLengthError,
-                                LucideIcons.triangle_alert,
-                                Colors.orange,
-                              );
-                              return;
-                            }
-                            Navigator.pop(sheetContext);
-                            final fullName =
-                                '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
-                            final result = await _authService.enrollStudent(
-                              name: fullName,
-                              lrn: lrnController.text.trim(),
-                              gender: selectedGender,
-                              username: usernameController.text,
-                              birthday: selectedBirthday,
-                              parentName: parentNameController.text.trim(),
-                              parentContact:
-                                  parentContactController.text.trim(),
-                              avatar: selectedAvatar,
-                            );
-                            if (!context.mounted) return;
-                            if (result['status'] == 'Success') {
-                              _showEnrollmentSuccess(
-                                usernameController.text,
-                                lrnController.text.trim(),
-                                fullName,
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                          ),
-                          child: Text(
-                            AppLocalizations.of(context)!.enroll,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      IconButton(
+                        icon: const Icon(LucideIcons.x),
+                        onPressed: () => Navigator.pop(sheetContext),
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                _buildStepBreadcrumb(
+                  labels: stepLabels,
+                  current: currentStep,
+                  onTap: (i) {
+                    // Only allow jumping to already-visited steps.
+                    if (i <= currentStep) {
+                      FocusScope.of(sheetStateContext).unfocus();
+                      setSheetState(() => currentStep = i);
+                    }
+                  },
+                ),
+                const Divider(height: 1),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: stepContent(),
+                    ),
+                  ),
+                ),
+                _buildWizardFooter(
+                  showBack: currentStep > 0,
+                  onBack: () {
+                    FocusScope.of(sheetStateContext).unfocus();
+                    setSheetState(() => currentStep--);
+                  },
+                  primary: SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: isLast ? submit : goNext,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: Text(
+                        isLast
+                            ? AppLocalizations.of(context)!.enroll
+                            : 'Next',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -650,370 +680,554 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       selectedAvatar =
           selectedGender.toLowerCase() == 'female' ? 'girl1' : 'boy1';
     }
+    int currentStep = 0;
+    const stepLabels = ['Profile', 'Parent', 'Account'];
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => StatefulBuilder(
-        builder: (sheetStateContext, setSheetState) => Container(
-          margin: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + 20,
-          ),
-          decoration: const BoxDecoration(
-            color: Color(0xFFF5F7FA),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 4),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              // Header with avatar and name
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: Row(
+        builder: (sheetStateContext, setSheetState) {
+          Widget stepContent() {
+            switch (currentStep) {
+              case 0:
+                return Column(
+                  key: const ValueKey(0),
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildPresetAvatar(selectedAvatar, size: 56, iconSize: 30),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            nameController.text,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '@$username',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        ],
+                    _buildSectionHeader('Avatar'),
+                    _buildAvatarPicker(
+                      selectedAvatar: selectedAvatar,
+                      onSelect: (preset) {
+                        setSheetState(() => selectedAvatar = preset);
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    _buildSectionHeader('Student Information'),
+                    _buildCard([
+                      _buildTextField(
+                        controller: nameController,
+                        label: AppLocalizations.of(context)!.fullName,
+                        icon: LucideIcons.badge,
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(LucideIcons.x),
-                      onPressed: () => Navigator.pop(sheetContext),
-                    ),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-                    left: 16,
-                    right: 16,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ── Avatar ──
-                      _buildSectionHeader('Avatar'),
-                      _buildAvatarPicker(
-                        selectedAvatar: selectedAvatar,
-                        onSelect: (preset) {
-                          setSheetState(() => selectedAvatar = preset);
+                      const SizedBox(height: 14),
+                      InkWell(
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: sheetStateContext,
+                            initialDate: selectedBirthday ??
+                                DateTime.now()
+                                    .subtract(const Duration(days: 365 * 4)),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now(),
+                          );
+                          if (picked != null) {
+                            setSheetState(() => selectedBirthday = picked);
+                          }
                         },
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ── Student Information ──
-                      _buildSectionHeader('Student Information'),
-                      _buildCard([
-                        _buildTextField(
-                          controller: nameController,
-                          label: AppLocalizations.of(context)!.fullName,
-                          icon: LucideIcons.badge,
-                        ),
-                        const SizedBox(height: 14),
-                        _buildTextField(
-                          controller: lrnController,
-                          label: AppLocalizations.of(context)!.lRNPassword,
-                          icon: LucideIcons.key_round,
-                        ),
-                        const SizedBox(height: 14),
-                        InkWell(
-                          onTap: () async {
-                            final picked = await showDatePicker(
-                              context: sheetStateContext,
-                              initialDate: selectedBirthday ??
-                                  DateTime.now()
-                                      .subtract(const Duration(days: 365 * 4)),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime.now(),
-                            );
-                            if (picked != null)
-                              setSheetState(() => selectedBirthday = picked);
-                          },
-                          child: InputDecorator(
-                            decoration: _inputDecoration(
-                              label: AppLocalizations.of(context)!.birthday,
-                              icon: LucideIcons.cake,
-                            ),
-                            child: Text(
-                              selectedBirthday == null
-                                  ? AppLocalizations.of(context)!.notSet
-                                  : "${selectedBirthday!.month}/${selectedBirthday!.day}/${selectedBirthday!.year}",
-                              style: TextStyle(
-                                color: selectedBirthday == null
-                                    ? Colors.grey.shade500
-                                    : AppColors.textDark,
-                              ),
+                        child: InputDecorator(
+                          decoration: _inputDecoration(
+                            label: AppLocalizations.of(context)!.birthday,
+                            icon: LucideIcons.cake,
+                          ),
+                          child: Text(
+                            selectedBirthday == null
+                                ? AppLocalizations.of(context)!.notSet
+                                : "${selectedBirthday!.month}/${selectedBirthday!.day}/${selectedBirthday!.year}",
+                            style: TextStyle(
+                              color: selectedBirthday == null
+                                  ? Colors.grey.shade500
+                                  : AppColors.textDark,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildModernChoiceChip(
-                                label: AppLocalizations.of(context)!.male,
-                                isSelected: selectedGender == 'Male',
-                                onSelected: (s) => setSheetState(
-                                    () => selectedGender = 'Male'),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _buildModernChoiceChip(
-                                label: AppLocalizations.of(context)!.female,
-                                isSelected: selectedGender == 'Female',
-                                onSelected: (s) => setSheetState(
-                                    () => selectedGender = 'Female'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ]),
-
-                      const SizedBox(height: 20),
-
-                      // ── Parent Information ──
-                      _buildSectionHeader('Parent Information'),
-                      _buildCard([
-                        _buildTextField(
-                          controller: parentNameController,
-                          label: AppLocalizations.of(context)!.parentNameLabel,
-                          icon: LucideIcons.users,
-                        ),
-                        const SizedBox(height: 14),
-                        _buildTextField(
-                          controller: parentContactController,
-                          label:
-                              AppLocalizations.of(context)!.parentContactLabel,
-                          icon: LucideIcons.phone,
-                          hintText: '09XXXXXXXXX',
-                          keyboardType: TextInputType.phone,
-                          maxLength: 11,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                        ),
-                      ]),
-
-                      const SizedBox(height: 20),
-
-                      // ── Login Credentials ──
-                      _buildSectionHeader('Login Credentials'),
-                      _buildCard([
-                        _buildCredentialRow(
-                          label: AppLocalizations.of(context)!.userLabel,
-                          value: username,
-                          icon: LucideIcons.user,
-                          color: AppColors.primary,
-                        ),
-                        Divider(
-                          height: 24,
-                          indent: 40,
-                          color: Colors.grey.shade200,
-                        ),
-                        _buildCredentialRow(
-                          label: AppLocalizations.of(context)!.passwordLabel,
-                          value: lrnController.text,
-                          icon: LucideIcons.lock,
-                          color: AppColors.textDark,
-                        ),
-                      ]),
-
-                      const SizedBox(height: 24),
-
-                      // ── Actions ──
+                      ),
+                      const SizedBox(height: 14),
                       Row(
                         children: [
                           Expanded(
-                            child: _buildActionButton(
-                              label: AppLocalizations.of(context)!.remove,
-                              icon: LucideIcons.trash_2,
-                              color: Colors.red,
-                              isFilled: false,
-                              onPressed: () async {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (c) => AlertDialog(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    title: Text(AppLocalizations.of(context)!
-                                        .removeStudent),
-                                    content: Text(AppLocalizations.of(context)!
-                                        .confirmRemoveStudent),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(c, false),
-                                          child: Text(
-                                              AppLocalizations.of(context)!
-                                                  .cancel)),
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(c, true),
-                                          child: Text(
-                                            AppLocalizations.of(context)!
-                                                .remove,
-                                            style: const TextStyle(
-                                                color: Colors.red),
-                                          )),
-                                    ],
-                                  ),
-                                );
-                                if (!mounted) return;
-                                if (confirm == true) {
-                                  await _authService.deleteStudent(studentId);
-                                  if (!mounted) return;
-                                  Navigator.of(context).pop();
-                                  _showStatusDialog(
-                                    AppLocalizations.of(context)!.remove,
-                                    LucideIcons.trash_2,
-                                    Colors.red,
-                                  );
-                                }
-                              },
+                            child: _buildModernChoiceChip(
+                              label: AppLocalizations.of(context)!.male,
+                              isSelected: selectedGender == 'Male',
+                              onSelected: (s) => setSheetState(
+                                  () => selectedGender = 'Male'),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           Expanded(
-                            child: _buildActionButton(
-                              label: 'Progress',
-                              icon: LucideIcons.chart_column,
-                              color: AppColors.secondary,
-                              isFilled: true,
-                              onPressed: () {
-                                Navigator.pop(sheetContext);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => StudentDetailScreen(
-                                      studentName: nameController.text,
-                                      studentData: studentData,
-                                    ),
-                                  ),
-                                );
-                              },
+                            child: _buildModernChoiceChip(
+                              label: AppLocalizations.of(context)!.female,
+                              isSelected: selectedGender == 'Female',
+                              onSelected: (s) => setSheetState(
+                                  () => selectedGender = 'Female'),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            if (nameController.text.trim().isEmpty ||
-                                lrnController.text.trim().isEmpty ||
-                                parentNameController.text.trim().isEmpty ||
-                                parentContactController.text.trim().isEmpty) {
-                              _showStatusDialog(
-                                AppLocalizations.of(context)!.fillAllFields,
-                                LucideIcons.triangle_alert,
-                                Colors.orange,
-                              );
-                              return;
-                            }
-                            if (parentContactController.text.trim().length !=
-                                11) {
-                              _showStatusDialog(
-                                AppLocalizations.of(context)!
-                                    .contactLengthError,
-                                LucideIcons.triangle_alert,
-                                Colors.orange,
-                              );
-                              return;
-                            }
-                            try {
-                              final updateMsg =
-                                  AppLocalizations.of(context)!.update;
-                              await _authService.updateStudent(
-                                studentId: studentId,
-                                name: nameController.text.trim(),
-                                lrn: lrnController.text.trim(),
-                                gender: selectedGender,
-                                birthday: selectedBirthday,
-                                parentName: parentNameController.text.trim(),
-                                parentContact:
-                                    parentContactController.text.trim(),
-                                avatar: selectedAvatar,
+                    ]),
+                  ],
+                );
+              case 1:
+                return Column(
+                  key: const ValueKey(1),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('Parent Information'),
+                    _buildCard([
+                      _buildTextField(
+                        controller: parentNameController,
+                        label: AppLocalizations.of(context)!.parentNameLabel,
+                        icon: LucideIcons.users,
+                      ),
+                      const SizedBox(height: 14),
+                      _buildTextField(
+                        controller: parentContactController,
+                        label: AppLocalizations.of(context)!.parentContactLabel,
+                        icon: LucideIcons.phone,
+                        hintText: '09XXXXXXXXX',
+                        keyboardType: TextInputType.phone,
+                        maxLength: 11,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                      ),
+                    ]),
+                  ],
+                );
+              default:
+                return Column(
+                  key: const ValueKey(2),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('Login Credentials'),
+                    _buildCard([
+                      _buildTextField(
+                        controller: lrnController,
+                        label: AppLocalizations.of(context)!.lRNPassword,
+                        icon: LucideIcons.key_round,
+                        onChanged: (_) => setSheetState(() {}),
+                      ),
+                      const SizedBox(height: 14),
+                      _buildCredentialRow(
+                        label: AppLocalizations.of(context)!.userLabel,
+                        value: username,
+                        icon: LucideIcons.user,
+                        color: AppColors.primary,
+                      ),
+                      Divider(
+                        height: 24,
+                        indent: 40,
+                        color: Colors.grey.shade200,
+                      ),
+                      _buildCredentialRow(
+                        label: AppLocalizations.of(context)!.passwordLabel,
+                        value: lrnController.text,
+                        icon: LucideIcons.lock,
+                        color: AppColors.textDark,
+                      ),
+                    ]),
+                    const SizedBox(height: 20),
+                    _buildSectionHeader('More'),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildActionButton(
+                            label: AppLocalizations.of(context)!.remove,
+                            icon: LucideIcons.trash_2,
+                            color: Colors.red,
+                            isFilled: false,
+                            onPressed: () async {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (c) => AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20)),
+                                  title: Text(AppLocalizations.of(context)!
+                                      .removeStudent),
+                                  content: Text(AppLocalizations.of(context)!
+                                      .confirmRemoveStudent),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(c, false),
+                                        child: Text(AppLocalizations.of(context)!
+                                            .cancel)),
+                                    TextButton(
+                                        onPressed: () => Navigator.pop(c, true),
+                                        child: Text(
+                                          AppLocalizations.of(context)!.remove,
+                                          style: const TextStyle(
+                                              color: Colors.red),
+                                        )),
+                                  ],
+                                ),
                               );
                               if (!mounted) return;
-                              Navigator.of(context).pop();
-                              _showStatusDialog(
-                                updateMsg,
-                                LucideIcons.circle_check,
-                                AppColors.success,
-                              );
-                            } catch (e) {
-                              if (!mounted) return;
-                              _showStatusDialog(
-                                "${AppLocalizations.of(context)!.error}: ${e.toString()}",
-                                LucideIcons.circle_alert,
-                                Colors.red,
-                              );
-                            }
-                          },
-                          icon: const Icon(LucideIcons.save, size: 20),
-                          label: Text(
-                            AppLocalizations.of(context)!.update,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            elevation: 2,
+                              if (confirm == true) {
+                                await _authService.deleteStudent(studentId);
+                                if (!mounted) return;
+                                Navigator.of(context).pop();
+                                _showStatusDialog(
+                                  AppLocalizations.of(context)!.remove,
+                                  LucideIcons.trash_2,
+                                  Colors.red,
+                                );
+                              }
+                            },
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildActionButton(
+                            label: 'Progress',
+                            icon: LucideIcons.chart_column,
+                            color: AppColors.secondary,
+                            isFilled: true,
+                            onPressed: () {
+                              Navigator.pop(sheetContext);
+                              context.pushPremium(
+                                StudentDetailScreen(
+                                  studentName: nameController.text,
+                                  studentData: studentData,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+            }
+          }
+
+          Future<void> saveUpdate() async {
+            if (nameController.text.trim().isEmpty ||
+                lrnController.text.trim().isEmpty ||
+                parentNameController.text.trim().isEmpty ||
+                parentContactController.text.trim().isEmpty) {
+              _showStatusDialog(
+                AppLocalizations.of(context)!.fillAllFields,
+                LucideIcons.triangle_alert,
+                Colors.orange,
+              );
+              return;
+            }
+            if (parentContactController.text.trim().length != 11) {
+              _showStatusDialog(
+                AppLocalizations.of(context)!.contactLengthError,
+                LucideIcons.triangle_alert,
+                Colors.orange,
+              );
+              return;
+            }
+            try {
+              final updateMsg = AppLocalizations.of(context)!.update;
+              await _authService.updateStudent(
+                studentId: studentId,
+                name: nameController.text.trim(),
+                lrn: lrnController.text.trim(),
+                gender: selectedGender,
+                birthday: selectedBirthday,
+                parentName: parentNameController.text.trim(),
+                parentContact: parentContactController.text.trim(),
+                avatar: selectedAvatar,
+              );
+              if (!mounted) return;
+              Navigator.of(context).pop();
+              _showStatusDialog(
+                updateMsg,
+                LucideIcons.circle_check,
+                AppColors.success,
+              );
+            } catch (e) {
+              if (!mounted) return;
+              _showStatusDialog(
+                "${AppLocalizations.of(context)!.error}: ${e.toString()}",
+                LucideIcons.circle_alert,
+                Colors.red,
+              );
+            }
+          }
+
+          void goNext() {
+            if (currentStep == 0) {
+              if (nameController.text.trim().isEmpty) {
+                _showStatusDialog(
+                  AppLocalizations.of(context)!.fillAllFields,
+                  LucideIcons.triangle_alert,
+                  Colors.orange,
+                );
+                return;
+              }
+            } else if (currentStep == 1) {
+              if (parentNameController.text.trim().isEmpty ||
+                  parentContactController.text.trim().isEmpty) {
+                _showStatusDialog(
+                  AppLocalizations.of(context)!.fillAllFields,
+                  LucideIcons.triangle_alert,
+                  Colors.orange,
+                );
+                return;
+              }
+              if (parentContactController.text.trim().length != 11) {
+                _showStatusDialog(
+                  AppLocalizations.of(context)!.contactLengthError,
+                  LucideIcons.triangle_alert,
+                  Colors.orange,
+                );
+                return;
+              }
+            }
+            FocusScope.of(sheetStateContext).unfocus();
+            setSheetState(() => currentStep++);
+          }
+
+          final isLast = currentStep == stepLabels.length - 1;
+
+          return Container(
+            margin: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 20,
+            ),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F7FA),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 4),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    children: [
+                      _buildPresetAvatar(selectedAvatar,
+                          size: 56, iconSize: 30),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nameController.text,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '@$username',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 12),
+                      IconButton(
+                        icon: const Icon(LucideIcons.x),
+                        onPressed: () => Navigator.pop(sheetContext),
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                _buildStepBreadcrumb(
+                  labels: stepLabels,
+                  current: currentStep,
+                  onTap: (i) {
+                    if (i <= currentStep) {
+                      FocusScope.of(sheetStateContext).unfocus();
+                      setSheetState(() => currentStep = i);
+                    }
+                  },
+                ),
+                const Divider(height: 1),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: stepContent(),
+                    ),
+                  ),
+                ),
+                _buildWizardFooter(
+                  showBack: currentStep > 0,
+                  onBack: () {
+                    FocusScope.of(sheetStateContext).unfocus();
+                    setSheetState(() => currentStep--);
+                  },
+                  primary: SizedBox(
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: isLast ? saveUpdate : goNext,
+                      icon: Icon(
+                          isLast ? LucideIcons.save : LucideIcons.arrow_right,
+                          size: 20),
+                      label: Text(
+                        isLast ? AppLocalizations.of(context)!.update : 'Next',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// Breadcrumb step indicator for the enroll/edit wizards. Numbered circles
+  /// connected by lines, with a label under each. Tapping a step jumps to it.
+  Widget _buildStepBreadcrumb({
+    required List<String> labels,
+    required int current,
+    required ValueChanged<int> onTap,
+  }) {
+    final items = <Widget>[];
+    for (int i = 0; i < labels.length; i++) {
+      final isActive = i == current;
+      final isDone = i < current;
+      final circleColor =
+          (isActive || isDone) ? AppColors.primary : Colors.grey.shade300;
+      items.add(
+        GestureDetector(
+          onTap: () => onTap(i),
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: 68,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration:
+                      BoxDecoration(color: circleColor, shape: BoxShape.circle),
+                  child: Center(
+                    child: isDone
+                        ? const Icon(LucideIcons.check,
+                            size: 16, color: Colors.white)
+                        : Text(
+                            '${i + 1}',
+                            style: TextStyle(
+                              color: isActive
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  labels[i],
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    height: 1.1,
+                    color: isActive ? AppColors.primary : Colors.grey.shade500,
+                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      );
+      if (i < labels.length - 1) {
+        items.add(
+          Expanded(
+            child: Container(
+              height: 2,
+              margin: const EdgeInsets.only(top: 14, left: 2, right: 2),
+              color: i < current ? AppColors.primary : Colors.grey.shade300,
+            ),
+          ),
+        );
+      }
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: items),
+    );
+  }
+
+  /// Sticky footer with an optional Back button and a primary action that
+  /// stays above the keyboard so the user never has to scroll to reach it.
+  Widget _buildWizardFooter({
+    required bool showBack,
+    required VoidCallback onBack,
+    required Widget primary,
+  }) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 12,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          if (showBack) ...[
+            OutlinedButton.icon(
+              onPressed: onBack,
+              icon: const Icon(LucideIcons.arrow_left, size: 18),
+              label: const Text('Back'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: BorderSide(color: AppColors.primary.withOpacity(0.4)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(child: primary),
+        ],
       ),
     );
   }
@@ -1093,9 +1307,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     TextInputType? keyboardType,
     int? maxLength,
     List<TextInputFormatter>? inputFormatters,
+    ValueChanged<String>? onChanged,
   }) {
     return TextField(
       controller: controller,
+      onChanged: onChanged,
       decoration: _inputDecoration(label: label, icon: icon).copyWith(
         hintText: hintText,
         counterText: maxLength != null ? '' : null,
@@ -1284,61 +1500,86 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       {'key': 'girl1', 'label': 'Female'},
     ];
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Wrap(
-        spacing: 24,
-        runSpacing: 10,
-        alignment: WrapAlignment.center,
-        children: options.map((option) {
-          final preset = option['key']!;
-          final isSelected = _isSameGenderAvatar(selectedAvatar, preset);
-          return GestureDetector(
-            onTap: () => onSelect(preset),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOut,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color:
-                          isSelected ? AppColors.primary : Colors.transparent,
-                      width: 3,
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(3),
-                  child: _buildPresetAvatar(preset, size: 64, iconSize: 32),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  option['label']!,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.normal,
-                    color:
-                        isSelected ? AppColors.primary : AppColors.textLight,
-                  ),
-                ),
-              ],
+    return Row(
+      children: List.generate(options.length, (i) {
+        final preset = options[i]['key']!;
+        final label = options[i]['label']!;
+        final isSelected = _isSameGenderAvatar(selectedAvatar, preset);
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: i == 0 ? 0 : 6,
+              right: i == options.length - 1 ? 0 : 6,
             ),
-          );
-        }).toList(),
-      ),
+            child: GestureDetector(
+              onTap: () => onSelect(preset),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppColors.primary.withOpacity(0.06)
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : Colors.grey.shade200,
+                    width: isSelected ? 2 : 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        _buildPresetAvatar(preset, size: 64, iconSize: 32),
+                        if (isSelected)
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: Colors.white, width: 2),
+                              ),
+                              padding: const EdgeInsets.all(2),
+                              child: const Icon(LucideIcons.check,
+                                  size: 12, color: Colors.white),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 
@@ -1421,16 +1662,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(140),
+        preferredSize: const Size.fromHeight(120),
         child: Container(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            MediaQuery.of(context).padding.top + 16,
-            20,
-            20,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -1453,17 +1689,21 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             bottom: false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(14),
+                    GestureDetector(
+                      onTap: _confirmLogout,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(LucideIcons.arrow_left,
+                            color: Colors.white, size: 24),
                       ),
-                      child: const Icon(LucideIcons.graduation_cap,
-                          color: Colors.white, size: 24),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -1488,58 +1728,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         ],
                       ),
                     ),
-                    PopupMenuButton<String>(
-                      icon: const Icon(LucideIcons.ellipsis_vertical, color: Colors.white),
-                      onSelected: (value) {
-                        if (value == 'reset') {
-                          _confirmResetAllStudents();
-                        } else if (value == 'settings') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const TeacherSettingsScreen(),
-                            ),
-                          );
-                        } else if (value == 'logout') {
-                          _logout();
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'settings',
-                          child: Row(
-                            children: [
-                              const Icon(LucideIcons.settings,
-                                  color: AppColors.primary),
-                              const SizedBox(width: 8),
-                              Text(AppLocalizations.of(context)!.settingsTitle),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'reset',
-                          child: Row(
-                            children: [
-                              const Icon(LucideIcons.trash_2,
-                                  color: Colors.red),
-                              const SizedBox(width: 8),
-                              Text(AppLocalizations.of(context)!
-                                  .resetAllStudents),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 'logout',
-                          child: Row(
-                            children: [
-                              const Icon(LucideIcons.log_out,
-                                  color: AppColors.primary),
-                              const SizedBox(width: 8),
-                              Text(AppLocalizations.of(context)!.logout),
-                            ],
-                          ),
-                        ),
-                      ],
+                    _HeaderIconButton(
+                      icon: LucideIcons.settings,
+                      tooltip: AppLocalizations.of(context)!.settingsTitle,
+                      onTap: () => context.pushPremium(
+                        const TeacherSettingsScreen(),
+                      ),
                     ),
                   ],
                 ),
@@ -1604,7 +1798,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           }
 
           // Auto-show the celebration once when a student has a birthday today.
-          if (birthdayStudents.isNotEmpty && !_birthdayCelebrationShown) {
+          if (birthdayStudents.isNotEmpty &&
+              !_birthdayCelebrationShown &&
+              _notificationsEnabled) {
             _birthdayCelebrationShown = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
@@ -1638,12 +1834,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
           return Column(
             children: [
-              // Space below gradient header
-              const SizedBox(height: 140),
-
               // Search bar
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
                 child: _buildSearchBar(),
               ),
 
@@ -1834,13 +2027,10 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                             studentData: studentData,
                           ),
                           onAvatarTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => StudentDetailScreen(
-                                  studentName: name,
-                                  studentData: studentData,
-                                ),
+                            context.pushPremium(
+                              StudentDetailScreen(
+                                studentName: name,
+                                studentData: studentData,
                               ),
                             );
                           },
@@ -2176,6 +2366,43 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 Icon(LucideIcons.chevron_right,
                     color: Colors.grey.shade300, size: 20),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  HEADER ICON BUTTON (glassy, for the dashboard top bar)
+// ─────────────────────────────────────────────────────────────────────────────
+class _HeaderIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  const _HeaderIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.white.withOpacity(0.2),
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: 42,
+            height: 42,
+            child: Center(
+              child: Icon(icon, color: Colors.white, size: 20),
             ),
           ),
         ),

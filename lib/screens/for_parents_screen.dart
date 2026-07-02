@@ -2,6 +2,8 @@ import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constants.dart';
+import '../utils/page_transitions.dart';
+import 'parent_account_screen.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 /// Keys used by TraceItScreen.
@@ -165,11 +167,11 @@ class _ForParentsScreenState extends State<ForParentsScreen>
     'Fruits': Colors.red,
     'Toys': Colors.brown,
   };
-  static const Map<String, String> _kulayIcons = {
-    'Animals': '🐶',
-    'Flowers': '🌸',
-    'Fruits': '🍎',
-    'Toys': '🧸',
+  static const Map<String, IconData> _kulayIcons = {
+    'Animals': LucideIcons.paw_print,
+    'Flowers': LucideIcons.flower,
+    'Fruits': LucideIcons.apple,
+    'Toys': LucideIcons.blocks,
   };
 
   int _kulayTotalCreations = 0;
@@ -182,10 +184,10 @@ class _ForParentsScreenState extends State<ForParentsScreen>
     'kwento': 5,
     'kanta': 13,
   };
-  static const Map<String, String> _magbasaIcons = {
-    'tula': '📖',
-    'kwento': '📚',
-    'kanta': '🎵',
+  static const Map<String, IconData> _magbasaIcons = {
+    'tula': LucideIcons.book_open,
+    'kwento': LucideIcons.book_marked,
+    'kanta': LucideIcons.music,
   };
   static const Map<String, Color> _magbasaColors = {
     'tula': Color(0xFFFF6B6B),
@@ -299,57 +301,129 @@ class _ForParentsScreenState extends State<ForParentsScreen>
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    const headerStart = Color(0xFF7C4DFF);
+    const headerEnd = Color(0xFF9C6BFF);
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FF),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(LucideIcons.chevron_left, size: 20),
-          color: AppColors.textDark,
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(AppLocalizations.of(context)!.forParents,
-            style: TextStyle(
-                color: AppColors.textDark,
-                fontSize: 18,
-                fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.refresh_cw),
-            color: AppColors.primary,
-            onPressed: () {
-              setState(() => _isLoading = true);
-              _loadAllProgress();
-            },
-            tooltip: AppLocalizations.of(context)!.refresh,
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
-          child: TabBar(
-            controller: _tabController,
-            indicatorColor: AppColors.primary,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: Colors.grey,
-            tabs: [
-              Tab(text: AppLocalizations.of(context)!.overviewTab),
-              Tab(text: AppLocalizations.of(context)!.kulaySaya),
-              Tab(text: AppLocalizations.of(context)!.traceItTitle),
-              Tab(text: AppLocalizations.of(context)!.magbasaTab),
-              Tab(text: AppLocalizations.of(context)!.matematikaTab),
-            ],
-          ),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          _buildOverviewTab(),
-          _buildKulayTab(),
-          _buildTraceItTab(),
-          _buildMagbasaTab(),
-          _buildMatematikaTab(),
+          // Gradient header (mirrors the teacher dashboard, different color)
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [headerStart, headerEnd],
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x337C4DFF),
+                  blurRadius: 20,
+                  offset: Offset(0, 10),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(LucideIcons.arrow_left,
+                              color: Colors.white, size: 24),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.forParents,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              AppLocalizations.of(context)!.forParentsSubtitle,
+                              style: const TextStyle(
+                                  color: Colors.white70, fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          context.pushPremium(const ParentAccountScreen());
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(LucideIcons.user_cog,
+                              color: Colors.white, size: 22),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    indicatorColor: Colors.white,
+                    indicatorWeight: 3,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white70,
+                    labelStyle: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.bold),
+                    unselectedLabelStyle: const TextStyle(fontSize: 14),
+                    tabs: [
+                      Tab(text: AppLocalizations.of(context)!.overviewTab),
+                      Tab(text: AppLocalizations.of(context)!.kulaySaya),
+                      Tab(text: AppLocalizations.of(context)!.traceItTitle),
+                      Tab(text: AppLocalizations.of(context)!.magbasaTab),
+                      Tab(text: AppLocalizations.of(context)!.matematikaTab),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildOverviewTab(),
+                _buildKulayTab(),
+                _buildTraceItTab(),
+                _buildMagbasaTab(),
+                _buildMatematikaTab(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -401,7 +475,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         Row(children: [
           Expanded(
               child: _summaryCard(
-            icon: '🎨',
+            icon: LucideIcons.palette,
             label: AppLocalizations.of(context)!.kulaySaya,
             value: '$totalKulay/$maxKulay',
             subtitle: AppLocalizations.of(context)!.pagesLabel,
@@ -411,7 +485,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           const SizedBox(width: 12),
           Expanded(
               child: _summaryCard(
-            icon: '✏️',
+            icon: LucideIcons.pencil_line,
             label: AppLocalizations.of(context)!.traceItTitle,
             value: '$totalTrace/$maxTrace',
             subtitle: AppLocalizations.of(context)!.lettersLabel,
@@ -425,7 +499,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         Row(children: [
           Expanded(
               child: _summaryCard(
-            icon: '📖',
+            icon: LucideIcons.book_open,
             label: AppLocalizations.of(context)!.magbasaTab,
             value: '$totalMagbasa/$maxMagbasa',
             subtitle: AppLocalizations.of(context)!.activitiesLabel,
@@ -435,7 +509,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           const SizedBox(width: 12),
           Expanded(
               child: _summaryCard(
-            icon: '🔢',
+            icon: LucideIcons.calculator,
             label: AppLocalizations.of(context)!.matematikaTab,
             value: '$totalMat/$maxMat',
             subtitle: AppLocalizations.of(context)!.gamesLabel,
@@ -447,7 +521,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         Row(children: [
           Expanded(
               child: _summaryCard(
-            icon: '🖼️',
+            icon: LucideIcons.image,
             label: AppLocalizations.of(context)!.artworksLabel,
             value: '$_kulayTotalCreations',
             subtitle: AppLocalizations.of(context)!.savedCountLabel,
@@ -457,7 +531,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           const SizedBox(width: 12),
           Expanded(
               child: _summaryCard(
-            icon: '🖊️',
+            icon: LucideIcons.type,
             label: AppLocalizations.of(context)!.traceItTitle,
             value: '$totalTrace/$maxTrace',
             subtitle: AppLocalizations.of(context)!.lettersLabel,
@@ -471,11 +545,13 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         _sectionHeader(AppLocalizations.of(context)!.recentActivity,
             LucideIcons.history),
         const SizedBox(height: 10),
-        _recentActivityCard('🎨 ${AppLocalizations.of(context)!.kulaySaya}',
+        _recentActivityCard(LucideIcons.palette,
+            AppLocalizations.of(context)!.kulaySaya,
             _kulayLastColored, Colors.orange),
         const SizedBox(height: 8),
         _recentActivityCard(
-            '✏️ ${AppLocalizations.of(context)!.traceItTitle}',
+            LucideIcons.pencil_line,
+            AppLocalizations.of(context)!.traceItTitle,
             '$totalTrace / $maxTrace ${AppLocalizations.of(context)!.lettersLabel}',
             Colors.indigo),
         const SizedBox(height: 20),
@@ -484,19 +560,19 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         _sectionHeader(
             AppLocalizations.of(context)!.parentTipsHeader, LucideIcons.lightbulb),
         const SizedBox(height: 10),
-        _tipCard('🎨', AppLocalizations.of(context)!.tipKulayTitle,
+        _tipCard(LucideIcons.palette, AppLocalizations.of(context)!.tipKulayTitle,
             AppLocalizations.of(context)!.tipKulayBody),
         const SizedBox(height: 8),
-        _tipCard('✏️', AppLocalizations.of(context)!.tipTraceItTitle,
+        _tipCard(LucideIcons.pencil_line, AppLocalizations.of(context)!.tipTraceItTitle,
             AppLocalizations.of(context)!.tipTraceItBody),
         const SizedBox(height: 8),
-        _tipCard('📖', AppLocalizations.of(context)!.tipMagbasaTitle,
+        _tipCard(LucideIcons.book_open, AppLocalizations.of(context)!.tipMagbasaTitle,
             AppLocalizations.of(context)!.tipMagbasaBody),
         const SizedBox(height: 8),
-        _tipCard('🔢', AppLocalizations.of(context)!.tipMatematikaTitle,
+        _tipCard(LucideIcons.calculator, AppLocalizations.of(context)!.tipMatematikaTitle,
             AppLocalizations.of(context)!.tipMatematikaBody),
         const SizedBox(height: 8),
-        _tipCard('⏰', AppLocalizations.of(context)!.tipStudyTimeTitle,
+        _tipCard(LucideIcons.alarm_clock, AppLocalizations.of(context)!.tipStudyTimeTitle,
             AppLocalizations.of(context)!.tipStudyTimeBody),
       ]),
     );
@@ -519,7 +595,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              const Text('🎨', style: TextStyle(fontSize: 28)),
+              const Icon(LucideIcons.palette, color: Colors.white, size: 28),
               const SizedBox(width: 10),
               Text(AppLocalizations.of(context)!.kulaySayaProgress,
                   style: TextStyle(
@@ -579,7 +655,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           final done = _kulayDone[catName]!.length;
           final total = _kulayTotal[catName] ?? 0;
           final color = _kulayColors[catName] ?? Colors.grey;
-          final icon = _kulayIcons[catName] ?? '🖼️';
+          final icon = _kulayIcons[catName] ?? LucideIcons.image;
           final pages = _kulayPages[catName] ?? [];
           final progress = total > 0 ? done / total : 0.0;
 
@@ -628,8 +704,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                           color: color.withOpacity(0.15),
                           shape: BoxShape.circle),
                       child: Center(
-                          child: Text(icon,
-                              style: const TextStyle(fontSize: 22)))),
+                          child: Icon(icon, color: color, size: 22))),
                   const SizedBox(width: 12),
                   Expanded(
                       child: Column(
@@ -764,7 +839,8 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                     color: Colors.teal.withOpacity(0.1),
                     shape: BoxShape.circle),
                 child: const Center(
-                    child: Text('🖼️', style: TextStyle(fontSize: 26)))),
+                    child: Icon(LucideIcons.image,
+                        color: Colors.teal, size: 26))),
             const SizedBox(width: 14),
             Expanded(
                 child: Column(
@@ -813,7 +889,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              const Text('✏️', style: TextStyle(fontSize: 28)),
+              const Icon(LucideIcons.pencil_line, color: Colors.white, size: 28),
               const SizedBox(width: 10),
               Text(AppLocalizations.of(context)!.traceItTitle,
                   style: TextStyle(
@@ -857,7 +933,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         // ── Uppercase ────────────────────────────────────────────────────────
         _tracingSection(
           title: AppLocalizations.of(context)!.uppercaseLettersTitle,
-          icon: '🔠',
+          icon: LucideIcons.case_upper,
           color: Colors.indigo,
           total: _allUpper.length,
           done: _traceDoneUpper.length,
@@ -872,7 +948,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         // ── Lowercase ───────────────────────────────────────────────────────
         _tracingSection(
           title: AppLocalizations.of(context)!.lowercaseLettersTitle,
-          icon: '🔡',
+          icon: LucideIcons.case_lower,
           color: Colors.purple,
           total: _allLower.length,
           done: _traceDoneLower.length,
@@ -887,7 +963,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         // ── Numbers ──────────────────────────────────────────────────────────
         _tracingSection(
           title: AppLocalizations.of(context)!.numbersTitle,
-          icon: '🔢',
+          icon: LucideIcons.hash,
           color: Colors.teal,
           total: _allNums.length,
           done: _traceDoneNums.length,
@@ -903,13 +979,13 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         // Tips for parents
         _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, LucideIcons.lightbulb),
         const SizedBox(height: 10),
-        _tipCard('✏️', AppLocalizations.of(context)!.tipPencilGripTitle,
+        _tipCard(LucideIcons.pencil_line, AppLocalizations.of(context)!.tipPencilGripTitle,
             AppLocalizations.of(context)!.tipPencilGripBody),
         const SizedBox(height: 8),
-        _tipCard('🔄', AppLocalizations.of(context)!.tipRepeatTitle,
+        _tipCard(LucideIcons.repeat, AppLocalizations.of(context)!.tipRepeatTitle,
             AppLocalizations.of(context)!.tipRepeatBody),
         const SizedBox(height: 8),
-        _tipCard('🌟', AppLocalizations.of(context)!.tipPraiseTitle,
+        _tipCard(LucideIcons.star, AppLocalizations.of(context)!.tipPraiseTitle,
             AppLocalizations.of(context)!.tipPraiseBody),
       ]),
     );
@@ -932,7 +1008,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              const Text('📖', style: TextStyle(fontSize: 28)),
+              const Icon(LucideIcons.book_open, color: Colors.white, size: 28),
               const SizedBox(width: 10),
               Text(AppLocalizations.of(context)!.magbasaProgress,
                   style: TextStyle(
@@ -980,7 +1056,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           final done = _magbasaDone[cat]!.length;
           final total = _magbasaTotals[cat] ?? 0;
           final color = _magbasaColors[cat] ?? Colors.grey;
-          final icon = _magbasaIcons[cat] ?? '📖';
+          final icon = _magbasaIcons[cat] ?? LucideIcons.book_open;
           final label = _magbasaLabels[cat] ?? cat;
           final progress = total > 0 ? done / total : 0.0;
 
@@ -1007,8 +1083,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                     decoration: BoxDecoration(
                         color: color.withOpacity(0.15), shape: BoxShape.circle),
                     child: Center(
-                        child:
-                            Text(icon, style: const TextStyle(fontSize: 22)))),
+                        child: Icon(icon, color: color, size: 22))),
                 const SizedBox(width: 12),
                 Expanded(
                     child: Column(
@@ -1080,13 +1155,13 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         const SizedBox(height: 4),
         _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, LucideIcons.lightbulb),
         const SizedBox(height: 10),
-        _tipCard('📖', AppLocalizations.of(context)!.tipTulaTitle,
+        _tipCard(LucideIcons.book_open, AppLocalizations.of(context)!.tipTulaTitle,
             AppLocalizations.of(context)!.tipTulaBody),
         const SizedBox(height: 8),
-        _tipCard('📚', AppLocalizations.of(context)!.tipKwentoTitle,
+        _tipCard(LucideIcons.book_marked, AppLocalizations.of(context)!.tipKwentoTitle,
             AppLocalizations.of(context)!.tipKwentoBody),
         const SizedBox(height: 8),
-        _tipCard('🎵', AppLocalizations.of(context)!.tipKantaTitle,
+        _tipCard(LucideIcons.music, AppLocalizations.of(context)!.tipKantaTitle,
             AppLocalizations.of(context)!.tipKantaBody),
       ]),
     );
@@ -1109,7 +1184,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              const Text('🔢', style: TextStyle(fontSize: 28)),
+              const Icon(LucideIcons.calculator, color: Colors.white, size: 28),
               const SizedBox(width: 10),
               Text(AppLocalizations.of(context)!.matematikaProgress,
                   style: TextStyle(
@@ -1149,7 +1224,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
               Column(children: [
                 _statBubble('$_matTotalScore', AppLocalizations.of(context)!.pointsStatLabel),
                 const SizedBox(height: 8),
-                _statBubble('$_matTotalStars ⭐', AppLocalizations.of(context)!.starsStatLabel),
+                _statBubble('$_matTotalStars', AppLocalizations.of(context)!.starsStatLabel),
               ]),
             ]),
           ]),
@@ -1265,13 +1340,13 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         const SizedBox(height: 4),
         _sectionHeader(AppLocalizations.of(context)!.parentTipsHeader, LucideIcons.lightbulb),
         const SizedBox(height: 10),
-        _tipCard('🔢', AppLocalizations.of(context)!.tipCountingTitle,
+        _tipCard(LucideIcons.calculator, AppLocalizations.of(context)!.tipCountingTitle,
             AppLocalizations.of(context)!.tipCountingBody),
         const SizedBox(height: 8),
-        _tipCard('⭐', AppLocalizations.of(context)!.tipPraiseMatTitle,
+        _tipCard(LucideIcons.star, AppLocalizations.of(context)!.tipPraiseMatTitle,
             AppLocalizations.of(context)!.tipPraiseMatBody),
         const SizedBox(height: 8),
-        _tipCard('🎮', AppLocalizations.of(context)!.tipGameFunTitle,
+        _tipCard(LucideIcons.gamepad_2, AppLocalizations.of(context)!.tipGameFunTitle,
             AppLocalizations.of(context)!.tipGameFunBody),
       ]),
     );
@@ -1283,7 +1358,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
   Widget _tracingSection({
     required String title,
-    required String icon,
+    required IconData icon,
     required Color color,
     required int total,
     required int done,
@@ -1326,7 +1401,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                   decoration: BoxDecoration(
                       color: color.withOpacity(0.15), shape: BoxShape.circle),
                   child: Center(
-                      child: Text(icon, style: const TextStyle(fontSize: 22)))),
+                      child: Icon(icon, color: color, size: 22))),
               const SizedBox(width: 12),
               Expanded(
                   child: Column(
@@ -1429,7 +1504,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
   }
 
   Widget _summaryCard({
-    required String icon,
+    required IconData icon,
     required String label,
     required String value,
     required String subtitle,
@@ -1448,13 +1523,21 @@ class _ForParentsScreenState extends State<ForParentsScreen>
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          Text(icon, style: const TextStyle(fontSize: 20)),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
           const Spacer(),
           Text(value,
               style: TextStyle(
                   fontSize: 20, fontWeight: FontWeight.bold, color: color)),
         ]),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(label,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
         Text(subtitle,
@@ -1528,7 +1611,8 @@ class _ForParentsScreenState extends State<ForParentsScreen>
     ]);
   }
 
-  Widget _recentActivityCard(String activity, String detail, Color color) {
+  Widget _recentActivityCard(
+      IconData icon, String activity, String detail, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1542,6 +1626,16 @@ class _ForParentsScreenState extends State<ForParentsScreen>
             height: 40,
             decoration: BoxDecoration(
                 color: color, borderRadius: BorderRadius.circular(4))),
+        const SizedBox(width: 12),
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 20, color: color),
+        ),
         const SizedBox(width: 12),
         Expanded(
             child:
@@ -1557,7 +1651,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
     );
   }
 
-  Widget _tipCard(String emoji, String title, String body) {
+  Widget _tipCard(IconData icon, String title, String body) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -1569,7 +1663,15 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         ],
       ),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(emoji, style: const TextStyle(fontSize: 24)),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.amber.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 20, color: Colors.amber.shade800),
+        ),
         const SizedBox(width: 12),
         Expanded(
             child:

@@ -30,14 +30,14 @@ dependencies:
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.4
   flutter_secure_storage: ^10.0.0
+  local_auth: ^2.3.0
   confetti: ^0.8.0
   cached_network_image: ^3.4.1
   image: ^4.5.2
   share_plus: ^13.1.0
   gal: ^2.3.2
   flutter_lucide: ^1.11.0
-  
-
+  crypto: ^3.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

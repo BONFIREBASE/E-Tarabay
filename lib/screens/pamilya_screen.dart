@@ -1582,6 +1582,26 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     );
   }
 
+  /// Consistent question header used across every Pamilya game.
+  Widget _questionBox(String question) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _currentMainColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        question,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: _currentMainColor,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
   Widget _choiceTile({
     required String label,
     required bool isSelected,
@@ -1871,18 +1891,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         const SizedBox(height: 12),
         _gameCard(
             child: Column(children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-                color: _currentMainColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16)),
-            child: Text(game['question'],
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: _currentMainColor),
-                textAlign: TextAlign.center),
-          ),
+          _questionBox(game['question']),
           const SizedBox(height: 20),
           ...List.generate(choices.length, (i) {
             final sel = _selectedEmotionAnswer == i;
@@ -1924,12 +1933,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         const SizedBox(height: 12),
         _gameCard(
             child: Column(children: [
-          Text(game['question'],
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: _currentMainColor),
-              textAlign: TextAlign.center),
+          _questionBox(game['question']),
           const SizedBox(height: 20),
           ...List.generate(choices.length, (i) {
             final sel = _selectedRoutineAnswer == i;
@@ -1964,12 +1968,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         const SizedBox(height: 12),
         _gameCard(
             child: Column(children: [
-          Text(game['question'],
-              style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: _currentMainColor),
-              textAlign: TextAlign.center),
+          _questionBox(game['question']),
           const SizedBox(height: 6),
           Text(game['description'],
               style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
@@ -2048,18 +2047,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         const SizedBox(height: 12),
         _gameCard(
             child: Column(children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-                color: _currentMainColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14)),
-            child: Text(game['question'],
-                style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: _currentMainColor),
-                textAlign: TextAlign.center),
-          ),
+          _questionBox(game['question']),
           const SizedBox(height: 20),
           ...List.generate(choices.length, (i) {
             final sel = _selectedFamilyAnswer == i;
@@ -2123,18 +2111,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         const SizedBox(height: 12),
         _gameCard(
             child: Column(children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-                color: _currentMainColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14)),
-            child: Text(game['question'],
-                style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: _currentMainColor),
-                textAlign: TextAlign.center),
-          ),
+          _questionBox(game['question']),
           const SizedBox(height: 20),
           ...List.generate(choices.length, (i) {
             final sel = _selectedRoleAnswer == i;
@@ -2166,12 +2143,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         const SizedBox(height: 12),
         _gameCard(
             child: Column(children: [
-          Text(game['question'],
-              style: TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: _currentMainColor),
-              textAlign: TextAlign.center),
+          _questionBox(game['question']),
           const SizedBox(height: 20),
           ...List.generate(choices.length, (i) {
             final sel = _selectedActivityAnswer == i;

@@ -10,6 +10,7 @@ import 'package:confetti/confetti.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:gal/gal.dart';
 import '../l10n/app_localizations.dart';
+import '../utils/page_transitions.dart';
 import '../models/certificate_model.dart';
 import '../providers/user_provider.dart';
 import '../providers/language_provider.dart';
@@ -548,12 +549,10 @@ class _CertificatesScreenState extends State<CertificatesScreen>
     CertificateInfo cert,
     String langCode,
   ) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CertificateDetailScreen(
-          certificate: cert,
-          langCode: langCode,
-        ),
+    await context.pushPremium(
+      CertificateDetailScreen(
+        certificate: cert,
+        langCode: langCode,
       ),
     );
     

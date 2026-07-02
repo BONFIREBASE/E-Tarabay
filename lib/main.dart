@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'providers/language_provider.dart';
 import 'providers/user_provider.dart';
@@ -230,6 +232,27 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // ── Smart network caching (offline-first) ──
+    // Cache all Firestore data locally so the app works fully offline:
+    // reads are served from cache when there's no network, writes are
+    // queued locally and automatically synced once the network returns.
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+
+    // Give every app instance a stable Firebase identity (anonymous).
+    // This is additive — students are still identified by their Firestore
+    // record — but it lets us secure Firestore behind authentication later.
+    // Fails gracefully (e.g. offline first-run, or provider disabled).
+    try {
+      if (FirebaseAuth.instance.currentUser == null) {
+        await FirebaseAuth.instance.signInAnonymously();
+      }
+    } catch (e) {
+      debugPrint('Anonymous auth skipped: $e');
+    }
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }

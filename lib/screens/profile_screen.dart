@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
+import '../utils/page_transitions.dart';
 import '../login_screen.dart';
 import 'package:confetti/confetti.dart';
 import '../widgets/custom_header_app_bar.dart';
@@ -26,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
     if (!context.mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      PremiumPageRoute(child: const LoginScreen()),
       (route) => false,
     );
   }

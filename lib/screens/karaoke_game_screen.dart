@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/magbasa_content.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
+import '../utils/page_transitions.dart';
 import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
@@ -113,14 +114,11 @@ class KaraokeGameScreenState extends State<KaraokeGameScreen> {
         return GestureDetector(
           onTap: () async {
             if (songDetail == null) return;
-            final result = await Navigator.push<bool>(
-              context,
-              MaterialPageRoute(
-                builder: (_) => KaraokePlayerScreen(
-                  songId: id,
-                  songTitle: title,
-                  songData: songDetail,
-                ),
+            final result = await context.pushPremium<bool>(
+              KaraokePlayerScreen(
+                songId: id,
+                songTitle: title,
+                songData: songDetail,
               ),
             );
             if (result == true && mounted) {

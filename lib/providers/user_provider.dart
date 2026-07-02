@@ -53,6 +53,16 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Store the LRN the student typed at login locally (device only) so the
+  /// certificate can display it. This is never synced to the cloud as
+  /// plaintext (the cloud only keeps the hashed `lrnHash`).
+  Future<void> setSessionLrn(String lrn) async {
+    if (_userProfile == null || lrn.trim().isEmpty) return;
+    _userProfile!.lrn = lrn.trim();
+    await _profileBox.put('currentUser', _userProfile!.toJson());
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     _currentStudentId = null;
     _currentRole = null;
@@ -1329,6 +1339,10 @@ class UserProvider extends ChangeNotifier {
     try {
       final progressData = getAllProgress();
       final profileData = _userProfile!.toJson();
+      // Never push the plaintext LRN to the cloud — only the hashed
+      // `lrnHash` (top-level) is stored there. The LRN is kept locally
+      // (from what the student typed at login) for certificate display.
+      profileData.remove('lrn');
 
       // Store raw keys from SharedPreferences too for full backup
       final prefs = await SharedPreferences.getInstance();

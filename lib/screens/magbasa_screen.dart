@@ -10,6 +10,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:confetti/confetti.dart';
 import '../widgets/custom_back_button.dart';
 import '../widgets/success_modal.dart';
+import '../utils/page_transitions.dart';
 import '../data/magbasa_content.dart';
 import '../providers/language_provider.dart';
 import '../main.dart';
@@ -689,15 +690,17 @@ class _MagbasaScreenState extends State<MagbasaScreen>
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-            color: isCompleted ? color.withOpacity(0.5) : Colors.grey.shade200,
-            width: 1.5),
+            color: isCompleted
+                ? color.withOpacity(0.6)
+                : color.withOpacity(0.25),
+            width: 2),
         boxShadow: [
           BoxShadow(
-              color: Colors.grey.withOpacity(0.05),
-              blurRadius: 5,
-              offset: const Offset(0, 2))
+              color: color.withOpacity(0.10),
+              blurRadius: 10,
+              offset: const Offset(0, 4))
         ],
       ),
       child: Material(
@@ -742,10 +745,11 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                     children: [
                       Text(
                         title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight:
-                              isCompleted ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight: FontWeight.w700,
                           color: isCompleted ? color : AppColors.textDark,
                         ),
                       ),
@@ -802,10 +806,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
       screen = SongScreen(songTitle: data['title'], songData: data);
     }
 
-    final completed = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(builder: (_) => screen),
-    );
+    final completed = await context.pushPremium<bool>(screen);
 
     if (completed == true) {
       await _updateProgress(category, index, true);

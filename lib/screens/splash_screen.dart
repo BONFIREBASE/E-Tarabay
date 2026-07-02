@@ -8,6 +8,7 @@ import '../providers/user_provider.dart';
 import 'home_screen.dart';
 import 'teacher_dashboard_screen.dart';
 import 'onboarding_screen.dart';
+import '../utils/page_transitions.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -66,21 +67,14 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     if (!hasSeenOnboarding) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
+      Navigator.of(context).pushReplacementPremium(const OnboardingScreen());
     } else if (role == 'student' && studentId != null) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+      Navigator.of(context).pushReplacementPremium(const HomeScreen());
     } else if (role == 'teacher') {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const TeacherDashboardScreen()),
-      );
+      Navigator.of(context)
+          .pushReplacementPremium(const TeacherDashboardScreen());
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      Navigator.of(context).pushReplacementPremium(const LoginScreen());
     }
   }
 

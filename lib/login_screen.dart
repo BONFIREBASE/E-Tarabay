@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/user_provider.dart';
 import 'services/auth_service.dart';
+import 'services/biometric_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/teacher_login_screen.dart';
 import 'utils/constants.dart';
+import 'utils/page_transitions.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -21,6 +23,40 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _biometricEnabled = false;
+  String _biometricName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _initBiometric();
+  }
+
+  Future<void> _initBiometric() async {
+    final enabled =
+        await BiometricService.isEnabled(BiometricService.studentKey);
+    final available = await BiometricService.isAvailable();
+    if (!mounted) return;
+    final creds = enabled
+        ? await BiometricService.getCredentials(BiometricService.studentKey)
+        : null;
+    if (!mounted) return;
+    setState(() {
+      _biometricEnabled = enabled && available;
+      _biometricName = creds?['name'] ?? '';
+    });
+  }
+
+  Future<void> _biometricLogin() async {
+    final creds =
+        await BiometricService.getCredentials(BiometricService.studentKey);
+    if (creds == null) return;
+    final ok = await BiometricService.authenticate('Log in to continue');
+    if (!ok || !mounted) return;
+    _usernameController.text = creds['username'] ?? '';
+    _passwordController.text = creds['password'] ?? '';
+    _loginStudent();
+  }
 
   @override
   void dispose() {
@@ -85,9 +121,12 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       if (!mounted) return;
+      // Keep the typed LRN locally for certificate display (cloud stays hashed).
+      await userProvider.setSessionLrn(password);
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        PremiumPageRoute(child: const HomeScreen()),
       );
     } else {
       setState(() => _isLoading = false);
@@ -331,6 +370,30 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                         ),
                                       ),
+
+                                      // Biometric quick-login
+                                      if (_biometricEnabled) ...[
+                                        const SizedBox(height: 14),
+                                        Center(
+                                          child: TextButton.icon(
+                                            onPressed: _biometricLogin,
+                                            icon: const Icon(
+                                              LucideIcons.fingerprint_pattern,
+                                              color: AppColors.primary,
+                                              size: 22,
+                                            ),
+                                            label: Text(
+                                              _biometricName.isNotEmpty
+                                                  ? 'Sign in as $_biometricName'
+                                                  : 'Use fingerprint / face',
+                                              style: const TextStyle(
+                                                color: AppColors.primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -344,12 +407,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               offset: const Offset(0, -24),
                               child: TextButton.icon(
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const TeacherLoginScreen(),
-                                    ),
+                                  context.pushPremium(
+                                    const TeacherLoginScreen(),
                                   );
                                 },
                                 icon: const Icon(

@@ -499,10 +499,7 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       color: AppColors.numbers,
       progress: _matTotal > 0 ? _matDone / _matTotal : 0.0,
       onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MatematikaScreen()),
-        );
+        await context.pushPremium(const MatematikaScreen());
         // Refresh progress when returning from the game
         setState(() => _isLoading = true);
         _loadProgress();
@@ -520,10 +517,7 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       color: AppColors.family,
       progress: _pamilyaTotal > 0 ? _pamilyaDone / _pamilyaTotal : 0.0,
       onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const PamilyaScreen()),
-        );
+        await context.pushPremium(const PamilyaScreen());
         setState(() => _isLoading = true);
         _loadProgress();
       },
@@ -540,10 +534,7 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       color: AppColors.colors,
       progress: _kulayTotal > 0 ? _kulayDone / _kulayTotal : 0.0,
       onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const KulayScreen()),
-        );
+        await context.pushPremium(const KulayScreen());
         setState(() => _isLoading = true);
         _loadProgress();
       },
@@ -560,10 +551,7 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       color: AppColors.success,
       progress: _traceItTotal > 0 ? _traceItDone / _traceItTotal : 0.0,
       onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TraceItScreen()),
-        );
+        await context.pushPremium(const TraceItScreen());
         setState(() => _isLoading = true);
         _loadProgress();
       },
@@ -580,10 +568,7 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       color: AppColors.alphabet,
       progress: _magbasaTotal > 0 ? _magbasaDone / _magbasaTotal : 0.0,
       onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MagbasaScreen()),
-        );
+        await context.pushPremium(const MagbasaScreen());
         setState(() => _isLoading = true);
         _loadProgress();
       },
@@ -600,10 +585,7 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       color: AppColors.shapes,
       progress: _tandaanTotal > 0 ? _tandaanDone / _tandaanTotal : 0.0,
       onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TandaanScreen()),
-        );
+        await context.pushPremium(const TandaanScreen());
         setState(() => _isLoading = true);
         _loadProgress();
       },

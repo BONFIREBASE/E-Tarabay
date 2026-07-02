@@ -7,6 +7,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import '../providers/language_provider.dart';
 import '../utils/constants.dart';
 import '../login_screen.dart';
+import '../utils/page_transitions.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -24,9 +25,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_seen_onboarding', true);
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+    Navigator.of(context).pushReplacementPremium(const LoginScreen());
   }
 
   @override

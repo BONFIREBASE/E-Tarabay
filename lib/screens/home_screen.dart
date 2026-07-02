@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../providers/user_provider.dart';
 import '../utils/constants.dart';
@@ -98,7 +99,12 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  void _checkBirthday() {
+  Future<void> _checkBirthday() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Notifications toggle controls the birthday celebration alert.
+    if (!(prefs.getBool('notifications_enabled') ?? true)) return;
+    if (!mounted) return;
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final profile = userProvider.userProfile;
     if (profile == null || profile.birthday == null) return;
@@ -218,12 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Profile Avatar
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ProfileScreen(),
-                              ),
-                            );
+                            context.pushPremium(const ProfileScreen());
                           },
                           child: Container(
                             width: 50,
@@ -295,13 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Certificates Button
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const CertificatesScreen(),
-                              ),
-                            );
+                            context.pushPremium(const CertificatesScreen());
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),
@@ -331,26 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 8),
 
-                        // For Parents Button
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ParentsLockScreen(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(
-                            LucideIcons.users,
-                            color: AppColors.primary,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor:
-                                AppColors.primary.withOpacity(0.08),
-                            padding: const EdgeInsets.all(10),
-                          ),
-                        ),
+                        // For Parents moved to the center of the bottom nav bar.
                       ],
                     ),
 
@@ -416,12 +392,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .sundanMoKayaMo,
                                       imagePath: 'assets/images/card1.png',
                                       color: AppColors.numbers,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const MatematikaScreen(),
-                                        ),
+                                      onTap: () => context.pushPremium(
+                                        const MatematikaScreen(),
                                       ),
                                     ),
                                   ),
@@ -437,12 +409,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .atAkingPamilya,
                                       imagePath: 'assets/images/card2.png',
                                       color: AppColors.family,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const PamilyaScreen(),
-                                        ),
+                                      onTap: () => context.pushPremium(
+                                        const PamilyaScreen(),
                                       ),
                                     ),
                                   ),
@@ -465,12 +433,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .magkulayTayo,
                                       imagePath: 'assets/images/card3.png',
                                       color: AppColors.colors,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const KulayScreen(),
-                                        ),
+                                      onTap: () => context.pushPremium(
+                                        const KulayScreen(),
                                       ),
                                     ),
                                   ),
@@ -486,12 +450,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .traceItSubtitle,
                                       imagePath: 'assets/images/card4.png',
                                       color: AppColors.success,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const TraceItScreen(),
-                                        ),
+                                      onTap: () => context.pushPremium(
+                                        const TraceItScreen(),
                                       ),
                                     ),
                                   ),
@@ -514,12 +474,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .alpabetoAtMgaSalita,
                                       imagePath: 'assets/images/card5.png',
                                       color: AppColors.alphabet,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const MagbasaScreen(),
-                                        ),
+                                      onTap: () => context.pushPremium(
+                                        const MagbasaScreen(),
                                       ),
                                     ),
                                   ),
@@ -534,12 +490,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       subtitle: AppLocalizations.of(context)!
                                           .tandaanTitle,
                                       color: AppColors.shapes,
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const TandaanScreen(),
-                                        ),
+                                      onTap: () => context.pushPremium(
+                                        const TandaanScreen(),
                                       ),
                                       child: _buildTandaanThumbnail(),
                                     ),
@@ -564,6 +516,11 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: FloatingBottomNavBar(
         selectedIndex: _selectedIndex,
         onTap: _onNavItemTapped,
+        centerIcon: LucideIcons.users,
+        centerLabel: AppLocalizations.of(context)!.forParents,
+        onCenterTap: () {
+          context.pushPremium(const ParentsLockScreen());
+        },
         items: [
           NavItemData(
             icon: LucideIcons.house,

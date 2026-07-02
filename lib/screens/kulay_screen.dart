@@ -1225,6 +1225,21 @@ class _KulayScreenState extends State<KulayScreen>
   //  GALLERY
   // ─────────────────────────────────────────────────────────────────────────
 
+  IconData _categoryIcon(String name) {
+    switch (name) {
+      case 'Animals':
+        return LucideIcons.paw_print;
+      case 'Flowers':
+        return LucideIcons.flower;
+      case 'Fruits':
+        return LucideIcons.apple;
+      case 'Toys':
+        return LucideIcons.blocks;
+      default:
+        return LucideIcons.palette;
+    }
+  }
+
   Widget _gallery() {
     final cat = _categories[_selectedCategory];
     final pages = cat.pages
@@ -1282,8 +1297,10 @@ class _KulayScreenState extends State<KulayScreen>
                       : [],
                 ),
                 child: Row(children: [
-                  Text(c.icon, style: const TextStyle(fontSize: 14)),
-                  const SizedBox(width: 5),
+                  Icon(_categoryIcon(c.name),
+                      size: 15,
+                      color: sel ? Colors.white : c.color),
+                  const SizedBox(width: 6),
                   Text(c.name,
                       style: TextStyle(
                           color: sel ? Colors.white : Colors.grey.shade700,
@@ -1349,9 +1366,14 @@ class _KulayScreenState extends State<KulayScreen>
         decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: isCompleted
+                    ? Colors.green.withOpacity(0.5)
+                    : cat.color.withOpacity(0.25),
+                width: 2),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: cat.color.withOpacity(0.12),
                   blurRadius: 12,
                   offset: const Offset(0, 4))
             ]),

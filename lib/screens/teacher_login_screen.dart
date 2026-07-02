@@ -1,18 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
+import '../services/auth_service.dart';
+import '../services/biometric_service.dart';
 import '../utils/constants.dart';
+import '../utils/page_transitions.dart';
 import '../widgets/custom_back_button.dart';
 import 'teacher_dashboard_screen.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
-/// Hardcoded teacher credentials — persists across installs.
-/// Username: Daycare Teacher
-/// Password: Tr@b4y2k
+/// Teacher credentials live in Firestore (`config/teacher`) — the password is
+/// stored only as a one-way SHA-256 hash, never in the app source. The username
+/// is not secret, so it's kept here just to pre-fill the field.
 class TeacherCredentials {
   static const String username = 'Daycare Teacher';
-  static const String password = 'Tr@b4y2k';
 }
 
 class TeacherLoginScreen extends StatefulWidget {
@@ -26,8 +29,27 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
   final TextEditingController _usernameController =
       TextEditingController(text: TeacherCredentials.username);
   final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _biometricEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initBiometric();
+  }
+
+  Future<void> _initBiometric() async {
+    final enabled = await BiometricService.isEnabled(BiometricService.teacherKey);
+    final available = await BiometricService.isAvailable();
+    if (!mounted) return;
+    setState(() => _biometricEnabled = enabled && available);
+    // Auto-offer biometric on open for a smoother return experience.
+    if (_biometricEnabled) {
+      _biometricLogin();
+    }
+  }
 
   @override
   void dispose() {
@@ -36,7 +58,43 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
     super.dispose();
   }
 
-  void _loginTeacher() {
+  void _enterDashboard() {
+    Provider.of<UserProvider>(context, listen: false).setCurrentRole('teacher');
+    Navigator.pushReplacement(
+      context,
+      PremiumPageRoute(child: const TeacherDashboardScreen()),
+    );
+  }
+
+  Future<void> _biometricLogin() async {
+    final ok = await BiometricService.authenticate(
+        'Log in to your teacher account');
+    if (!ok || !mounted) return;
+
+    final creds = await BiometricService.getCredentials(BiometricService.teacherKey);
+    if (creds == null) return;
+
+    setState(() => _isLoading = true);
+    // Re-verify the saved password against the current cloud hash in case it
+    // was changed on another device. If it no longer matches, drop the saved
+    // credential and make them sign in with the new password.
+    final valid = await _authService.verifyTeacherPassword(creds['password']!);
+    if (!mounted) return;
+    if (valid) {
+      _enterDashboard();
+    } else {
+      await BiometricService.clearCredentials(BiometricService.teacherKey);
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _biometricEnabled = false;
+      });
+      _showErrorDialog(
+          'Your password changed. Please sign in with your password once.');
+    }
+  }
+
+  void _loginTeacher() async {
     final username = _usernameController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -47,28 +105,47 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
 
     setState(() => _isLoading = true);
 
-    // Simulate brief delay for UX
-    Future.delayed(const Duration(milliseconds: 500), () {
+    try {
+      // Fetch the teacher credentials from Firestore. Uses serverAndCache so it
+      // works offline AFTER the first successful online load (smart caching).
+      final snap = await FirebaseFirestore.instance
+          .collection('config')
+          .doc('teacher')
+          .get(const GetOptions(source: Source.serverAndCache))
+          .timeout(const Duration(seconds: 5));
+
       if (!mounted) return;
+
+      final data = snap.data();
+      if (data == null) {
+        setState(() => _isLoading = false);
+        _showErrorDialog(
+            'Teacher account not set up yet. Please connect to the internet once to finish setup.');
+        return;
+      }
+
+      final storedUsername = (data['username'] ?? '').toString();
+      final storedHash = (data['passwordHash'] ?? '').toString();
+
+      final usernameOk = username.toLowerCase().trim() ==
+          storedUsername.toLowerCase().trim();
+      final passwordOk =
+          storedHash.isNotEmpty && storedHash == AuthService.hashLrn(password);
 
       setState(() => _isLoading = false);
 
-      if (username.toLowerCase().trim() ==
-              TeacherCredentials.username.toLowerCase().trim() &&
-          password.trim() == TeacherCredentials.password.trim()) {
-        // Save session
-        Provider.of<UserProvider>(context, listen: false)
-            .setCurrentRole('teacher');
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const TeacherDashboardScreen()),
-        );
+      if (usernameOk && passwordOk) {
+        _enterDashboard();
       } else {
         _showErrorDialog(
             AppLocalizations.of(context)!.invalidTeacherCredentials);
       }
-    });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      _showErrorDialog(
+          'Could not verify credentials. If this is your first login, please connect to the internet once.');
+    }
   }
 
   void _showErrorDialog(String message) {
@@ -160,7 +237,7 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                               child: Row(
                                 children: [
                                   CustomBackButton(
-                                    iconColor: Colors.white,
+                                    iconColor: AppColors.primary,
                                     onPressed: () => Navigator.pop(context),
                                   ),
                                   const Spacer(),
@@ -187,8 +264,8 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    Color(0xFF2D3436),
-                                    Color(0xFF636E72),
+                                    AppColors.primary,
+                                    AppColors.secondary,
                                   ],
                                 ),
                                 borderRadius: BorderRadius.vertical(
@@ -344,6 +421,28 @@ class _TeacherLoginScreenState extends State<TeacherLoginScreen> {
                                           ),
                                         ),
                                       ),
+
+                                      // Biometric quick-login
+                                      if (_biometricEnabled) ...[
+                                        const SizedBox(height: 16),
+                                        Center(
+                                          child: TextButton.icon(
+                                            onPressed: _biometricLogin,
+                                            icon: const Icon(
+                                              LucideIcons.fingerprint_pattern,
+                                              color: AppColors.primary,
+                                              size: 22,
+                                            ),
+                                            label: const Text(
+                                              'Use fingerprint / face',
+                                              style: TextStyle(
+                                                color: AppColors.primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),

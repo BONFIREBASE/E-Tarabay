@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'for_parents_screen.dart';
 import '../utils/constants.dart';
+import '../utils/page_transitions.dart';
 import '../providers/user_provider.dart';
+import '../services/auth_service.dart';
 import '../widgets/custom_back_button.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
@@ -55,13 +57,18 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
           .get();
 
       if (doc.exists) {
-        final storedLrn = (doc.data()?['lrn'] ?? '').toString().trim();
-        if (storedLrn == lrn) {
+        final storedHash = (doc.data()?['lrnHash'] ?? '').toString();
+        final legacyLrn = (doc.data()?['lrn'] ?? '').toString().trim();
+        final entered = lrn.trim();
+        final matches = storedHash.isNotEmpty
+            ? storedHash == AuthService.hashLrn(entered)
+            : (legacyLrn.isNotEmpty && legacyLrn == entered);
+        if (matches) {
           HapticFeedback.heavyImpact();
           if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const ForParentsScreen()),
+            PremiumPageRoute(child: const ForParentsScreen()),
           );
           return;
         }

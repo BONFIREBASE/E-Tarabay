@@ -281,6 +281,9 @@ class _TandaanScreenState extends State<TandaanScreen>
   bool get _allCategoriesCompleted =>
       _completedCategories.length == _categories.length;
 
+  bool get _currentCategoryCompleted =>
+      _completedCategories.contains(_selectedCategory);
+
   @override
   void initState() {
     super.initState();
@@ -307,8 +310,10 @@ class _TandaanScreenState extends State<TandaanScreen>
         Tween<double>(begin: 1.0, end: 1.18).animate(_timerPulseController);
 
     _loadCompletedCategories().then((_) {
-      _initRound();
-      _startTimer();
+      if (!_currentCategoryCompleted) {
+        _initRound();
+        _startTimer();
+      }
     });
   }
 
@@ -430,6 +435,8 @@ class _TandaanScreenState extends State<TandaanScreen>
       _currentRound = 0;
       _categoryStars = 0;
     });
+    // A completed category is locked — show its "done" state, no replay.
+    if (_currentCategoryCompleted) return;
     _initRound();
     _startTimer();
   }
@@ -655,8 +662,12 @@ class _TandaanScreenState extends State<TandaanScreen>
           Column(
             children: [
               _buildCategoryTabs(),
-              _buildProgressHeader(),
-              Expanded(child: _buildCardGrid()),
+              if (!_currentCategoryCompleted) _buildProgressHeader(),
+              Expanded(
+                child: _currentCategoryCompleted
+                    ? _buildCompletedView()
+                    : _buildCardGrid(),
+              ),
               _buildFeedbackBanner(),
             ],
           ),
@@ -684,43 +695,45 @@ class _TandaanScreenState extends State<TandaanScreen>
         ),
       ),
       actions: [
-        AnimatedBuilder(
-          animation: _timerPulseAnim,
-          builder: (_, __) {
-            final urgent = _secondsLeft <= 10;
-            return Transform.scale(
-              scale: urgent ? _timerPulseAnim.value : 1.0,
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: urgent
-                      ? Colors.red.withOpacity(0.15)
-                      : AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(LucideIcons.timer,
-                        color: urgent ? Colors.red : AppColors.primary,
-                        size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$_secondsLeft',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: urgent ? Colors.red : AppColors.primary,
+        if (!_currentCategoryCompleted)
+          AnimatedBuilder(
+            animation: _timerPulseAnim,
+            builder: (_, __) {
+              final urgent = _secondsLeft <= 10;
+              return Transform.scale(
+                scale: urgent ? _timerPulseAnim.value : 1.0,
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: urgent
+                        ? Colors.red.withOpacity(0.15)
+                        : AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(LucideIcons.timer,
+                          color: urgent ? Colors.red : AppColors.primary,
+                          size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$_secondsLeft',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: urgent ? Colors.red : AppColors.primary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          ),
         Container(
           margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -895,35 +908,163 @@ class _TandaanScreenState extends State<TandaanScreen>
   Widget _buildCardGrid() {
     if (_cards.isEmpty) return const Center(child: CircularProgressIndicator());
 
-    final crossAxisCount = 4;
-    final childAspectRatio = _cards.length <= 8 ? 1.0 : 1.05;
+    // Balance the grid into two even rows: 6→3×2, 8→4×2, 10→5×2.
+    final crossAxisCount = (_cards.length / 2).ceil();
     final color = _currentCategory['color'] as Color;
+    const spacing = 12.0;
+    const rows = 2;
 
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           // Instruction card
           _buildInstructionCard(color),
           const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              childAspectRatio: childAspectRatio,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Largest square that fits both the width (columns) and the
+                // height (2 rows), so cards stay square instead of stretched.
+                final cellFromWidth =
+                    (constraints.maxWidth - (crossAxisCount - 1) * spacing) /
+                        crossAxisCount;
+                final cellFromHeight =
+                    (constraints.maxHeight - (rows - 1) * spacing) / rows;
+                final cell = cellFromWidth < cellFromHeight
+                    ? cellFromWidth
+                    : cellFromHeight;
+                final gridWidth =
+                    cell * crossAxisCount + spacing * (crossAxisCount - 1);
+
+                return Center(
+                  child: SizedBox(
+                    width: gridWidth,
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: 1.0,
+                        crossAxisSpacing: spacing,
+                        mainAxisSpacing: spacing,
+                      ),
+                      itemCount: _cards.length,
+                      itemBuilder: (context, index) {
+                        final card = _cards[index];
+                        return _buildCard(index, card);
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
-            itemCount: _cards.length,
-            itemBuilder: (context, index) {
-              final card = _cards[index];
-              return _buildCard(index, card);
-            },
           ),
         ],
       ),
     );
+  }
+
+  /// Shown when the current category is already fully completed — like the
+  /// Matematika module, a finished tab stays done and cannot be replayed.
+  Widget _buildCompletedView() {
+    final color = _currentCategory['color'] as Color;
+    final next = _nextUncompletedCategory();
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(LucideIcons.circle_check,
+                  color: Colors.green, size: 64),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              _getCategoryTitleLocalized(_selectedCategory),
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textDark,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              AppLocalizations.of(context)!.doneAlready,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                3,
+                (_) => const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2),
+                  child: Icon(LucideIcons.star, color: Colors.amber, size: 26),
+                ),
+              ),
+            ),
+            const SizedBox(height: 28),
+            if (next != null)
+              SizedBox(
+                width: 220,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () => _switchCategory(next),
+                  icon: const Icon(LucideIcons.arrow_right, size: 20),
+                  label: Text(AppLocalizations.of(context)!.continueText),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: color,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              )
+            else
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(LucideIcons.party_popper,
+                        color: Colors.green, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      AppLocalizations.of(context)!.finishedAlready,
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  int? _nextUncompletedCategory() {
+    for (int i = 0; i < _categories.length; i++) {
+      if (!_completedCategories.contains(i)) return i;
+    }
+    return null;
   }
 
   Widget _buildInstructionCard(Color color) {
@@ -985,19 +1126,26 @@ class _TandaanScreenState extends State<TandaanScreen>
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOutBack,
         decoration: BoxDecoration(
+          gradient: showFront
+              ? null
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [color, color.withOpacity(0.78)],
+                ),
           color: showFront
               ? (card.isMatched ? Colors.green.withOpacity(0.12) : Colors.white)
-              : color,
-          borderRadius: BorderRadius.circular(20),
+              : null,
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: card.isMatched ? Colors.green : color.withOpacity(0.5),
-            width: 2.5,
+            color: card.isMatched ? Colors.green : color.withOpacity(0.45),
+            width: card.isMatched ? 3 : 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.35),
+              color: (card.isMatched ? Colors.green : color).withOpacity(0.30),
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -1013,38 +1161,72 @@ class _TandaanScreenState extends State<TandaanScreen>
             );
           },
           child: showFront
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              ? Stack(
                   key: ValueKey('front_$index'),
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      card.emoji,
-                      style: TextStyle(
-                        fontSize: isEmoji ? 36 : 26,
-                        fontWeight: FontWeight.bold,
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                card.emoji,
+                                style: TextStyle(
+                                  fontSize: isEmoji ? 34 : 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                card.label,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textDark.withOpacity(0.75),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 1),
-                    Text(
-                      card.label,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textDark.withOpacity(0.7),
+                    if (card.isMatched)
+                      const Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Icon(LucideIcons.circle_check,
+                            color: Colors.green, size: 16),
                       ),
-                    ),
                   ],
                 )
               : Container(
                   key: ValueKey('back_$index'),
                   alignment: Alignment.center,
-                  child: Text(
-                    '?',
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.22),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.6),
+                        width: 2,
+                      ),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '?',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
