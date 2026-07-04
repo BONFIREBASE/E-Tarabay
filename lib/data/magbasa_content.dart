@@ -696,9 +696,9 @@ class MagbasaContent {
         'title': 'Adda Asok',
         'content': [
           'Adda asok',
-          'Bond Puraw a burbor',
-          'Gog-gog-gog-gog',
+          'Puraw a burbor',
           'No agtaul',
+          'Gog-gog-gog-gog',
           'Titit, asok, gog-gog-gog',
           'Titit, asok, gog-gog-gog-gog!',
         ],

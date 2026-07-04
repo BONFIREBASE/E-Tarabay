@@ -673,7 +673,7 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${loc.version} 1.0.4',
+                        '${loc.version} 1.0.4++',
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textLight,

@@ -806,6 +806,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         controller: lrnController,
                         label: AppLocalizations.of(context)!.lRNPassword,
                         icon: LucideIcons.key_round,
+                        hintText: lrnController.text.isEmpty
+                            ? 'Enter LRN to set/show the password'
+                            : null,
                         onChanged: (_) => setSheetState(() {}),
                       ),
                       const SizedBox(height: 14),
@@ -822,7 +825,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                       _buildCredentialRow(
                         label: AppLocalizations.of(context)!.passwordLabel,
-                        value: lrnController.text,
+                        value: lrnController.text.isEmpty
+                            ? 'Not saved yet — type an LRN above to set it'
+                            : lrnController.text,
                         icon: LucideIcons.lock,
                         color: AppColors.textDark,
                       ),

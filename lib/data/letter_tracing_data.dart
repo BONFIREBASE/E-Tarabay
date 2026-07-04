@@ -1193,3 +1193,136 @@ const List<LetterData> numberLetters = [
         Offset(130, 62)
       ]),
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  UPPERCASE STROKE SKELETONS (for the guided drag-to-fill mechanic)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+//  Each uppercase letter is described as an ORDERED list of strokes, where each
+//  stroke is an ordered polyline of design-space points (same ~300x260 space,
+//  glyph area ~x:110-190, y:60-180 used by the legacy tracing data). The child
+//  drags along each stroke in order to fill it in. Single-motion letters have
+//  one stroke; letters written with pen-lifts have several, in natural writing
+//  order. Lowercase letters and numbers intentionally have NO skeletons here and
+//  keep using the legacy freehand tracing mechanic.
+
+const Map<String, List<List<Offset>>> uppercaseStrokes = {
+  'A': [
+    [Offset(150, 60), Offset(130, 120), Offset(110, 180)],
+    [Offset(150, 60), Offset(170, 120), Offset(190, 180)],
+    [Offset(126, 130), Offset(174, 130)],
+  ],
+  'B': [
+    [Offset(120, 60), Offset(120, 180)],
+    [Offset(120, 60), Offset(150, 64), Offset(168, 80), Offset(152, 106), Offset(120, 110)],
+    [Offset(120, 110), Offset(154, 116), Offset(174, 145), Offset(150, 176), Offset(120, 180)],
+  ],
+  'C': [
+    [Offset(170, 78), Offset(150, 62), Offset(128, 64), Offset(114, 88), Offset(112, 130), Offset(128, 158), Offset(150, 164), Offset(170, 150)],
+  ],
+  'D': [
+    [Offset(120, 60), Offset(120, 180)],
+    [Offset(120, 60), Offset(150, 66), Offset(168, 95), Offset(170, 120), Offset(160, 158), Offset(135, 176), Offset(120, 180)],
+  ],
+  'E': [
+    [Offset(120, 60), Offset(120, 180)],
+    [Offset(120, 60), Offset(162, 60)],
+    [Offset(120, 120), Offset(150, 120)],
+    [Offset(120, 180), Offset(162, 180)],
+  ],
+  'F': [
+    [Offset(120, 60), Offset(120, 180)],
+    [Offset(120, 60), Offset(162, 60)],
+    [Offset(120, 120), Offset(150, 120)],
+  ],
+  'G': [
+    [Offset(170, 78), Offset(150, 62), Offset(128, 64), Offset(114, 88), Offset(112, 130), Offset(128, 158), Offset(155, 164), Offset(176, 148), Offset(176, 120)],
+    [Offset(176, 120), Offset(150, 120)],
+  ],
+  'H': [
+    [Offset(120, 60), Offset(120, 180)],
+    [Offset(170, 60), Offset(170, 180)],
+    [Offset(120, 120), Offset(170, 120)],
+  ],
+  'I': [
+    [Offset(120, 60), Offset(170, 60)],
+    [Offset(145, 60), Offset(145, 180)],
+    [Offset(120, 180), Offset(170, 180)],
+  ],
+  'J': [
+    [Offset(160, 60), Offset(160, 150), Offset(148, 172), Offset(128, 168), Offset(120, 150)],
+  ],
+  'K': [
+    [Offset(120, 60), Offset(120, 180)],
+    [Offset(160, 60), Offset(120, 120)],
+    [Offset(120, 120), Offset(160, 180)],
+  ],
+  'L': [
+    [Offset(120, 60), Offset(120, 180), Offset(162, 180)],
+  ],
+  'M': [
+    [Offset(110, 180), Offset(110, 60), Offset(150, 125), Offset(190, 60), Offset(190, 180)],
+  ],
+  'N': [
+    [Offset(120, 180), Offset(120, 60), Offset(170, 180), Offset(170, 60)],
+  ],
+  'O': [
+    [Offset(150, 60), Offset(122, 78), Offset(112, 120), Offset(122, 162), Offset(150, 180), Offset(178, 162), Offset(188, 120), Offset(178, 78), Offset(150, 60)],
+  ],
+  'P': [
+    [Offset(120, 60), Offset(120, 180)],
+    [Offset(120, 60), Offset(155, 66), Offset(168, 90), Offset(155, 112), Offset(120, 116)],
+  ],
+  'Q': [
+    [Offset(150, 60), Offset(122, 78), Offset(112, 120), Offset(122, 162), Offset(150, 180), Offset(178, 162), Offset(188, 120), Offset(178, 78), Offset(150, 60)],
+    [Offset(155, 150), Offset(182, 184)],
+  ],
+  'R': [
+    [Offset(120, 60), Offset(120, 180)],
+    [Offset(120, 60), Offset(155, 66), Offset(168, 90), Offset(155, 112), Offset(120, 116)],
+    [Offset(120, 116), Offset(170, 180)],
+  ],
+  'S': [
+    [Offset(168, 70), Offset(140, 60), Offset(120, 78), Offset(128, 104), Offset(155, 116), Offset(172, 140), Offset(160, 166), Offset(132, 170), Offset(116, 158)],
+  ],
+  'T': [
+    [Offset(118, 60), Offset(172, 60)],
+    [Offset(145, 60), Offset(145, 180)],
+  ],
+  'U': [
+    [Offset(120, 60), Offset(120, 148), Offset(135, 170), Offset(150, 174), Offset(165, 170), Offset(180, 148), Offset(180, 60)],
+  ],
+  'V': [
+    [Offset(120, 60), Offset(150, 180), Offset(180, 60)],
+  ],
+  'W': [
+    [Offset(110, 60), Offset(130, 180), Offset(150, 110), Offset(170, 180), Offset(190, 60)],
+  ],
+  'X': [
+    [Offset(120, 60), Offset(180, 180)],
+    [Offset(180, 60), Offset(120, 180)],
+  ],
+  'Y': [
+    [Offset(120, 60), Offset(150, 120)],
+    [Offset(180, 60), Offset(150, 120)],
+    [Offset(150, 120), Offset(150, 180)],
+  ],
+  'Z': [
+    [Offset(120, 60), Offset(180, 60), Offset(120, 180), Offset(180, 180)],
+  ],
+};
+
+/// Ordered stroke skeletons for the given mode and letter, or null.
+/// Only uppercase (mode 0) has a Stroke_Set — lowercase and numbers always
+/// use the legacy freehand tracing mechanic (Requirement 6).
+List<List<Offset>>? strokesForMode(int mode, String letter) {
+  if (mode != 0) return null;
+  return uppercaseStrokes[letter];
+}
+
+/// Testing/verification helper: concatenates a Stroke_Set in order.
+/// Not used at runtime — the runtime UI never needs the flattened form
+/// (it already has `LetterData.points` for the background glyph and
+/// `uppercaseStrokes` for the drag-fill mechanic separately).
+List<Offset> flattenStrokes(List<List<Offset>> strokes) =>
+    strokes.expand((s) => s).toList();

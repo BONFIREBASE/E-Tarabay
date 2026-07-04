@@ -313,26 +313,13 @@ class ETarabayApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Base readable font (ABeeZee) for all text, with the playful Chelsea
-    // Market used for large display/headline/title styles.
+    // Use the platform default font for all text (no custom font family).
+    // Only the top header/app-bar text is emphasized in bold — handled where
+    // headers are built (see CustomHeaderAppBar and screen headers).
     final baseText = ThemeData(useMaterial3: true).textTheme;
-    final bodyText = baseText.apply(
-      fontFamily: 'ABeeZee',
+    final appTextTheme = baseText.apply(
       bodyColor: AppColors.textDark,
       displayColor: AppColors.textDark,
-    );
-    final appTextTheme = bodyText.copyWith(
-      displayLarge: bodyText.displayLarge?.copyWith(fontFamily: 'ChelseaMarket'),
-      displayMedium:
-          bodyText.displayMedium?.copyWith(fontFamily: 'ChelseaMarket'),
-      displaySmall: bodyText.displaySmall?.copyWith(fontFamily: 'ChelseaMarket'),
-      headlineLarge:
-          bodyText.headlineLarge?.copyWith(fontFamily: 'ChelseaMarket'),
-      headlineMedium:
-          bodyText.headlineMedium?.copyWith(fontFamily: 'ChelseaMarket'),
-      headlineSmall:
-          bodyText.headlineSmall?.copyWith(fontFamily: 'ChelseaMarket'),
-      titleLarge: bodyText.titleLarge?.copyWith(fontFamily: 'ChelseaMarket'),
     );
 
     return MaterialApp(

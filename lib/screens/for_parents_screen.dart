@@ -46,7 +46,6 @@ class ForParentsScreen extends StatefulWidget {
 class _ForParentsScreenState extends State<ForParentsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isLoading = true;
 
   // ── Trace It data ─────────────────────────────────────────────────────────
   final Set<String> _traceDoneUpper = {};
@@ -289,7 +288,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
     _matTotalScore = prefs.getInt(_MatematikaKeys.totalScore) ?? 0;
     _matTotalStars = prefs.getInt(_MatematikaKeys.totalStars) ?? 0;
 
-    setState(() => _isLoading = false);
+    if (mounted) setState(() {});
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -298,9 +297,9 @@ class _ForParentsScreenState extends State<ForParentsScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    // Render immediately — progress loads from SharedPreferences and fills in
+    // silently via setState, so there's no full-screen spinner flash when
+    // transitioning to this page.
     const headerStart = Color(0xFF7C4DFF);
     const headerEnd = Color(0xFF9C6BFF);
     return Scaffold(

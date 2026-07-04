@@ -205,7 +205,7 @@ class _TandaanScreenState extends State<TandaanScreen>
           'label_il': 'Puso'
         },
         {
-          'emoji': '💚',
+          'emoji': '🔷',
           'label_en': 'Diamond',
           'label_tl': 'Diamante',
           'label_il': 'Diamante'
@@ -527,13 +527,43 @@ class _TandaanScreenState extends State<TandaanScreen>
     return 1;
   }
 
-  void _advanceOrComplete() {
+  void _advanceOrComplete() async {
+    // Record the round that was just finished so per-round progress (and the
+    // Lessons screen counter) actually advances instead of only saving the
+    // very last round on category completion.
+    await _markRoundDone(_currentRound);
     if (_currentRound < _totalRounds - 1) {
       setState(() => _currentRound++);
       _initRound();
       _startTimer();
     } else {
       _showCategoryComplete();
+    }
+  }
+
+  /// Persist a single completed round and refresh the local progress state.
+  Future<void> _markRoundDone(int round) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(
+        'tandaan_cat_${_selectedCategory}_round_$round', true);
+
+    if (mounted) {
+      setState(() {
+        _categoryRoundProgress[_selectedCategory] ??= [false, false, false];
+        _categoryRoundProgress[_selectedCategory]![round] = true;
+      });
+    }
+
+    // Mark the whole category complete once all three rounds are done.
+    bool allDone = true;
+    for (int r = 0; r < 3; r++) {
+      if (prefs.getBool('tandaan_cat_${_selectedCategory}_round_$r') != true) {
+        allDone = false;
+        break;
+      }
+    }
+    if (allDone && mounted) {
+      setState(() => _completedCategories.add(_selectedCategory));
     }
   }
 
@@ -595,31 +625,14 @@ class _TandaanScreenState extends State<TandaanScreen>
 
   Future<void> _saveProgress(int stars) async {
     final prefs = await SharedPreferences.getInstance();
-    final key = 'tandaan_cat_${_selectedCategory}_round_${_currentRound}';
-    await prefs.setBool(key, true);
+
+    // Ensure the final round is recorded (per-round saving happens in
+    // _advanceOrComplete, but guard here for the last round too).
+    await _markRoundDone(_currentRound);
 
     final totalKey = 'tandaan_total_stars';
     final prev = prefs.getInt(totalKey) ?? 0;
     await prefs.setInt(totalKey, prev + stars);
-
-    // Update round progress map
-    setState(() {
-      _categoryRoundProgress[_selectedCategory] ??= [false, false, false];
-      _categoryRoundProgress[_selectedCategory]![_currentRound] = true;
-    });
-
-    // Check if category is now fully completed
-    bool allDone = true;
-    for (int round = 0; round < 3; round++) {
-      if (prefs.getBool('tandaan_cat_${_selectedCategory}_round_$round') !=
-          true) {
-        allDone = false;
-        break;
-      }
-    }
-    if (allDone && mounted) {
-      setState(() => _completedCategories.add(_selectedCategory));
-    }
   }
 
   // ── Feedback ───────────────────────────────────────────────────────────────

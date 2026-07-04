@@ -654,6 +654,7 @@
   "readFullStoryBeforeBack": "Read the entire story before going back.",
   "iReadTheStory": "I Have Read It! ✓",
   "tandaanTitle": "Remember It!",
+  "tandaanSubtitle": "Match the Pairs",
   "round": "Round",
   "matchThePairs": "Find and match the pairs!",
   "flipCardsToMatch": "Tap a card to flip it. Find two that match!",
@@ -661,6 +662,7 @@
   "traceItSubtitle": "Draw from memory",
   "checkTracing": "Check",
   "showHint": "Hint",
+  "startAtDot": "Start at the dot!",
   "almostThere": "Almost there! Try again!",
   "progressPages": "{done} / {total} pages",
   "@progressPages": {

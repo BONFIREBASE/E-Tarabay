@@ -653,6 +653,7 @@
   "readFullStoryBeforeBack": "Basahin ang buong kwento bago bumalik.",
   "iReadTheStory": "Nabasa Ko! ✓",
   "tandaanTitle": "Tandaan Mo!",
+  "tandaanSubtitle": "TUGMAIN ANG PARES",
   "round": "Round",
   "matchThePairs": "Hanapin at pagtugmain ang mga pares!",
   "flipCardsToMatch": "Pindutin ang card para i-flip ito. Hanapin ang dalawang magkatulad!",
@@ -660,6 +661,7 @@
   "traceItSubtitle": "Idrowing mula sa memorya",
   "checkTracing": "Tingnan",
   "showHint": "Tulong",
+  "startAtDot": "Magsimula sa tuldok!",
   "almostThere": "Malapit na! Subukan muli!",
   "progressPages": "{done} / {total} pahina",
   "@progressPages": {

@@ -236,7 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'v1.0.4+',
+                    '1.0.4++',
                     style: TextStyle(
                       fontSize: 13,
                       color: colorScheme.onSurfaceVariant,

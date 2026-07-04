@@ -173,13 +173,23 @@ class _FloatingBottomNavBarState extends State<FloatingBottomNavBar>
             child: Icon(widget.centerIcon, color: Colors.white, size: 26),
           ),
           if (widget.centerLabel != null) ...[
-            const SizedBox(height: 2),
-            Text(
-              widget.centerLabel!,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: _centerStart,
+            const SizedBox(height: 3),
+            // Constrain + center the label so long translations (e.g.
+            // "Para kadagiti Nagannak") wrap neatly under the button instead
+            // of overflowing onto the neighbouring tab icons/labels.
+            SizedBox(
+              width: 84,
+              child: Text(
+                widget.centerLabel!,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 9.5,
+                  height: 1.1,
+                  fontWeight: FontWeight.w700,
+                  color: _centerStart,
+                ),
               ),
             ),
           ],

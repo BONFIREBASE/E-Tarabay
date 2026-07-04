@@ -3022,6 +3022,12 @@ abstract class AppLocalizations {
   /// **'Remember It!'**
   String get tandaanTitle;
 
+  /// No description provided for @tandaanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Match the Pairs'**
+  String get tandaanSubtitle;
+
   /// No description provided for @round.
   ///
   /// In en, this message translates to:
@@ -3063,6 +3069,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hint'**
   String get showHint;
+
+  /// No description provided for @startAtDot.
+  ///
+  /// In en, this message translates to:
+  /// **'Start at the dot!'**
+  String get startAtDot;
 
   /// No description provided for @almostThere.
   ///

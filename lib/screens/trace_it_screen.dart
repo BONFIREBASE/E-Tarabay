@@ -246,6 +246,222 @@ class _TracePainter extends CustomPainter {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  POLYLINE MATH (shared by the drag-to-fill painter and gesture logic)
+// ─────────────────────────────────────────────────────────────────────────────
+
+double _polylineLength(List<Offset> pts) {
+  double total = 0;
+  for (int i = 1; i < pts.length; i++) {
+    total += (pts[i] - pts[i - 1]).distance;
+  }
+  return total;
+}
+
+/// Returns the sub-polyline from the start up to [fraction] (0..1) of the
+/// total length — used to render how much of a stroke has been filled.
+List<Offset> _partialPolyline(List<Offset> pts, double fraction) {
+  if (pts.isEmpty) return const [];
+  if (pts.length < 2 || fraction <= 0) return [pts.first];
+  if (fraction >= 1) return List.of(pts);
+  final total = _polylineLength(pts);
+  final target = total * fraction;
+  final out = <Offset>[pts.first];
+  double acc = 0;
+  for (int i = 1; i < pts.length; i++) {
+    final seg = (pts[i] - pts[i - 1]).distance;
+    if (acc + seg >= target) {
+      final t = seg == 0 ? 0.0 : (target - acc) / seg;
+      out.add(Offset.lerp(pts[i - 1], pts[i], t)!);
+      return out;
+    }
+    acc += seg;
+    out.add(pts[i]);
+  }
+  return out;
+}
+
+/// Projects [p] onto the polyline, returning how far along the path the nearest
+/// point is (progress 0..1) and the perpendicular distance to the path.
+({double progress, double distance}) _projectOntoPolyline(
+    List<Offset> pts, Offset p) {
+  if (pts.isEmpty) return (progress: 0.0, distance: double.infinity);
+  if (pts.length < 2) return (progress: 0.0, distance: (p - pts.first).distance);
+  final total = _polylineLength(pts);
+  double acc = 0, bestDist = double.infinity, bestProg = 0;
+  for (int i = 1; i < pts.length; i++) {
+    final a = pts[i - 1];
+    final b = pts[i];
+    final seg = (b - a).distance;
+    if (seg == 0) continue;
+    final abx = b.dx - a.dx, aby = b.dy - a.dy;
+    double t = ((p.dx - a.dx) * abx + (p.dy - a.dy) * aby) / (seg * seg);
+    t = t.clamp(0.0, 1.0);
+    final proj = Offset(a.dx + abx * t, a.dy + aby * t);
+    final d = (p - proj).distance;
+    if (d < bestDist) {
+      bestDist = d;
+      bestProg = total > 0 ? (acc + seg * t) / total : 0.0;
+    }
+    acc += seg;
+  }
+  return (progress: bestProg, distance: bestDist);
+}
+
+/// Completion-based Star_Rating for an Uppercase_Letter_Session.
+/// Pure function of Attempt_Count and stroke count — does NOT call
+/// `_computeSmartScore` or any of its proximity/coverage/length/overlap
+/// sub-scores (Requirement 5.2).
+///
+/// "Reasonable attempt range" = one attempt per stroke, plus up to 1 extra
+/// restart, i.e. `attempts <= strokeCount + 1` is a "clean" run.
+int _computeStarRating({required int attempts, required int strokeCount}) {
+  final reasonable = strokeCount + 1;
+  if (attempts <= reasonable) return 3;
+  if (attempts <= reasonable + 3) return 2;
+  return 1; // never 0 — reaching Letter_Completion_State always completed
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  DRAG-TO-FILL PAINTER (uppercase letters)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+//  Renders each stroke of an uppercase letter as a light "track", fills the
+//  completed portion in the letter's color as the child drags, and marks the
+//  active stroke's start with a numbered, pulsing dot + direction arrow. No
+//  image or SVG assets — pure CustomPainter drawing from the stroke skeletons.
+class _StrokeFillPainter extends CustomPainter {
+  final List<List<Offset>> strokes;
+  final List<double> strokeProgress;
+  final int activeStroke;
+  final Color color;
+  final bool isCompleted;
+  final double scale;
+  final Offset offset;
+  final double? guideProgress;
+
+  _StrokeFillPainter({
+    required this.strokes,
+    required this.strokeProgress,
+    required this.activeStroke,
+    required this.color,
+    required this.isCompleted,
+    required this.scale,
+    required this.offset,
+    this.guideProgress,
+  });
+
+  Offset _toScreen(Offset d) =>
+      Offset(d.dx * scale + offset.dx, d.dy * scale + offset.dy);
+
+  Path _screenPath(List<Offset> designPts) {
+    final path = Path();
+    if (designPts.isEmpty) return path;
+    final p0 = _toScreen(designPts.first);
+    path.moveTo(p0.dx, p0.dy);
+    for (int i = 1; i < designPts.length; i++) {
+      final p = _toScreen(designPts[i]);
+      path.lineTo(p.dx, p.dy);
+    }
+    return path;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final trackWidth = 26.0 * scale;
+    final fillWidth = 24.0 * scale;
+
+    final trackPaint = Paint()
+      ..color = Colors.grey.shade200
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = trackWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final fillColor = isCompleted ? const Color(0xFF4CAF50) : color;
+    final fillPaint = Paint()
+      ..color = fillColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = fillWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // 1. All stroke tracks (background).
+    for (final stroke in strokes) {
+      canvas.drawPath(_screenPath(stroke), trackPaint);
+    }
+
+    // 2. Filled portions.
+    for (int i = 0; i < strokes.length; i++) {
+      final prog = i < strokeProgress.length ? strokeProgress[i] : 0.0;
+      if (prog <= 0) continue;
+      final filled = _partialPolyline(strokes[i], prog);
+      if (filled.length >= 2) {
+        canvas.drawPath(_screenPath(filled), fillPaint);
+      } else if (filled.isNotEmpty) {
+        canvas.drawCircle(
+            _toScreen(filled.first), fillWidth / 2, Paint()..color = fillColor);
+      }
+    }
+
+    // 3. Active-stroke start marker (numbered dot + direction arrow).
+    if (!isCompleted && activeStroke >= 0 && activeStroke < strokes.length) {
+      final stroke = strokes[activeStroke];
+      if (stroke.isNotEmpty) {
+        final at = _toScreen(stroke.first);
+        double angle = math.pi / 2;
+        if (stroke.length > 1) {
+          final n = _toScreen(stroke[1]);
+          angle = math.atan2(n.dy - at.dy, n.dx - at.dx);
+        }
+        _drawStartMarker(canvas, at, angle, activeStroke + 1);
+      }
+    }
+  }
+
+  void _drawStartMarker(Canvas canvas, Offset at, double angle, int number) {
+    final pulse = guideProgress != null && guideProgress! >= 0
+        ? (0.85 + 0.15 * math.sin(guideProgress! * math.pi * 2))
+        : 1.0;
+
+    final arrowPaint = Paint()
+      ..color = const Color(0xFF2E7D32)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    final dir = Offset(math.cos(angle), math.sin(angle));
+    final base = at + dir * 20;
+    final tip = at + dir * 38;
+    canvas.drawLine(base, tip, arrowPaint);
+    final head1 =
+        tip + Offset(math.cos(angle + 2.5), math.sin(angle + 2.5)) * 9;
+    final head2 =
+        tip + Offset(math.cos(angle - 2.5), math.sin(angle - 2.5)) * 9;
+    canvas.drawLine(tip, head1, arrowPaint);
+    canvas.drawLine(tip, head2, arrowPaint);
+
+    canvas.drawCircle(
+        at, 16 * pulse, Paint()..color = Colors.green.withOpacity(0.25));
+    canvas.drawCircle(at, 11, Paint()..color = const Color(0xFF2E7D32));
+    final tp = TextPainter(
+      text: TextSpan(
+        text: '$number',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, at - Offset(tp.width / 2, tp.height / 2));
+  }
+
+  @override
+  bool shouldRepaint(_StrokeFillPainter old) => true;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  SCREEN
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -275,7 +491,7 @@ class _TraceItScreenState extends State<TraceItScreen>
   bool _checking = false;
 
   // Store kid's drawing per letter so they can review it later
-  Map<int, List<Offset>> _completedTraces = {};
+  final Map<int, List<Offset>> _completedTraces = {};
 
   // ── Feedback ───────────────────────────────────────────────────────────────
   String _feedbackMessage = '';
@@ -303,6 +519,38 @@ class _TraceItScreenState extends State<TraceItScreen>
 
   static const double _hitRadius = 20.0;
 
+  // ── Drag-to-fill state (uppercase letters) ─────────────────────────────────
+  List<List<Offset>> _strokes = [];
+  List<double> _strokeProgress = [];
+  int _activeStroke = 0;
+  int _dragAttempts = 0;
+  bool _dragging = false;
+  // Design-space thresholds (same ~300x260 space as the stroke skeletons).
+  static const double _startZoneRadius = 30.0;
+  static const double _pathTolerance = 42.0;
+  static const double _strokeCompleteThreshold = 0.85;
+  // Cap how far progress can jump in a single drag update. This forces the
+  // child to actually drag ALONG the stroke instead of jumping the finger to
+  // the end — important for self-touching paths like O, 8, g, 6 and 9 where
+  // the start and end points are near each other.
+  static const double _maxProgressStep = 0.12;
+
+  // Enlarge the drawn letter by scaling the skeleton around the glyph center.
+  // Applied consistently to both rendering and drag hit-testing so they align.
+  static const double _letterMagnify = 1.35;
+  static const Offset _glyphCenter = Offset(150, 120);
+
+  List<List<Offset>> _magnify(List<List<Offset>> strokes) => [
+        for (final stroke in strokes)
+          [
+            for (final p in stroke)
+              Offset(
+                _glyphCenter.dx + (p.dx - _glyphCenter.dx) * _letterMagnify,
+                _glyphCenter.dy + (p.dy - _glyphCenter.dy) * _letterMagnify,
+              )
+          ]
+      ];
+
   // ─────────────────────────────────────────────────────────────────────────
   //  Getters
   // ─────────────────────────────────────────────────────────────────────────
@@ -315,10 +563,60 @@ class _TraceItScreenState extends State<TraceItScreen>
 
   LetterData get _currentLetter => _currentLetters[_selectedIndex];
 
+  /// Whether the current item uses the guided drag-fill mechanic.
+  /// ONLY true for uppercase letters (mode 0) — lowercase and numbers always
+  /// use the legacy freehand mechanic (Requirement 6).
+  bool get _useDragFill =>
+      _selectedMode == 0 && strokesForMode(_selectedMode, _currentLetter.letter) != null;
+
+  /// (Re)initialise the drag-to-fill stroke state for the current letter.
+  void _initStrokes() {
+    final raw = strokesForMode(_selectedMode, _currentLetter.letter);
+    if (raw == null) {
+      _strokes = [];
+      _strokeProgress = [];
+      _activeStroke = 0;
+      _dragAttempts = 0;
+      _dragging = false;
+      return;
+    }
+    _strokes = _magnify(raw);
+    _dragAttempts = 0;
+    _dragging = false;
+    if (_currentCompletedSet.contains(_selectedIndex)) {
+      _strokeProgress = List<double>.filled(_strokes.length, 1.0);
+      _activeStroke = _strokes.length;
+    } else {
+      _strokeProgress = List<double>.filled(_strokes.length, 0.0);
+      _activeStroke = 0;
+    }
+  }
+
   Set<int> get _currentCompletedSet {
     if (_selectedMode == 0) return _completedUpper;
     if (_selectedMode == 1) return _completedLower;
     return _completedNums;
+  }
+
+  /// The furthest letter the student is allowed to reach: every completed
+  /// letter plus the single next one they still need to trace. They can go
+  /// back to finished letters but cannot skip ahead to ones "not yet present",
+  /// so they can't randomly trace whatever they want.
+  int get _maxReachableIndex {
+    for (int i = 0; i < _currentLetters.length; i++) {
+      if (!_currentCompletedSet.contains(i)) return i;
+    }
+    return _currentLetters.length - 1;
+  }
+
+  void _goToLetter(int index) {
+    if (index < 0 || index >= _currentLetters.length) return;
+    if (index > _maxReachableIndex) return; // cannot skip ahead
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -350,6 +648,7 @@ class _TraceItScreenState extends State<TraceItScreen>
       if (mounted) setState(() => _guideProgress = _guideController.value);
     });
 
+    _initStrokes();
     _loadProgress();
     _initSmartResume();
   }
@@ -408,8 +707,18 @@ class _TraceItScreenState extends State<TraceItScreen>
         setState(() {
           _selectedMode = targetMode;
           _selectedIndex = targetIndex;
-          _pageController = PageController(initialPage: _selectedIndex);
           _resetTracing();
+        });
+        // Sync the PageView to the resumed letter via jumpToPage. Recreating
+        // the controller here would NOT move the viewport (Flutter transfers
+        // the old scroll position to the new controller), which desynced the
+        // page from _selectedIndex.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted &&
+              _pageController.hasClients &&
+              _pageController.page?.round() != targetIndex) {
+            _pageController.jumpToPage(targetIndex);
+          }
         });
       }
     } catch (e) {
@@ -510,6 +819,10 @@ class _TraceItScreenState extends State<TraceItScreen>
       _showFeedback(AppLocalizations.of(context)!.doneAlready, Colors.green);
       return;
     }
+    if (_useDragFill) {
+      _onDragFillStart(d);
+      return;
+    }
     final designPt = _toDesign(d.localPosition);
 
     _guideController.stop();
@@ -529,7 +842,116 @@ class _TraceItScreenState extends State<TraceItScreen>
 
   bool _outOfBounds = false;
 
+  // ── Drag-to-fill gesture logic ─────────────────────────────────────────────
+
+  void _onDragFillStart(DragStartDetails d) {
+    if (_activeStroke >= _strokes.length) return;
+    final designPt = _toDesign(d.localPosition);
+    final start = _strokes[_activeStroke].first;
+    if ((designPt - start).distance <= _startZoneRadius) {
+      _guideController.stop();
+      setState(() {
+        _dragging = true;
+        _dragAttempts++;
+        _outOfBounds = false;
+      });
+    } else {
+      _showFeedback(AppLocalizations.of(context)!.startAtDot, Colors.orange);
+    }
+  }
+
+  void _onDragFillUpdate(DragUpdateDetails d) {
+    if (!_dragging || _isCompleted || _activeStroke >= _strokes.length) return;
+    final designPt = _toDesign(d.localPosition);
+    final stroke = _strokes[_activeStroke];
+    final proj = _projectOntoPolyline(stroke, designPt);
+
+    // Off the stroke: pause progress and flash the warning border.
+    if (proj.distance > _pathTolerance) {
+      if (!_outOfBounds) {
+        setState(() => _outOfBounds = true);
+        _warningController
+            .forward(from: 0)
+            .then((_) => _warningController.reverse());
+      }
+      return;
+    }
+
+    setState(() {
+      _outOfBounds = false;
+      // Forward-only, and capped per update so progress can't leap ahead on
+      // looping letters — the child must trace along the stroke.
+      final cur = _strokeProgress[_activeStroke];
+      if (proj.progress > cur) {
+        _strokeProgress[_activeStroke] =
+            math.min(proj.progress, cur + _maxProgressStep);
+      }
+    });
+
+    if (_strokeProgress[_activeStroke] >= _strokeCompleteThreshold) {
+      _completeActiveStroke();
+    }
+  }
+
+  void _completeActiveStroke() {
+    setState(() {
+      _strokeProgress[_activeStroke] = 1.0;
+      _activeStroke++;
+      _dragging = false;
+      _outOfBounds = false;
+    });
+    if (_activeStroke >= _strokes.length) {
+      _completeDragFillLetter();
+    } else {
+      // Restart the pulse so the next stroke's start dot draws attention.
+      _guideController
+        ..reset()
+        ..repeat();
+    }
+  }
+
+  void _completeDragFillLetter() {
+    if (_isCompleted) return;
+    final stars = _computeStarRating(
+      attempts: _dragAttempts,
+      strokeCount: _strokes.length,
+    );
+    final earned = stars * 5;
+
+    setState(() {
+      _isCompleted = true;
+      _dragging = false;
+      _score += earned;
+      _stars += stars;
+    });
+
+    _currentCompletedSet.add(_selectedIndex);
+    _saveLetterComplete(_selectedMode, _selectedIndex);
+
+    _guideController.stop();
+    _successController.forward(from: 0);
+    _showFeedback(
+        AppLocalizations.of(context)!.goodJobPoints(earned), Colors.green);
+
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      if (!mounted) return;
+      if (_selectedIndex + 1 < _currentLetters.length) {
+        _pageController.animateToPage(
+          _selectedIndex + 1,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _showCompletionDialog();
+      }
+    });
+  }
+
   void _onPanUpdate(DragUpdateDetails d) {
+    if (_useDragFill) {
+      _onDragFillUpdate(d);
+      return;
+    }
     if (_isCompleted || _tracedPoints.isEmpty) return;
     final designPt = _toDesign(d.localPosition);
     final screenPt = _toScreen(designPt);
@@ -562,6 +984,13 @@ class _TraceItScreenState extends State<TraceItScreen>
   }
 
   void _onPanEnd(DragEndDetails d) {
+    if (_useDragFill) {
+      setState(() {
+        _dragging = false;
+        _outOfBounds = false;
+      });
+      return;
+    }
     if (_isCompleted) return;
     setState(() => _outOfBounds = false);
   }
@@ -577,6 +1006,7 @@ class _TraceItScreenState extends State<TraceItScreen>
       _checking = false;
       _canvasSize = Size.zero;
       _guideProgress = completed ? -1 : 0;
+      _initStrokes();
     });
     if (!completed) {
       _guideController.repeat();
@@ -599,8 +1029,8 @@ class _TraceItScreenState extends State<TraceItScreen>
     final designPts = validPoints.map(_toDesign).toList();
     // Densify guide points so ALL letters have smooth path validation
     final densePts = _TracePainter._densifyPoints(pts, 6);
-    final outerRadius = _hitRadius * 2.0; // penalty beyond this
-    final nearRadius = _hitRadius * 1.5;
+    const outerRadius = _hitRadius * 2.0; // penalty beyond this
+    const nearRadius = _hitRadius * 1.5;
 
     int nearCount = 0;
     int outOfBoundsCount = 0;
@@ -747,37 +1177,6 @@ class _TraceItScreenState extends State<TraceItScreen>
     });
   }
 
-  void _resetAllProgress() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    if (!userProvider.isInitialized) return;
-
-    // Clear all traceit progress in UserProvider
-    for (int i = 0; i < uppercaseLetters.length; i++) {
-      await userProvider.updateTraceItProgress('uppercase', i, false);
-    }
-    for (int i = 0; i < lowercaseLetters.length; i++) {
-      await userProvider.updateTraceItProgress('lowercase', i, false);
-    }
-    for (int i = 0; i < numberLetters.length; i++) {
-      await userProvider.updateTraceItProgress('numbers', i, false);
-    }
-
-    setState(() {
-      _completedUpper.clear();
-      _completedLower.clear();
-      _completedNums.clear();
-      _completedTraces.clear();
-      _score = 0;
-      _stars = 0;
-      _selectedIndex = 0;
-      _selectedMode = 0;
-      _resetTracing();
-    });
-
-    _pageController = PageController(initialPage: 0);
-    _guideController.repeat();
-  }
-
   void _showCompletionDialog() {
     final modeName = _selectedMode == 0
         ? AppLocalizations.of(context)!.uppercase
@@ -827,6 +1226,7 @@ class _TraceItScreenState extends State<TraceItScreen>
         _outOfBounds = false;
         _checking = false;
         _canvasSize = Size.zero;
+        _initStrokes();
       });
       if (!wasCompleted) {
         _guideController.repeat();
@@ -876,12 +1276,6 @@ class _TraceItScreenState extends State<TraceItScreen>
                   fontWeight: FontWeight.bold)),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.refresh_cw, size: 20),
-            color: Colors.grey.shade400,
-            tooltip: 'Reset (test)',
-            onPressed: _resetAllProgress,
-          ),
           Container(
             margin: const EdgeInsets.all(8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -900,16 +1294,7 @@ class _TraceItScreenState extends State<TraceItScreen>
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
-          child: Container(
-            color: Colors.white,
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildModeTab(0, 'ABC', loc.upper),
-                  _buildModeTab(1, 'abc', loc.lower),
-                  _buildModeTab(2, '123', loc.numbers),
-                ]),
-          ),
+          child: _buildModeTabs(),
         ),
       ),
       body: Column(children: [
@@ -973,15 +1358,28 @@ class _TraceItScreenState extends State<TraceItScreen>
           ]),
         ),
 
-        // Navigation
+        // Navigation — back goes to finished letters, forward only up to the
+        // current letter (can't jump ahead to untraced ones).
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            _buildNavArrow(
+              icon: LucideIcons.chevron_left,
+              enabled: _selectedIndex > 0,
+              onTap: () => _goToLetter(_selectedIndex - 1),
+            ),
+            const SizedBox(width: 18),
             Text('${_selectedIndex + 1} / ${_currentLetters.length}',
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Colors.grey.shade600)),
+            const SizedBox(width: 18),
+            _buildNavArrow(
+              icon: LucideIcons.chevron_right,
+              enabled: _selectedIndex < _maxReachableIndex,
+              onTap: () => _goToLetter(_selectedIndex + 1),
+            ),
           ]),
         ),
 
@@ -991,11 +1389,17 @@ class _TraceItScreenState extends State<TraceItScreen>
             controller: _pageController,
             onPageChanged: _onPageChanged,
             itemCount: _currentLetters.length,
-            physics: _currentCompletedSet.contains(_selectedIndex)
-                ? const BouncingScrollPhysics()
-                : const NeverScrollableScrollPhysics(),
+            // Navigation is arrow-only so students can't swipe to letters they
+            // haven't reached yet.
+            physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               final letter = _currentLetters[index];
+              final rawStrokes = strokesForMode(_selectedMode, letter.letter);
+              // Selected page reuses the already-magnified live strokes; other
+              // pages magnify on the fly for their preview.
+              final letterStrokes = rawStrokes == null
+                  ? null
+                  : (_selectedIndex == index ? _strokes : _magnify(rawStrokes));
               return Center(
                 child: AnimatedBuilder(
                   animation: _warningAnimation,
@@ -1030,23 +1434,51 @@ class _TraceItScreenState extends State<TraceItScreen>
                         onPanUpdate: _onPanUpdate,
                         onPanEnd: _onPanEnd,
                         child: Stack(fit: StackFit.expand, children: [
-                          // Tracing painter draws the outline letter + dashes
+                          // Uppercase letters use the guided drag-to-fill
+                          // painter; lowercase/numbers keep the legacy painter.
                           CustomPaint(
-                            painter: _TracePainter(
-                              guidePoints: letter.points,
-                              tracedPoints:
-                                  _selectedIndex == index ? _tracedPoints : [],
-                              color: letter.color,
-                              isCompleted: _currentCompletedSet.contains(index),
-                              visitedPoints:
-                                  _selectedIndex == index ? _visitedPoints : {},
-                              scale: _canvasScale,
-                              offset: _canvasOffset,
-                              letter: letter.letter,
-                              guideProgress: _selectedIndex == index
-                                  ? _guideProgress
-                                  : null,
-                            ),
+                            painter: letterStrokes != null
+                                ? _StrokeFillPainter(
+                                    strokes: letterStrokes,
+                                    strokeProgress: _selectedIndex == index
+                                        ? _strokeProgress
+                                        : List<double>.filled(
+                                            letterStrokes.length,
+                                            _currentCompletedSet.contains(index)
+                                                ? 1.0
+                                                : 0.0),
+                                    activeStroke: _selectedIndex == index
+                                        ? _activeStroke
+                                        : (_currentCompletedSet.contains(index)
+                                            ? letterStrokes.length
+                                            : 0),
+                                    color: letter.color,
+                                    isCompleted:
+                                        _currentCompletedSet.contains(index),
+                                    scale: _canvasScale,
+                                    offset: _canvasOffset,
+                                    guideProgress: _selectedIndex == index
+                                        ? _guideProgress
+                                        : null,
+                                  )
+                                : _TracePainter(
+                                    guidePoints: letter.points,
+                                    tracedPoints: _selectedIndex == index
+                                        ? _tracedPoints
+                                        : [],
+                                    color: letter.color,
+                                    isCompleted:
+                                        _currentCompletedSet.contains(index),
+                                    visitedPoints: _selectedIndex == index
+                                        ? _visitedPoints
+                                        : {},
+                                    scale: _canvasScale,
+                                    offset: _canvasOffset,
+                                    letter: letter.letter,
+                                    guideProgress: _selectedIndex == index
+                                        ? _guideProgress
+                                        : null,
+                                  ),
                           ),
                           // Success overlay
                           if (_isCompleted && _selectedIndex == index)
@@ -1124,7 +1556,7 @@ class _TraceItScreenState extends State<TraceItScreen>
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
           child: Row(
             children: [
-              // Clear button
+              // Clear button — resets the current letter's progress.
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _resetTracing,
@@ -1139,30 +1571,33 @@ class _TraceItScreenState extends State<TraceItScreen>
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              // Check button
-              Expanded(
-                flex: 2,
-                child: ElevatedButton.icon(
-                  onPressed: _isCompleted ? null : _checkTracing,
-                  icon: _checking
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Icon(LucideIcons.check, size: 20),
-                  label: Text(loc.checkTracing),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _isCompleted ? Colors.green : AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+              // Check button — only for the legacy freehand mechanic. The
+              // drag-to-fill mechanic completes automatically, so no Check.
+              if (!_useDragFill) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton.icon(
+                    onPressed: _isCompleted ? null : _checkTracing,
+                    icon: _checking
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
+                        : const Icon(LucideIcons.check, size: 20),
+                    label: Text(loc.checkTracing),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          _isCompleted ? Colors.green : AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -1170,36 +1605,145 @@ class _TraceItScreenState extends State<TraceItScreen>
     );
   }
 
-  Widget _buildModeTab(int index, String icon, String label) {
-    final isSelected = _selectedMode == index;
+  Widget _buildNavArrow({
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedMode = index;
-          _selectedIndex = 0;
-          _resetTracing();
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        margin: const EdgeInsets.symmetric(vertical: 6),
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          color: enabled
+              ? AppColors.primary.withOpacity(0.12)
+              : Colors.grey.shade100,
+          shape: BoxShape.circle,
         ),
-        child: Row(children: [
-          Text(icon,
+        child: Icon(
+          icon,
+          size: 22,
+          color: enabled ? AppColors.primary : Colors.grey.shade300,
+        ),
+      ),
+    );
+  }
+
+  void _switchMode(int index) {
+    if (_selectedMode == index) return;
+    // Jump to page 0 while the current mode's page count is still valid, THEN
+    // switch mode. Letter counts differ per mode (26/26/10), so switching first
+    // could leave the controller holding an out-of-range offset.
+    if (_pageController.hasClients) _pageController.jumpToPage(0);
+    setState(() {
+      _selectedMode = index;
+      _selectedIndex = 0;
+      _resetTracing();
+    });
+  }
+
+  /// Modern segmented control for the ABC / abc / 123 modes.
+  Widget _buildModeTabs() {
+    final loc = AppLocalizations.of(context)!;
+    final modes = [
+      (0, 'ABC', loc.upper, _completedUpper.length >= uppercaseLetters.length),
+      (1, 'abc', loc.lower, _completedLower.length >= lowercaseLetters.length),
+      (2, '123', loc.numbers, _completedNums.length >= numberLetters.length),
+    ];
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEEF1F8),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            for (final m in modes)
+              Expanded(
+                child: _buildModeSegment(
+                  index: m.$1,
+                  badge: m.$2,
+                  label: m.$3,
+                  completed: m.$4,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeSegment({
+    required int index,
+    required String badge,
+    required String label,
+    required bool completed,
+  }) {
+    final active = _selectedMode == index;
+    final Color contentColor = active
+        ? Colors.white
+        : (completed ? Colors.green.shade600 : Colors.grey.shade600);
+
+    return GestureDetector(
+      onTap: () => _switchMode(index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(vertical: 9),
+        decoration: BoxDecoration(
+          color: active ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: active
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              badge,
               style: TextStyle(
-                  fontSize: 14,
-                  color: isSelected ? Colors.white : Colors.grey.shade600)),
-          const SizedBox(width: 4),
-          Text(label,
-              style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey.shade600,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 13)),
-        ]),
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.3,
+                color: contentColor,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                  color: contentColor,
+                ),
+              ),
+            ),
+            if (completed) ...[
+              const SizedBox(width: 5),
+              Icon(
+                LucideIcons.circle_check,
+                size: 13,
+                color: active ? Colors.white : Colors.green.shade600,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

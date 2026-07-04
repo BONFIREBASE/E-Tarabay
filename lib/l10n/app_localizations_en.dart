@@ -1538,6 +1538,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tandaanTitle => 'Remember It!';
 
   @override
+  String get tandaanSubtitle => 'Match the Pairs';
+
+  @override
   String get round => 'Round';
 
   @override
@@ -1557,6 +1560,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get showHint => 'Hint';
+
+  @override
+  String get startAtDot => 'Start at the dot!';
 
   @override
   String get almostThere => 'Almost there! Try again!';

@@ -9,7 +9,7 @@ class AppLocalizationsIlo extends AppLocalizations {
   AppLocalizationsIlo([String locale = 'ilo']) : super(locale);
 
   @override
-  String get back => 'Aga';
+  String get back => 'Agsubli';
 
   @override
   String get done => 'Nalpas';
@@ -597,7 +597,7 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get redo => 'Sublien';
 
   @override
-  String get clear => 'Dalisan';
+  String get clear => 'Dalosan';
 
   @override
   String get surotemKabaelam => 'Surotem, Kabaelam!';
@@ -1118,7 +1118,7 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get imageNotFound => 'Saan a nabirukan ti ladawan';
 
   @override
-  String get clearCanvasQuestion => 'Dalisan ti Canvas?';
+  String get clearCanvasQuestion => 'Dalosan ti Canvas?';
 
   @override
   String get eraseColoringWarning => 'Punasenna amin a kinulormo daytoy.';
@@ -1551,6 +1551,9 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get tandaanTitle => 'Tandaem!';
 
   @override
+  String get tandaanSubtitle => 'PARISEM TI AGPADA';
+
+  @override
   String get round => 'Round';
 
   @override
@@ -1571,6 +1574,9 @@ class AppLocalizationsIlo extends AppLocalizations {
 
   @override
   String get showHint => 'Tulong';
+
+  @override
+  String get startAtDot => 'Rugiam iti tuldok!';
 
   @override
   String get almostThere => 'Asideg pay laeng! Padasem manen!';

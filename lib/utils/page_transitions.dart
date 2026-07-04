@@ -12,64 +12,28 @@ class PremiumPageRoute<T> extends PageRouteBuilder<T> {
     RouteSettings? settings,
   }) : super(
           settings: settings,
-          transitionDuration: const Duration(milliseconds: 420),
-          reverseTransitionDuration: const Duration(milliseconds: 320),
+          transitionDuration: const Duration(milliseconds: 240),
+          reverseTransitionDuration: const Duration(milliseconds: 200),
           pageBuilder: (context, animation, secondaryAnimation) => child,
           transitionsBuilder:
               (context, animation, secondaryAnimation, child) {
-            final primary = CurvedAnimation(
+            // A simple, fast, smooth slide + fade — one lightweight transition
+            // with no scale/dim layers, so navigation feels snappy and never
+            // janks, even on lower-end devices.
+            final curved = CurvedAnimation(
               parent: animation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
-            );
-            final secondary = CurvedAnimation(
-              parent: secondaryAnimation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
+              curve: Curves.easeOut,
+              reverseCurve: Curves.easeIn,
             );
 
-            // Incoming page (driven by `animation`).
             final slideIn = Tween<Offset>(
-              begin: const Offset(0.22, 0),
+              begin: const Offset(0.12, 0),
               end: Offset.zero,
-            ).animate(primary);
-            final fadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
-              ),
-            );
-            final scaleIn =
-                Tween<double>(begin: 0.97, end: 1.0).animate(primary);
-
-            // Outgoing page (driven by `secondaryAnimation`) recedes back.
-            final slideOut = Tween<Offset>(
-              begin: Offset.zero,
-              end: const Offset(-0.12, 0),
-            ).animate(secondary);
-            final scaleOut =
-                Tween<double>(begin: 1.0, end: 0.93).animate(secondary);
-            final dimOut =
-                Tween<double>(begin: 1.0, end: 0.80).animate(secondary);
+            ).animate(curved);
 
             return SlideTransition(
-              position: slideOut,
-              child: ScaleTransition(
-                scale: scaleOut,
-                child: FadeTransition(
-                  opacity: dimOut,
-                  child: SlideTransition(
-                    position: slideIn,
-                    child: FadeTransition(
-                      opacity: fadeIn,
-                      child: ScaleTransition(
-                        scale: scaleIn,
-                        child: child,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              position: slideIn,
+              child: FadeTransition(opacity: curved, child: child),
             );
           },
         );
@@ -87,34 +51,18 @@ class FadeThroughPageRoute<T> extends PageRouteBuilder<T> {
     RouteSettings? settings,
   }) : super(
           settings: settings,
-          transitionDuration: const Duration(milliseconds: 380),
-          reverseTransitionDuration: const Duration(milliseconds: 300),
+          transitionDuration: const Duration(milliseconds: 220),
+          reverseTransitionDuration: const Duration(milliseconds: 180),
           pageBuilder: (context, animation, secondaryAnimation) => child,
           transitionsBuilder:
               (context, animation, secondaryAnimation, child) {
-            final fadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
-              CurvedAnimation(
-                parent: animation,
-                curve: const Interval(0.35, 1.0, curve: Curves.easeOut),
-              ),
+            // Simple, fast cross-fade — cheap to composite and smooth for
+            // switching between unrelated destinations (e.g. bottom-nav tabs).
+            final fadeIn = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOut,
             );
-            final scaleIn = Tween<double>(begin: 0.92, end: 1.0).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-            );
-            final fadeOut = Tween<double>(begin: 1.0, end: 0.0).animate(
-              CurvedAnimation(
-                parent: secondaryAnimation,
-                curve: const Interval(0.0, 0.35, curve: Curves.easeIn),
-              ),
-            );
-
-            return FadeTransition(
-              opacity: fadeOut,
-              child: FadeTransition(
-                opacity: fadeIn,
-                child: ScaleTransition(scale: scaleIn, child: child),
-              ),
-            );
+            return FadeTransition(opacity: fadeIn, child: child);
           },
         );
 }

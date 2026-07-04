@@ -1554,6 +1554,9 @@ class AppLocalizationsFil extends AppLocalizations {
   String get tandaanTitle => 'Tandaan Mo!';
 
   @override
+  String get tandaanSubtitle => 'TUGMAIN ANG PARES';
+
+  @override
   String get round => 'Round';
 
   @override
@@ -1574,6 +1577,9 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String get showHint => 'Tulong';
+
+  @override
+  String get startAtDot => 'Magsimula sa tuldok!';
 
   @override
   String get almostThere => 'Malapit na! Subukan muli!';

@@ -93,20 +93,6 @@ flutter:
     - assets/audio/tunog.mp3
     - assets/audio/Ania ti Nagan Mo by Kurtjam Kyle Silva Nono.mp3
     - assets/audio/modules_bg/
-  fonts:
-    - family: ABeeZee
-      fonts:
-        - asset: assets/fonts/ABeeZee/ABeeZee-Regular.ttf
-        - asset: assets/fonts/ABeeZee/ABeeZee-Italic.ttf
-          style: italic
-    - family: ChelseaMarket
-      fonts:
-        - asset: assets/fonts/Chelsea_Market/ChelseaMarket-Regular.ttf
-    - family: FuzzyBubbles
-      fonts:
-        - asset: assets/fonts/Fuzzy_Bubbles/FuzzyBubbles-Regular.ttf
-        - asset: assets/fonts/Fuzzy_Bubbles/FuzzyBubbles-Bold.ttf
-          weight: 700
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true

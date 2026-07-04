@@ -1,5 +1,4 @@
 import 'package:e_tarabay/l10n/app_localizations.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +48,6 @@ class LessonsScreen extends StatefulWidget {
 }
 
 class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
-  bool _isLoading = true;
 
   // ── Trace It progress ──────────────────────────────────────────────────────
   static const List<String> _allUpper = [
@@ -253,7 +251,6 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       _tandaanDone = tandaanCount;
       _pamilyaDone = pamilyaDone;
       _pamilyaTotal = pamilyaTotal;
-      _isLoading = false;
     });
   }
 
@@ -283,12 +280,9 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
+    // Render immediately (no full-screen spinner). Progress fields start at 0
+    // and update silently once _loadProgress finishes, avoiding a jarring
+    // spinner flash during page transitions.
     return Scaffold(
       backgroundColor: Colors.white,
       extendBody: true,
@@ -328,14 +322,18 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
               fit: BoxFit.cover,
             ),
           ),
+          // A static translucent overlay instead of a live BackdropFilter
+          // blur. The real-time blur re-rendered every frame caused noticeable
+          // lag (especially during page transitions); this keeps a soft,
+          // readable backdrop at a fraction of the cost.
           Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.white.withOpacity(0.08)),
-            ),
+            child: Container(color: Colors.white.withOpacity(0.55)),
           ),
           SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        // Extra bottom padding so the last card isn't hidden behind the
+        // floating bottom navigation bar (body uses extendBody: true).
+        padding: EdgeInsets.fromLTRB(
+            16, 16, 16, 120 + MediaQuery.of(context).padding.bottom),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -500,8 +498,7 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       progress: _matTotal > 0 ? _matDone / _matTotal : 0.0,
       onTap: () async {
         await context.pushPremium(const MatematikaScreen());
-        // Refresh progress when returning from the game
-        setState(() => _isLoading = true);
+        // Progress refreshes silently via didPopNext — no spinner flash.
         _loadProgress();
       },
     );
@@ -518,7 +515,6 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       progress: _pamilyaTotal > 0 ? _pamilyaDone / _pamilyaTotal : 0.0,
       onTap: () async {
         await context.pushPremium(const PamilyaScreen());
-        setState(() => _isLoading = true);
         _loadProgress();
       },
     );
@@ -535,7 +531,6 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       progress: _kulayTotal > 0 ? _kulayDone / _kulayTotal : 0.0,
       onTap: () async {
         await context.pushPremium(const KulayScreen());
-        setState(() => _isLoading = true);
         _loadProgress();
       },
     );
@@ -552,7 +547,6 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       progress: _traceItTotal > 0 ? _traceItDone / _traceItTotal : 0.0,
       onTap: () async {
         await context.pushPremium(const TraceItScreen());
-        setState(() => _isLoading = true);
         _loadProgress();
       },
     );
@@ -569,7 +563,6 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       progress: _magbasaTotal > 0 ? _magbasaDone / _magbasaTotal : 0.0,
       onTap: () async {
         await context.pushPremium(const MagbasaScreen());
-        setState(() => _isLoading = true);
         _loadProgress();
       },
     );
@@ -586,7 +579,6 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
       progress: _tandaanTotal > 0 ? _tandaanDone / _tandaanTotal : 0.0,
       onTap: () async {
         await context.pushPremium(const TandaanScreen());
-        setState(() => _isLoading = true);
         _loadProgress();
       },
     );

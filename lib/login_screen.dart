@@ -91,18 +91,9 @@ class _LoginScreenState extends State<LoginScreen> {
       userProvider.setCurrentStudentId(studentId);
       userProvider.setCurrentRole('student');
 
-      // 1. Sync EVERYTHING from Firebase FIRST.
-      // This restores their profile and all progress keys to local Hive/SharedPreferences.
-      try {
-        await userProvider
-            .syncFromFirebase()
-            .timeout(const Duration(seconds: 8));
-      } catch (e) {
-        debugPrint('Firebase sync failed or timed out: $e');
-      }
-
-      // 2. If for some reason we still don't have a profile (e.g. sync failed or Firestore doc is empty),
-      // then we create one from the studentData we got during login.
+      // Make sure a profile exists locally right away (fast, offline) using the
+      // data the login already returned — so the home screen has something to
+      // show immediately without waiting on the network.
       if (userProvider.userProfile == null) {
         final profile = studentData['profile'] as Map<String, dynamic>?;
         DateTime? bday;
@@ -124,10 +115,19 @@ class _LoginScreenState extends State<LoginScreen> {
       // Keep the typed LRN locally for certificate display (cloud stays hashed).
       await userProvider.setSessionLrn(password);
       if (!mounted) return;
+
+      // Navigate to home immediately — no blocking spinner. The full progress
+      // sync runs in the background and the UI updates silently once it lands
+      // (UserProvider notifies listeners when the data arrives).
       Navigator.pushReplacement(
         context,
         PremiumPageRoute(child: const HomeScreen()),
       );
+
+      userProvider
+          .syncFromFirebase()
+          .timeout(const Duration(seconds: 8))
+          .catchError((e) => debugPrint('Background Firebase sync failed: $e'));
     } else {
       setState(() => _isLoading = false);
       _showErrorDialog(
@@ -191,11 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
-        child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              )
-            : LayoutBuilder(
+        child: LayoutBuilder(
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     child: ConstrainedBox(
@@ -350,7 +346,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                         width: double.infinity,
                                         height: 56,
                                         child: ElevatedButton(
-                                          onPressed: _loginStudent,
+                                          onPressed:
+                                              _isLoading ? null : _loginStudent,
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: AppColors.primary,
                                             foregroundColor: Colors.white,
@@ -360,14 +357,24 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   BorderRadius.circular(16),
                                             ),
                                           ),
-                                          child: Text(
-                                            AppLocalizations.of(context)!
-                                                .loginButton,
-                                            style: const TextStyle(
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
+                                          child: _isLoading
+                                              ? const SizedBox(
+                                                  width: 22,
+                                                  height: 22,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    strokeWidth: 2.5,
+                                                    color: Colors.white,
+                                                  ),
+                                                )
+                                              : Text(
+                                                  AppLocalizations.of(context)!
+                                                      .loginButton,
+                                                  style: const TextStyle(
+                                                    fontSize: 17,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
                                         ),
                                       ),
 

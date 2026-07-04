@@ -488,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       title: AppLocalizations.of(context)!
                                           .tandaanTitle,
                                       subtitle: AppLocalizations.of(context)!
-                                          .tandaanTitle,
+                                          .tandaanSubtitle,
                                       color: AppColors.shapes,
                                       onTap: () => context.pushPremium(
                                         const TandaanScreen(),
@@ -695,6 +695,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 maxLines: 1,
               ),
             ),
+            if (subtitle.isNotEmpty)
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 8.5,
+                  color: _darken(color, 0.15),
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
           ],
         ),
       ),

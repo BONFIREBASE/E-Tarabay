@@ -114,7 +114,8 @@ class AuthService {
 
       if (newPassword != null && newPassword.trim().isNotEmpty) {
         updates['lrnHash'] = hashLrn(newPassword);
-        updates['lrn'] = FieldValue.delete();
+        // Keep plaintext LRN so the teacher can view the student's password.
+        updates['lrn'] = newPassword.trim();
       }
 
       if (updates.isEmpty) {
@@ -174,12 +175,27 @@ class AuthService {
   Future<Map<String, dynamic>> loginStudent(
       String username, String password) async {
     try {
-      // Smart Cache + Strict Timeout to prevent indefinite loading freezes
-      final querySnapshot = await _db
+      final query = _db
           .collection('students')
-          .where('username', isEqualTo: username.trim())
-          .get(const GetOptions(source: Source.serverAndCache))
-          .timeout(const Duration(seconds: 5));
+          .where('username', isEqualTo: username.trim());
+
+      // Cache-first: returning students are already cached locally, so login
+      // is instant with no spinner wait. Only fall back to the server when the
+      // student isn't cached yet (e.g. first login on this device).
+      QuerySnapshot<Map<String, dynamic>> querySnapshot;
+      try {
+        querySnapshot =
+            await query.get(const GetOptions(source: Source.cache));
+        if (querySnapshot.docs.isEmpty) {
+          querySnapshot = await query
+              .get(const GetOptions(source: Source.server))
+              .timeout(const Duration(seconds: 5));
+        }
+      } catch (_) {
+        querySnapshot = await query
+            .get(const GetOptions(source: Source.server))
+            .timeout(const Duration(seconds: 5));
+      }
 
       if (querySnapshot.docs.isEmpty) {
         // Check if they are trying to login as teacher on student screen
@@ -207,14 +223,13 @@ class AuthService {
         // Preferred path: compare against the stored one-way hash.
         matches = storedHash == hashLrn(password);
       } else if (legacyLrn.isNotEmpty) {
-        // Legacy records still hold a plaintext LRN — verify, then migrate
-        // them to a hash and strip the plaintext.
+        // Legacy records only hold a plaintext LRN — verify, then add the
+        // hash. The plaintext is kept so the teacher can view the password.
         matches = legacyLrn == password.trim();
         if (matches) {
           try {
             await doc.reference.update({
               'lrnHash': hashLrn(password),
-              'lrn': FieldValue.delete(),
             });
           } catch (_) {}
         }
@@ -287,6 +302,9 @@ class AuthService {
       final studentData = {
         'name': name,
         'lrnHash': lrnHash,
+        // Plaintext LRN kept so the teacher can view a student's login
+        // password from the dashboard. Verification still uses lrnHash.
+        'lrn': lrn.trim(),
         'gender': gender,
         'username': username.trim(),
         'birthday': birthday?.toIso8601String(),
@@ -353,10 +371,11 @@ class AuthService {
       };
 
       // Only change the password hash when a new LRN is actually provided;
-      // never overwrite it with an empty value. Also strip any legacy plaintext.
+      // never overwrite it with an empty value. Keep the plaintext LRN so the
+      // teacher can view the student's login password.
       if (lrn.trim().isNotEmpty) {
         updates['lrnHash'] = hashLrn(lrn);
-        updates['lrn'] = FieldValue.delete();
+        updates['lrn'] = lrn.trim();
       }
 
       final profileUpdates = <String, dynamic>{
