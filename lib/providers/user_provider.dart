@@ -296,6 +296,7 @@ class UserProvider extends ChangeNotifier {
       name: name,
       gender: gender,
       birthday: birthday,
+      createdAt: DateTime.now(),
       parentName: parentName ?? '',
       parentContact: parentContact ?? '',
       lrn: lrn ?? '',
@@ -378,6 +379,22 @@ class UserProvider extends ChangeNotifier {
         if (data['parentContact'] != null &&
             data['parentContact'].toString().isNotEmpty)
           mergedProfileData['parentContact'] = data['parentContact'];
+        if (data['birthday'] != null &&
+            data['birthday'].toString().isNotEmpty)
+          mergedProfileData['birthday'] = data['birthday'];
+        // Use Firestore's enrolledAt timestamp as createdAt if available and
+        // we don't already have one locally.
+        if (mergedProfileData['createdAt'] == null) {
+          final enrolled = data['enrolledAt'];
+          if (enrolled != null) {
+            if (enrolled is Timestamp) {
+              mergedProfileData['createdAt'] =
+                  enrolled.toDate().toIso8601String();
+            } else if (enrolled is String) {
+              mergedProfileData['createdAt'] = enrolled;
+            }
+          }
+        }
 
         if (mergedProfileData.isNotEmpty) {
           _userProfile = UserProfile.fromJson(mergedProfileData);
@@ -430,26 +447,62 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Remove every progress-related SharedPreferences key. Must cover ALL
+  /// modules (including traceit_ and matematika_) so no stale local progress
+  /// leaks into a different account on the same device.
+  Future<void> _clearProgressPrefs() async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    final keys = prefs
+        .getKeys()
+        .where((k) =>
+            k.startsWith('traceit_') ||
+            k.startsWith('matematika_') ||
+            k.startsWith('mat_') ||
+            k.startsWith('kulay_') ||
+            k.startsWith('magbasa_') ||
+            k.startsWith('pamilya_') ||
+            k.startsWith('tandaan_'))
+        .toList();
+    for (final key in keys) {
+      await prefs.remove(key);
+    }
+  }
+
   Future<void> clearLocalData() async {
     await _ensureInitialized();
     _userProfile = null;
     await _profileBox.clear();
     await _progressBox.clear();
-
-    final prefs = await SharedPreferences.getInstance();
-    final keys = prefs
-        .getKeys()
-        .where((k) =>
-            k.startsWith('kulay_') ||
-            k.startsWith('magbasa_') ||
-            k.startsWith('mat_') ||
-            k.startsWith('pamilya_'))
-        .toList();
-    for (String key in keys) {
-      await prefs.remove(key);
-    }
-
+    await _clearProgressPrefs();
     _initProgressBox();
+    notifyListeners();
+  }
+
+  /// Begin a student session. If a DIFFERENT student was previously on this
+  /// device, wipe all their local data first so the new account starts clean
+  /// (also handles a teacher deleting an account and enrolling a fresh one).
+  Future<void> startStudentSession(String id) async {
+    await _ensureInitialized();
+    final prevId = _prefs?.getString('session_student_id');
+    if (prevId != null && prevId != id) {
+      await clearLocalData();
+    }
+    setCurrentStudentId(id);
+  }
+
+  /// Full wipe + logout — used when the teacher has deleted the account so no
+  /// residual local progress remains for the next (new) account.
+  Future<void> logoutAndClearData() async {
+    _stopProfileListener();
+    await clearLocalData();
+    _currentStudentId = null;
+    _currentRole = null;
+    _hasSyncedFromCloud = false;
+    _isAccountDeleted = false;
+    if (_prefs != null) {
+      await _prefs!.remove('session_student_id');
+      await _prefs!.remove('session_role');
+    }
     notifyListeners();
   }
 

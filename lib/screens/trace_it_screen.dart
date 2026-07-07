@@ -365,6 +365,19 @@ class _StrokeFillPainter extends CustomPainter {
     return path;
   }
 
+  /// Draws [path] as a dashed line using its path metrics.
+  void _drawDashedPath(Canvas canvas, Path path, Paint paint,
+      {double dash = 9, double gap = 7}) {
+    for (final metric in path.computeMetrics()) {
+      double dist = 0;
+      while (dist < metric.length) {
+        final next = math.min(dist + dash, metric.length);
+        canvas.drawPath(metric.extractPath(dist, next), paint);
+        dist += dash + gap;
+      }
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final trackWidth = 26.0 * scale;
@@ -388,6 +401,19 @@ class _StrokeFillPainter extends CustomPainter {
     // 1. All stroke tracks (background).
     for (final stroke in strokes) {
       canvas.drawPath(_screenPath(stroke), trackPaint);
+    }
+
+    // 1b. Dashed centerline guide inside each track so the child sees the
+    // path to follow. The fill drawn next covers the dashes as they trace.
+    final guidePaint = Paint()
+      ..color = (isCompleted ? const Color(0xFF4CAF50) : color)
+          .withOpacity(0.55)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0
+      ..strokeCap = StrokeCap.round;
+    for (final stroke in strokes) {
+      _drawDashedPath(canvas, _screenPath(stroke), guidePaint,
+          dash: 9.0 * scale, gap: 7.0 * scale);
     }
 
     // 2. Filled portions.
@@ -563,11 +589,10 @@ class _TraceItScreenState extends State<TraceItScreen>
 
   LetterData get _currentLetter => _currentLetters[_selectedIndex];
 
-  /// Whether the current item uses the guided drag-fill mechanic.
-  /// ONLY true for uppercase letters (mode 0) — lowercase and numbers always
-  /// use the legacy freehand mechanic (Requirement 6).
+  /// Whether the current item uses the guided drag-fill mechanic. True for any
+  /// mode (uppercase, lowercase, numbers) that has a stroke skeleton.
   bool get _useDragFill =>
-      _selectedMode == 0 && strokesForMode(_selectedMode, _currentLetter.letter) != null;
+      strokesForMode(_selectedMode, _currentLetter.letter) != null;
 
   /// (Re)initialise the drag-to-fill stroke state for the current letter.
   void _initStrokes() {
@@ -1261,9 +1286,12 @@ class _TraceItScreenState extends State<TraceItScreen>
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 2,
-        leading: CustomBackButton(
-          iconColor: AppColors.textDark,
-          onPressed: () => Navigator.pop(context),
+        leadingWidth: 60,
+        leading: Center(
+          child: CustomBackButton(
+            iconColor: AppColors.textDark,
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
         title: FittedBox(
           fit: BoxFit.scaleDown,

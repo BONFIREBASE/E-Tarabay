@@ -2,6 +2,7 @@ class UserProfile {
   String name;
   String gender;
   DateTime? birthday;
+  DateTime? createdAt;
   String parentName;
   String parentContact;
   String lrn;
@@ -28,6 +29,7 @@ class UserProfile {
     required this.name,
     required this.gender,
     this.birthday,
+    this.createdAt,
     this.parentName = '',
     this.parentContact = '',
     this.lrn = '',
@@ -46,6 +48,7 @@ class UserProfile {
       'name': name,
       'gender': gender,
       'birthday': birthday?.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
       'parentName': parentName,
       'parentContact': parentContact,
       'lrn': lrn,
@@ -63,7 +66,9 @@ class UserProfile {
       name: json['name']?.toString() ?? '',
       gender: json['gender']?.toString() ?? '',
       birthday:
-          json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
+          json['birthday'] != null ? DateTime.tryParse(json['birthday'].toString()) : null,
+      createdAt:
+          json['createdAt'] != null ? DateTime.tryParse(json['createdAt'].toString()) : null,
       parentName: json['parentName']?.toString() ?? '',
       parentContact: json['parentContact']?.toString() ?? '',
       lrn: json['lrn']?.toString() ?? '',

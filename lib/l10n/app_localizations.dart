@@ -2668,6 +2668,66 @@ abstract class AppLocalizations {
   /// **'letters'**
   String get lettersLabel;
 
+  /// No description provided for @diffEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get diffEasy;
+
+  /// No description provided for @diffMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get diffMedium;
+
+  /// No description provided for @diffHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get diffHard;
+
+  /// No description provided for @catAnimals.
+  ///
+  /// In en, this message translates to:
+  /// **'Animals'**
+  String get catAnimals;
+
+  /// No description provided for @catFlowers.
+  ///
+  /// In en, this message translates to:
+  /// **'Flowers'**
+  String get catFlowers;
+
+  /// No description provided for @catFruits.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits'**
+  String get catFruits;
+
+  /// No description provided for @catToys.
+  ///
+  /// In en, this message translates to:
+  /// **'Toys'**
+  String get catToys;
+
+  /// No description provided for @poemLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Poem'**
+  String get poemLabel;
+
+  /// No description provided for @storyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Story'**
+  String get storyLabel;
+
+  /// No description provided for @songLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Song'**
+  String get songLabel;
+
   /// No description provided for @activitiesLabel.
   ///
   /// In en, this message translates to:

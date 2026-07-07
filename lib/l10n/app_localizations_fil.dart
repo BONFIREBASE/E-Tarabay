@@ -1361,6 +1361,36 @@ class AppLocalizationsFil extends AppLocalizations {
   String get lettersLabel => 'letra';
 
   @override
+  String get diffEasy => 'Madali';
+
+  @override
+  String get diffMedium => 'Katamtaman';
+
+  @override
+  String get diffHard => 'Mahirap';
+
+  @override
+  String get catAnimals => 'Mga Hayop';
+
+  @override
+  String get catFlowers => 'Mga Bulaklak';
+
+  @override
+  String get catFruits => 'Mga Prutas';
+
+  @override
+  String get catToys => 'Mga Laruan';
+
+  @override
+  String get poemLabel => 'Tula';
+
+  @override
+  String get storyLabel => 'Kwento';
+
+  @override
+  String get songLabel => 'Kanta';
+
+  @override
   String get activitiesLabel => 'aktibidad';
 
   @override

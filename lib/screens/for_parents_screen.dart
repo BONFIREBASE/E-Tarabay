@@ -193,11 +193,6 @@ class _ForParentsScreenState extends State<ForParentsScreen>
     'kwento': Color(0xFFFFB347),
     'kanta': Color(0xFF26A96C),
   };
-  static const Map<String, String> _magbasaLabels = {
-    'tula': 'Tula',
-    'kwento': 'Kwento',
-    'kanta': 'Kanta',
-  };
   // category → completed indices
   final Map<String, Set<int>> _magbasaDone = {
     'tula': {},
@@ -530,12 +525,12 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           const SizedBox(width: 12),
           Expanded(
               child: _summaryCard(
-            icon: LucideIcons.type,
-            label: AppLocalizations.of(context)!.traceItTitle,
-            value: '$totalTrace/$maxTrace',
-            subtitle: AppLocalizations.of(context)!.lettersLabel,
+            icon: LucideIcons.pen_tool,
+            label: AppLocalizations.of(context)!.strokesLabel,
+            value: '$_kulayTotalStrokes',
+            subtitle: AppLocalizations.of(context)!.savedCountLabel,
             color: Colors.deepPurple,
-            progress: maxTrace > 0 ? totalTrace / maxTrace : 0,
+            progress: null,
           )),
         ]),
         const SizedBox(height: 20),
@@ -709,7 +704,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                        Text(catName,
+                        Text(_catLabel(catName),
                             style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -785,7 +780,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                             decoration: BoxDecoration(
                                 color: diffColor.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(8)),
-                            child: Text(diff,
+                            child: Text(_diffLabel(diff),
                                 style: TextStyle(
                                     fontSize: 10,
                                     color: diffColor,
@@ -799,14 +794,16 @@ class _ForParentsScreenState extends State<ForParentsScreen>
                     const SizedBox(height: 4),
                     Row(children: [
                       if (easyDone > 0)
-                        _diffChip('Easy $easyDone', Colors.green),
+                        _diffChip(
+                            '${_diffLabel('Easy')} $easyDone', Colors.green),
                       if (medDone > 0) ...[
                         const SizedBox(width: 6),
-                        _diffChip('Medium $medDone', Colors.orange)
+                        _diffChip(
+                            '${_diffLabel('Medium')} $medDone', Colors.orange)
                       ],
                       if (hardDone > 0) ...[
                         const SizedBox(width: 6),
-                        _diffChip('Hard $hardDone', Colors.red)
+                        _diffChip('${_diffLabel('Hard')} $hardDone', Colors.red)
                       ],
                     ]),
                   ],
@@ -1056,7 +1053,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
           final total = _magbasaTotals[cat] ?? 0;
           final color = _magbasaColors[cat] ?? Colors.grey;
           final icon = _magbasaIcons[cat] ?? LucideIcons.book_open;
-          final label = _magbasaLabels[cat] ?? cat;
+          final label = _magbasaCatLabel(cat);
           final progress = total > 0 ? done / total : 0.0;
 
           return Container(
@@ -1587,6 +1584,51 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         ])),
       ]),
     );
+  }
+
+  // ── Localized label helpers (keep map keys English for progress lookup) ────
+  String _catLabel(String cat) {
+    final loc = AppLocalizations.of(context)!;
+    switch (cat) {
+      case 'Animals':
+        return loc.catAnimals;
+      case 'Flowers':
+        return loc.catFlowers;
+      case 'Fruits':
+        return loc.catFruits;
+      case 'Toys':
+        return loc.catToys;
+      default:
+        return cat;
+    }
+  }
+
+  String _diffLabel(String d) {
+    final loc = AppLocalizations.of(context)!;
+    switch (d) {
+      case 'Easy':
+        return loc.diffEasy;
+      case 'Medium':
+        return loc.diffMedium;
+      case 'Hard':
+        return loc.diffHard;
+      default:
+        return d;
+    }
+  }
+
+  String _magbasaCatLabel(String cat) {
+    final loc = AppLocalizations.of(context)!;
+    switch (cat) {
+      case 'tula':
+        return loc.poemLabel;
+      case 'kwento':
+        return loc.storyLabel;
+      case 'kanta':
+        return loc.songLabel;
+      default:
+        return cat;
+    }
   }
 
   Widget _diffChip(String label, Color color) {

@@ -87,26 +87,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      // Set session data
-      userProvider.setCurrentStudentId(studentId);
+      // Set session data. startStudentSession wipes any previous student's
+      // local data if this is a different account (so a deleted-then-recreated
+      // student, or a different student on this device, starts clean).
+      await userProvider.startStudentSession(studentId);
       userProvider.setCurrentRole('student');
+      if (!mounted) return;
 
       // Make sure a profile exists locally right away (fast, offline) using the
       // data the login already returned — so the home screen has something to
       // show immediately without waiting on the network.
       if (userProvider.userProfile == null) {
         final profile = studentData['profile'] as Map<String, dynamic>?;
+        // Birthday might be at the top-level studentData or inside the profile
+        // sub-map. Check both so newly enrolled students don't show "Not set".
         DateTime? bday;
-        if (profile?['birthday'] != null) {
-          bday = DateTime.tryParse(profile!['birthday']);
+        final bdayStr = profile?['birthday'] ?? studentData['birthday'];
+        if (bdayStr != null) {
+          bday = DateTime.tryParse(bdayStr.toString());
         }
 
         await userProvider.createUserProfile(
           profile?['name'] ?? studentData['name'] ?? username,
           profile?['gender'] ?? studentData['gender'] ?? 'Male',
           birthday: bday,
-          parentName: profile?['parentName'],
-          parentContact: profile?['parentContact'],
+          parentName: profile?['parentName'] ?? studentData['parentName'],
+          parentContact: profile?['parentContact'] ?? studentData['parentContact'],
           lrn: profile?['lrn'] ?? studentData['lrn'],
         );
       }

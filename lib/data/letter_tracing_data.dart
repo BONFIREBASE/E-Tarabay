@@ -1312,12 +1312,164 @@ const Map<String, List<List<Offset>>> uppercaseStrokes = {
   ],
 };
 
-/// Ordered stroke skeletons for the given mode and letter, or null.
-/// Only uppercase (mode 0) has a Stroke_Set — lowercase and numbers always
-/// use the legacy freehand tracing mechanic (Requirement 6).
+// ─────────────────────────────────────────────────────────────────────────────
+//  LOWERCASE STROKE SKELETONS (drag-to-fill)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Map<String, List<List<Offset>>> lowercaseStrokes = {
+  'a': [
+    [Offset(170, 100), Offset(156, 86), Offset(138, 82), Offset(126, 92), Offset(120, 110), Offset(124, 130), Offset(138, 146), Offset(156, 144), Offset(170, 132)],
+    [Offset(170, 86), Offset(170, 150), Offset(178, 162)],
+  ],
+  'b': [
+    [Offset(120, 55), Offset(120, 160)],
+    [Offset(120, 112), Offset(136, 98), Offset(156, 100), Offset(168, 116), Offset(166, 138), Offset(150, 150), Offset(130, 146), Offset(120, 136)],
+  ],
+  'c': [
+    [Offset(168, 95), Offset(152, 82), Offset(134, 80), Offset(122, 92), Offset(118, 116), Offset(124, 140), Offset(140, 152), Offset(158, 152), Offset(168, 142)],
+  ],
+  'd': [
+    [Offset(170, 112), Offset(156, 98), Offset(138, 96), Offset(124, 108), Offset(118, 128), Offset(126, 146), Offset(144, 152), Offset(162, 146), Offset(170, 136)],
+    [Offset(170, 55), Offset(170, 160)],
+  ],
+  'e': [
+    [Offset(120, 120), Offset(160, 120), Offset(168, 106), Offset(158, 88), Offset(138, 82), Offset(122, 92), Offset(117, 116), Offset(126, 142), Offset(146, 154), Offset(166, 150)],
+  ],
+  'f': [
+    [Offset(166, 66), Offset(150, 58), Offset(138, 68), Offset(138, 175)],
+    [Offset(122, 100), Offset(158, 100)],
+  ],
+  'g': [
+    [Offset(170, 96), Offset(154, 84), Offset(136, 86), Offset(124, 100), Offset(122, 120), Offset(132, 136), Offset(150, 140), Offset(168, 132)],
+    [Offset(170, 86), Offset(170, 180), Offset(156, 200), Offset(132, 196)],
+  ],
+  'h': [
+    [Offset(120, 55), Offset(120, 175)],
+    [Offset(120, 108), Offset(134, 92), Offset(154, 90), Offset(168, 104), Offset(168, 175)],
+  ],
+  'i': [
+    [Offset(148, 90), Offset(148, 172)],
+    [Offset(148, 58), Offset(148, 68)],
+  ],
+  'j': [
+    [Offset(160, 90), Offset(160, 175), Offset(148, 196), Offset(130, 188)],
+    [Offset(160, 58), Offset(160, 68)],
+  ],
+  'k': [
+    [Offset(120, 55), Offset(120, 175)],
+    [Offset(165, 90), Offset(120, 128)],
+    [Offset(120, 128), Offset(166, 172)],
+  ],
+  'l': [
+    [Offset(148, 55), Offset(148, 168), Offset(160, 180)],
+  ],
+  'm': [
+    [Offset(112, 90), Offset(112, 175)],
+    [Offset(112, 105), Offset(126, 92), Offset(144, 92), Offset(154, 106), Offset(154, 175)],
+    [Offset(154, 106), Offset(168, 92), Offset(188, 92), Offset(198, 106), Offset(198, 175)],
+  ],
+  'n': [
+    [Offset(120, 90), Offset(120, 175)],
+    [Offset(120, 108), Offset(134, 92), Offset(154, 90), Offset(168, 104), Offset(168, 175)],
+  ],
+  'o': [
+    [Offset(148, 84), Offset(128, 94), Offset(118, 116), Offset(124, 142), Offset(144, 156), Offset(168, 150), Offset(180, 128), Offset(174, 102), Offset(154, 86), Offset(148, 84)],
+  ],
+  'p': [
+    [Offset(120, 90), Offset(120, 205)],
+    [Offset(120, 110), Offset(136, 94), Offset(156, 96), Offset(170, 112), Offset(168, 134), Offset(152, 148), Offset(132, 146), Offset(120, 136)],
+  ],
+  'q': [
+    [Offset(172, 110), Offset(156, 96), Offset(136, 94), Offset(122, 110), Offset(124, 132), Offset(140, 148), Offset(160, 146), Offset(172, 136)],
+    [Offset(172, 90), Offset(172, 205)],
+  ],
+  'r': [
+    [Offset(120, 90), Offset(120, 175)],
+    [Offset(120, 110), Offset(136, 94), Offset(160, 90)],
+  ],
+  's': [
+    [Offset(166, 92), Offset(144, 82), Offset(124, 90), Offset(126, 110), Offset(148, 120), Offset(168, 134), Offset(162, 156), Offset(140, 164), Offset(118, 156)],
+  ],
+  't': [
+    [Offset(146, 58), Offset(146, 168), Offset(160, 180)],
+    [Offset(126, 95), Offset(172, 95)],
+  ],
+  'u': [
+    [Offset(120, 90), Offset(120, 150), Offset(134, 168), Offset(154, 170), Offset(172, 156)],
+    [Offset(172, 90), Offset(172, 172)],
+  ],
+  'v': [
+    [Offset(122, 90), Offset(150, 172), Offset(178, 90)],
+  ],
+  'w': [
+    [Offset(112, 90), Offset(130, 172), Offset(150, 112), Offset(170, 172), Offset(190, 90)],
+  ],
+  'x': [
+    [Offset(122, 90), Offset(180, 172)],
+    [Offset(180, 90), Offset(122, 172)],
+  ],
+  'y': [
+    [Offset(122, 90), Offset(150, 150)],
+    [Offset(180, 90), Offset(150, 150), Offset(136, 185), Offset(120, 205)],
+  ],
+  'z': [
+    [Offset(122, 90), Offset(180, 90), Offset(122, 172), Offset(180, 172)],
+  ],
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  NUMBER STROKE SKELETONS (drag-to-fill)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Map<String, List<List<Offset>>> numberStrokes = {
+  '1': [
+    [Offset(128, 84), Offset(150, 62), Offset(150, 182)],
+  ],
+  '2': [
+    [Offset(122, 78), Offset(140, 60), Offset(162, 64), Offset(172, 84), Offset(160, 108), Offset(132, 140), Offset(120, 178), Offset(178, 178)],
+  ],
+  '3': [
+    [Offset(124, 68), Offset(150, 60), Offset(172, 76), Offset(156, 110), Offset(176, 140), Offset(160, 170), Offset(130, 172), Offset(118, 158)],
+  ],
+  '4': [
+    [Offset(162, 60), Offset(120, 132), Offset(180, 132)],
+    [Offset(162, 60), Offset(162, 185)],
+  ],
+  '5': [
+    [Offset(172, 62), Offset(122, 62), Offset(118, 110), Offset(150, 110), Offset(174, 128), Offset(172, 156), Offset(146, 172), Offset(120, 166)],
+  ],
+  '6': [
+    [Offset(170, 66), Offset(134, 64), Offset(116, 100), Offset(114, 150), Offset(132, 174), Offset(160, 172), Offset(176, 148), Offset(164, 120), Offset(134, 116), Offset(116, 132)],
+  ],
+  '7': [
+    [Offset(118, 64), Offset(178, 64), Offset(138, 185)],
+  ],
+  '8': [
+    [Offset(150, 62), Offset(126, 74), Offset(122, 98), Offset(150, 124), Offset(176, 150), Offset(172, 176), Offset(150, 186), Offset(128, 176), Offset(124, 150), Offset(150, 124), Offset(176, 98), Offset(172, 74), Offset(150, 62)],
+  ],
+  '9': [
+    [Offset(176, 108), Offset(164, 128), Offset(136, 132), Offset(118, 110), Offset(126, 80), Offset(154, 64), Offset(176, 90), Offset(178, 140), Offset(164, 175), Offset(140, 186)],
+  ],
+  '10': [
+    // "1" — small flag then a straight downstroke (left digit).
+    [Offset(96, 82), Offset(112, 66), Offset(112, 186)],
+    // "0" — oval (right digit), spaced a little apart from the "1".
+    [Offset(176, 68), Offset(156, 74), Offset(144, 96), Offset(140, 126), Offset(148, 156), Offset(170, 174), Offset(192, 158), Offset(200, 126), Offset(194, 96), Offset(180, 74), Offset(176, 68)],
+  ],
+};
+
+/// Ordered stroke skeletons for the given mode (0=uppercase, 1=lowercase,
+/// 2=numbers) and letter, or null if none exist. All three modes use the
+/// guided drag-to-fill mechanic.
 List<List<Offset>>? strokesForMode(int mode, String letter) {
-  if (mode != 0) return null;
-  return uppercaseStrokes[letter];
+  switch (mode) {
+    case 0:
+      return uppercaseStrokes[letter];
+    case 1:
+      return lowercaseStrokes[letter];
+    default:
+      return numberStrokes[letter];
+  }
 }
 
 /// Testing/verification helper: concatenates a Stroke_Set in order.

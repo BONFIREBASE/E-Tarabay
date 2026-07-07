@@ -155,7 +155,9 @@ class ProfileScreen extends StatelessWidget {
                         // Member Since
                         _buildProfileField(
                           AppLocalizations.of(context)!.memberSince,
-                          AppLocalizations.of(context)!.notSet,
+                          userProfile.createdAt != null
+                              ? _formatBirthday(context, userProfile.createdAt)
+                              : AppLocalizations.of(context)!.notSet,
                           LucideIcons.calendar,
                         ),
                       ],

@@ -80,7 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () async {
                   final userProvider =
                       Provider.of<UserProvider>(context, listen: false);
-                  await userProvider.logout();
+                  // Account was deleted by the teacher — wipe all local data so
+                  // no progress carries over to the next account on this device.
+                  await userProvider.logoutAndClearData();
                   if (!context.mounted) return;
                   Navigator.of(context).pushNamedAndRemoveUntil(
                       '/', (Route<dynamic> route) => false);

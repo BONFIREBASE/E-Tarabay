@@ -1351,6 +1351,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lettersLabel => 'letters';
 
   @override
+  String get diffEasy => 'Easy';
+
+  @override
+  String get diffMedium => 'Medium';
+
+  @override
+  String get diffHard => 'Hard';
+
+  @override
+  String get catAnimals => 'Animals';
+
+  @override
+  String get catFlowers => 'Flowers';
+
+  @override
+  String get catFruits => 'Fruits';
+
+  @override
+  String get catToys => 'Toys';
+
+  @override
+  String get poemLabel => 'Poem';
+
+  @override
+  String get storyLabel => 'Story';
+
+  @override
+  String get songLabel => 'Song';
+
+  @override
   String get activitiesLabel => 'activities';
 
   @override

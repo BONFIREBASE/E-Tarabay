@@ -1360,6 +1360,36 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get lettersLabel => 'letra';
 
   @override
+  String get diffEasy => 'Nalaka';
+
+  @override
+  String get diffMedium => 'Katengngaan';
+
+  @override
+  String get diffHard => 'Narigat';
+
+  @override
+  String get catAnimals => 'Ay-ayup';
+
+  @override
+  String get catFlowers => 'Sabsabong';
+
+  @override
+  String get catFruits => 'Prutas';
+
+  @override
+  String get catToys => 'Ay-ayam';
+
+  @override
+  String get poemLabel => 'Daniw';
+
+  @override
+  String get storyLabel => 'Sarita';
+
+  @override
+  String get songLabel => 'Kanta';
+
+  @override
   String get activitiesLabel => 'aktibidad';
 
   @override

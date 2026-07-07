@@ -43,7 +43,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Support 32-bit (armeabi-v7a) and 64-bit (arm64-v8a) phones. Exclude x86_64 (emulators).
+        // Only include 32-bit and 64-bit ARM (no x86_64 emulator lib).
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
         }
