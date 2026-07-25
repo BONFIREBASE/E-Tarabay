@@ -672,11 +672,26 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Icon(
-                    isCompleted ? LucideIcons.lock : LucideIcons.chevron_right,
-                    color: isCompleted ? Colors.green : Colors.grey.shade400,
-                    size: 16,
-                  ),
+                  if (isCompleted)
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFFFBEB),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        LucideIcons.star,
+                        color: Color(0xFFFFD700),
+                        fill: 1.0,
+                        size: 20,
+                      ),
+                    )
+                  else
+                    Icon(
+                      LucideIcons.chevron_right,
+                      color: Colors.grey.shade400,
+                      size: 16,
+                    ),
                 ],
               ),
               const SizedBox(height: 12),

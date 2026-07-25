@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:convert';
+import 'dart:math';
 import 'package:crypto/crypto.dart';
 
 class AuthService {
@@ -257,10 +258,44 @@ class AuthService {
     }
   }
 
+  /// Validate password format for DC-2026-0001 structure.
+  /// Format: DC-YYYY-XXXX (e.g., DC-2026-0001)
+  /// Also detects repeated digits in suffix (e.g. DC-2026-0000, DC-2026-1111).
+  static Map<String, dynamic> validateDcPasswordFormat(String password) {
+    final trimmed = password.trim();
+    if (trimmed.isEmpty) {
+      return {'isValid': false, 'message': 'Password (LRN) cannot be empty.'};
+    }
+
+    // Match DC-XXXX-XXXX format (e.g. DC-2026-0001)
+    final regex = RegExp(r'^DC-\d{4}-\d{4}$', caseSensitive: false);
+    if (!regex.hasMatch(trimmed)) {
+      return {
+        'isValid': false,
+        'message': 'Password must follow format: DC-2026-0001',
+      };
+    }
+
+    // Extract trailing numeric portion
+    final parts = trimmed.split('-');
+    final numericPart = parts.last;
+
+    // Check for identical repeated digits
+    if (RegExp(r'^(\d)\1{3}$').hasMatch(numericPart)) {
+      return {
+        'isValid': false,
+        'message': 'Password cannot contain repeated digits (e.g., 0000, 1111).',
+      };
+    }
+
+    return {'isValid': true, 'message': ''};
+  }
+
   /// Enroll a student — called by the teacher.
   /// Adds a new student record to `students` collection.
   Future<Map<String, dynamic>> enrollStudent({
     required String name,
+    String middleName = '',
     required String lrn,
     required String gender,
     required String username,
@@ -301,6 +336,7 @@ class AuthService {
       final docRef = _db.collection('students').doc();
       final studentData = {
         'name': name,
+        'middleName': middleName.trim(),
         'lrnHash': lrnHash,
         // Plaintext LRN kept so the teacher can view a student's login
         // password from the dashboard. Verification still uses lrnHash.
@@ -319,6 +355,7 @@ class AuthService {
         },
         'profile': {
           'name': name,
+          'middleName': middleName.trim(),
           'gender': gender,
           'birthday': birthday?.toIso8601String(),
           'parentName': parentName,
@@ -358,6 +395,7 @@ class AuthService {
   Future<void> updateStudent({
     required String studentId,
     required String name,
+    String? middleName,
     required String lrn,
     String? gender,
     DateTime? birthday,
@@ -370,6 +408,10 @@ class AuthService {
         'name': name,
       };
 
+      if (middleName != null) {
+        updates['middleName'] = middleName.trim();
+      }
+
       // Only change the password hash when a new LRN is actually provided;
       // never overwrite it with an empty value. Keep the plaintext LRN so the
       // teacher can view the student's login password.
@@ -381,6 +423,9 @@ class AuthService {
       final profileUpdates = <String, dynamic>{
         'profile.name': name,
       };
+      if (middleName != null) {
+        profileUpdates['profile.middleName'] = middleName.trim();
+      }
 
       if (gender != null) {
         updates['gender'] = gender;
@@ -457,6 +502,74 @@ class AuthService {
       return {
         'status': 'Error',
         'message': 'Could not delete students. Please try again.',
+      };
+    }
+  }
+
+  /// Reset credentials for all existing students to DC-2026-XXXX format.
+  Future<Map<String, dynamic>> resetAllStudentCredentialsToDcFormat() async {
+    try {
+      final querySnapshot = await _db.collection('students').get();
+      final docs = querySnapshot.docs;
+
+      if (docs.isEmpty) {
+        return {
+          'status': 'Success',
+          'message': 'No students found to reset.',
+          'updatedStudents': <Map<String, String>>[],
+        };
+      }
+
+      final year = DateTime.now().year;
+      final updatedList = <Map<String, String>>[];
+      final usedIds = <String>{};
+
+      const int batchLimit = 500;
+      for (var i = 0; i < docs.length; i += batchLimit) {
+        final batch = _db.batch();
+        final end =
+            (i + batchLimit < docs.length) ? i + batchLimit : docs.length;
+
+        for (var j = i; j < end; j++) {
+          final doc = docs[j];
+          final name = (doc.data()['name'] ?? 'Student').toString();
+          final username = (doc.data()['username'] ?? '').toString();
+
+          // Generate unique DC-YYYY-XXXX ID
+          String newId;
+          do {
+            final rand = (Random().nextInt(9000) + 1000).toString();
+            newId = 'DC-$year-$rand';
+          } while (usedIds.contains(newId));
+
+          usedIds.add(newId);
+          final newHash = hashLrn(newId);
+
+          batch.update(doc.reference, {
+            'lrn': newId,
+            'lrnHash': newHash,
+            'profile.lrn': newId,
+          });
+
+          updatedList.add({
+            'name': name,
+            'username': username,
+            'studentId': newId,
+          });
+        }
+        await batch.commit();
+      }
+
+      return {
+        'status': 'Success',
+        'message': 'Successfully reset credentials for ${docs.length} students.',
+        'updatedStudents': updatedList,
+      };
+    } catch (e) {
+      debugPrint('Error resetting student credentials: $e');
+      return {
+        'status': 'Error',
+        'message': 'Failed to reset credentials. Please try again.',
       };
     }
   }

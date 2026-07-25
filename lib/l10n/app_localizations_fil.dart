@@ -40,7 +40,7 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
-  String get finished => 'Tapos na! 🏆';
+  String get finished => 'Tapos na! ';
 
   @override
   String get previous => 'Nauna';
@@ -55,7 +55,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get earned => 'natamo';
 
   @override
-  String get levels => 'Levels';
+  String get levels => 'Mga Antas';
 
   @override
   String get activities => 'mga aktibidad';
@@ -108,16 +108,16 @@ class AppLocalizationsFil extends AppLocalizations {
   String get alpabetoAtMgaSalita => 'MGA TULA, KWENTO AT KANTA';
 
   @override
-  String get home => 'Home';
+  String get home => 'Tahanan';
 
   @override
-  String get profile => 'Profile';
+  String get profile => 'Profil';
 
   @override
   String get videoDance => 'Sayaw Video';
 
   @override
-  String get settingsTitle => 'Settings';
+  String get settingsTitle => 'Mga Setting';
 
   @override
   String get totalProgress => 'Kabuuang Progress';
@@ -165,10 +165,10 @@ class AppLocalizationsFil extends AppLocalizations {
   String get moreOrLess => 'Marami o Kaunti?';
 
   @override
-  String get numberPuzzle => 'Number Puzzle';
+  String get numberPuzzle => 'Palaisipan ng Numero';
 
   @override
-  String get numberSequence => 'Number Sequence';
+  String get numberSequence => 'Pagkakasunod ng Numero';
 
   @override
   String get chooseAnswer => 'Piliin ang tamang sagot:';
@@ -187,11 +187,11 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String level(int level) {
-    return 'Level $level';
+    return 'Antas $level';
   }
 
   @override
-  String get levelShort => 'L';
+  String get levelShort => 'A';
 
   @override
   String get perfect => 'Perpekto!';
@@ -343,7 +343,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get familyActivities => 'Gawaing Pampamilya';
 
   @override
-  String get familyTree => 'Family Tree';
+  String get familyTree => 'Puno ng Pamilya';
 
   @override
   String get myHome => 'Aming Tahanan';
@@ -514,8 +514,8 @@ class AppLocalizationsFil extends AppLocalizations {
   String get justNow => 'ngayon lang';
 
   @override
-  String timeAgo(int amount, String unit) {
-    return '\$${amount}m ang nakalipas';
+  String timeAgo(int amount) {
+    return '${amount}m ang nakalipas';
   }
 
   @override
@@ -525,7 +525,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get others => 'Iba pa';
 
   @override
-  String get coloringBook => 'Coloring Book';
+  String get coloringBook => 'Libro ng Pagkukulay';
 
   @override
   String get myCreations => 'Aking mga Likha';
@@ -585,7 +585,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get hard => 'Mahirap';
 
   @override
-  String get brush => 'Brush';
+  String get brush => 'Pinsel';
 
   @override
   String get eraser => 'Pambura';
@@ -713,7 +713,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get parentsTotalStars => 'Kabuuang Bituin';
 
   @override
-  String get badges => 'badges';
+  String get badges => 'mga badge';
 
   @override
   String get myProfile => 'Aking Profile';
@@ -751,7 +751,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get comingSoon => 'Malapit na!';
 
   @override
-  String get settings => 'Settings';
+  String get settings => 'Mga Setting';
 
   @override
   String get language => 'Wika';
@@ -852,7 +852,7 @@ class AppLocalizationsFil extends AppLocalizations {
       'Kumpletuhin ang mga aktibidad para makakuha ng gantimpala!';
 
   @override
-  String get teacherDashboard => 'Teacher Dashboard';
+  String get teacherDashboard => 'Dashboard ng Guro';
 
   @override
   String get enrollStudent => 'I-enroll ang Estudyante';
@@ -864,7 +864,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get lastName => 'Apelyido';
 
   @override
-  String get lRN => 'LRN (Password)';
+  String get lRN => 'Student ID (Password)';
 
   @override
   String get usernameLabel => 'Username (Auto-generated)';
@@ -885,23 +885,23 @@ class AppLocalizationsFil extends AppLocalizations {
   String get logout => 'Mag-logout';
 
   @override
-  String get confirmLogout => '\'Sigurado ka bang gusto mong mag-logout?\',';
+  String get confirmLogout => 'Sigurado ka bang gusto mong mag-logout?';
 
   @override
-  String get verifyLRN => 'I-verify ang LRN';
+  String get verifyLRN => 'Verify Student ID';
 
   @override
-  String get enterLRN => 'Mangyaring ilagay ang iyong LRN para magpatuloy';
+  String get enterLRN => 'Please enter your Student ID to proceed';
 
   @override
-  String get invalidLRN => 'Maling LRN. Pakisubukan muli.';
+  String get invalidLRN => 'Invalid Student ID. Please try again.';
 
   @override
   String get password => 'Password';
 
   @override
   String get enrollmentInfo =>
-      'Ibigay ang username at LRN sa magulang/estudyante para sa login.';
+      'Ibigay ang username at Student ID sa magulang/estudyante para sa login.';
 
   @override
   String get fillAllFields => 'Pakisuyong punan ang lahat ng fields.';
@@ -942,7 +942,7 @@ class AppLocalizationsFil extends AppLocalizations {
   }
 
   @override
-  String get loginCredentials => 'Login Credentials:';
+  String get loginCredentials => 'Mga Kredensyal sa Pag-login:';
 
   @override
   String get userLabel => 'User:';
@@ -1039,7 +1039,7 @@ class AppLocalizationsFil extends AppLocalizations {
 
   @override
   String monthName(int month) {
-    return 'Hindi nakatakda';
+    return 'Buwan $month';
   }
 
   @override
@@ -1531,7 +1531,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get confirm => 'Kumpirmahin';
 
   @override
-  String get rateYourArtwork => 'Rate Artwork';
+  String get rateYourArtwork => 'I-rate ang Likha';
 
   @override
   String get howManyStars => 'Ilang bituin ang ibibigay mo?';
@@ -1628,7 +1628,7 @@ class AppLocalizationsFil extends AppLocalizations {
   String get obraLabel => 'Obra';
 
   @override
-  String get strokesLabel => 'Strokes';
+  String get strokesLabel => 'Mga Pahid';
 
   @override
   String get categoryProgressHeader => 'Progreso sa Bawat Kategorya';

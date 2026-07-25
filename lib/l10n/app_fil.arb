@@ -23,12 +23,12 @@
       }
     }
   },
-  "finished": "Tapos na! 🏆",
+  "finished": "Tapos na! ",
   "previous": "Nauna",
   "completed": "Tapos na",
   "inProgress": "Isinasagawa",
   "earned": "natamo",
-  "levels": "Levels",
+  "levels": "Mga Antas",
   "activities": "mga aktibidad",
   "appTitle": "E-Tarabay",
   "parents": "MGA MAGULANG",
@@ -52,10 +52,10 @@
   "sundanMo": "SUNDAN MO,",
   "magbasaTitle": "Magbasa Tayo",
   "alpabetoAtMgaSalita": "MGA TULA, KWENTO AT KANTA",
-  "home": "Home",
-  "profile": "Profile",
+  "home": "Tahanan",
+  "profile": "Profil",
   "videoDance": "Sayaw Video",
-  "settingsTitle": "Settings",
+  "settingsTitle": "Mga Setting",
   "totalProgress": "Kabuuang Progress",
   "poems": "Mga Tula",
   "stories": "Mga Kwento",
@@ -71,14 +71,14 @@
   "lineMatch": "Itugma gamit ang Linya",
   "popBalloon": "I-pop ang Balloon",
   "moreOrLess": "Marami o Kaunti?",
-  "numberPuzzle": "Number Puzzle",
-  "numberSequence": "Number Sequence",
+  "numberPuzzle": "Palaisipan ng Numero",
+  "numberSequence": "Pagkakasunod ng Numero",
   "chooseAnswer": "Piliin ang tamang sagot:",
   "check": "Suriin",
   "correct": "Tama!",
   "wrong": "Mali! Subukan muli!",
   "timeOut": "Ubos na ang oras! Subukan muli.",
-  "level": "Level {level}",
+  "level": "Antas {level}",
   "@level": {
     "placeholders": {
       "level": {
@@ -86,6 +86,7 @@
       }
     }
   },
+  "levelShort": "A",
   "perfect": "Perpekto!",
   "great": "Magaling!",
   "good": "Mabuti!",
@@ -167,7 +168,7 @@
   "familyMembers": "Mga Miyembro ng Pamilya",
   "familyRoles": "Tungkulin sa Pamilya",
   "familyActivities": "Gawaing Pampamilya",
-  "familyTree": "Family Tree",
+  "familyTree": "Puno ng Pamilya",
   "myHome": "Aming Tahanan",
   "whatIsYourName": "Ano ang pangalan mo?",
   "howOldAreYou": "Ilang taon ka na?",
@@ -229,20 +230,17 @@
   "giveArtworkName": "Bigyan ng pangalan ang iyong artwork...",
   "colorSomethingFirst": "Magkulay muna ng kahit ano!",
   "justNow": "ngayon lang",
-  "timeAgo": "${amount}m ang nakalipas",
+  "timeAgo": "{amount}m ang nakalipas",
   "@timeAgo": {
     "placeholders": {
       "amount": {
         "type": "int"
-      },
-      "unit": {
-        "type": "String"
       }
     }
   },
   "saved": "Nai-save na!",
   "others": "Iba pa",
-  "coloringBook": "Coloring Book",
+  "coloringBook": "Libro ng Pagkukulay",
   "myCreations": "Aking mga Likha",
   "color": "Kulay",
   "animals": "Mga Hayop",
@@ -262,7 +260,7 @@
   "easy": "Madali",
   "medium": "Katamtaman",
   "hard": "Mahirap",
-  "brush": "Brush",
+  "brush": "Pinsel",
   "eraser": "Pambura",
   "undo": "Urong",
   "redo": "Ulitin",
@@ -330,7 +328,7 @@
     }
   },
   "parentsTotalStars": "Kabuuang Bituin",
-  "badges": "badges",
+  "badges": "mga badge",
   "myProfile": "Aking Profile",
   "yearsOld": "{age} taong gulang",
   "@yearsOld": {
@@ -349,7 +347,7 @@
   "editProfile": "I-edit ang Profile",
   "noProfileData": "Walang data ng profile",
   "comingSoon": "Malapit na!",
-  "settings": "Settings",
+  "settings": "Mga Setting",
   "language": "Wika",
   "sound": "Tunog",
   "music": "Musika",
@@ -382,23 +380,23 @@
   "perfectScoreDesc": "Mag-perpekto sa 3 laro",
   "noAwardsYet": "Wala pang Gantimpala",
   "completeActivitiesToEarn": "Kumpletuhin ang mga aktibidad para makakuha ng gantimpala!",
-  "teacherDashboard": "Teacher Dashboard",
+  "teacherDashboard": "Dashboard ng Guro",
   "enrollStudent": "I-enroll ang Estudyante",
   "firstName": "Unang Pangalan",
   "lastName": "Apelyido",
-  "lRN": "LRN (Password)",
+  "studentID": "Student ID (Password)",
   "usernameLabel": "Username (Auto-generated)",
   "genderLabel": "Kasarian",
   "studentInfo": "Impormasyon ng Estudyante",
   "removeStudent": "Tanggalin ang Estudyante?",
   "progressLabel": "Progress",
   "logout": "Mag-logout",
-  "confirmLogout": "'Sigurado ka bang gusto mong mag-logout?',",
-  "verifyLRN": "I-verify ang LRN",
-  "enterLRN": "Mangyaring ilagay ang iyong LRN para magpatuloy",
-  "invalidLRN": "Maling LRN. Pakisubukan muli.",
+  "confirmLogout": "Sigurado ka bang gusto mong mag-logout?",
+  "verifyStudentID": "I-verify ang Student ID",
+  "enterStudentID": "Mangyaring ilagay ang iyong Student ID para magpatuloy",
+  "invalidStudentID": "Maling Student ID. Pakisubukan muli.",
   "password": "Password",
-  "enrollmentInfo": "Ibigay ang username at LRN sa magulang/estudyante para sa login.",
+  "enrollmentInfo": "Ibigay ang username at Student ID sa magulang/estudyante para sa login.",
   "fillAllFields": "Pakisuyong punan ang lahat ng fields.",
   "parentsInfo": "Impormasyon ng Magulang",
   "parentNameLabel": "Pangalan ng Magulang",
@@ -424,7 +422,7 @@
       }
     }
   },
-  "loginCredentials": "Login Credentials:",
+  "loginCredentials": "Mga Kredensyal sa Pag-login:",
   "userLabel": "User:",
   "usernameCopied": "Username ay nakopya!",
   "passwordLabel": "Pass:",
@@ -467,7 +465,7 @@
   "teacherLoginPrompt": "Ipasok ang iyong teacher credentials para magpatuloy",
   "teacherLoginButtonLabel": "Mag-login bilang Guro",
   "invalidTeacherCredentials": "Maling teacher credentials. Pakisubukang muli.",
-  "monthName": "Hindi nakatakda",
+  "monthName": "Buwan {month}",
   "@monthName": {
     "placeholders": {
       "month": {
@@ -646,7 +644,7 @@
   "resetAllStudents": "I-reset Lahat ng Mag-aaral",
   "confirmResetAllStudents": "Sigurado ka bang gusto mong burahin ang lahat ng naka-enroll na mag-aaral? Hindi ito maa-undo.",
   "confirm": "Kumpirmahin",
-  "rateYourArtwork": "Rate Artwork",
+  "rateYourArtwork": "I-rate ang Likha",
   "howManyStars": "Ilang bituin ang ibibigay mo?",
   "tapToView": "Pindutin para tingnan",
   "delete": "Burahin",
@@ -693,7 +691,7 @@
     }
   },
   "obraLabel": "Obra",
-  "strokesLabel": "Strokes",
+  "strokesLabel": "Mga Pahid",
   "categoryProgressHeader": "Progreso sa Bawat Kategorya",
   "savedArtworksHeader": "Mga Nai-save na Obra",
   "parentTipsHeader": "Tips para sa Magulang",
@@ -792,5 +790,22 @@
   "claimBadgeBody": "Nakuha mo ang badge na ito! Angkinin ito para idagdag sa iyong koleksyon.",
   "claimBadge": "Angkinin ang {title}",
   "plusStarsLabel": "+{stars} Bituin",
-  "awardsWaiting": "{earned} ang nakuha, {remaining} ang naghihintay na angkinin!"
+  "@plusStarsLabel": {
+    "placeholders": {
+      "stars": {
+        "type": "int"
+      }
+    }
+  },
+  "awardsWaiting": "{earned} ang nakuha, {remaining} ang naghihintay na angkinin!",
+  "@awardsWaiting": {
+    "placeholders": {
+      "earned": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  }
 }

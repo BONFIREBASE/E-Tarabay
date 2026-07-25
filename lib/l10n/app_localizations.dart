@@ -607,7 +607,7 @@ abstract class AppLocalizations {
   /// No description provided for @whatsMissing.
   ///
   /// In en, this message translates to:
-  /// **'What\\\'s missing?'**
+  /// **'What\'s missing?'**
   String get whatsMissing;
 
   /// No description provided for @noGames.
@@ -847,7 +847,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyRolesSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'What is everyone\\\'s job?'**
+  /// **'What is everyone\'s job?'**
   String get familyRolesSubtitle;
 
   /// No description provided for @familyActivitiesSubtitle.
@@ -1063,8 +1063,8 @@ abstract class AppLocalizations {
   /// No description provided for @timeAgo.
   ///
   /// In en, this message translates to:
-  /// **'\${amount}m ago'**
-  String timeAgo(int amount, String unit);
+  /// **'{amount}m ago'**
+  String timeAgo(int amount);
 
   /// No description provided for @saved.
   ///
@@ -1327,7 +1327,7 @@ abstract class AppLocalizations {
   /// No description provided for @tooHardSwitch.
   ///
   /// In en, this message translates to:
-  /// **'Too hard? Let\\\'s try the next one!'**
+  /// **'Too hard? Let\'s try the next one!'**
   String get tooHardSwitch;
 
   /// No description provided for @reTrace.
@@ -1735,7 +1735,7 @@ abstract class AppLocalizations {
   /// No description provided for @lRN.
   ///
   /// In en, this message translates to:
-  /// **'LRN (Password)'**
+  /// **'Student ID (Password)'**
   String get lRN;
 
   /// No description provided for @usernameLabel.
@@ -1783,19 +1783,19 @@ abstract class AppLocalizations {
   /// No description provided for @verifyLRN.
   ///
   /// In en, this message translates to:
-  /// **'Verify LRN'**
+  /// **'Verify Student ID'**
   String get verifyLRN;
 
   /// No description provided for @enterLRN.
   ///
   /// In en, this message translates to:
-  /// **'Please enter your LRN to proceed'**
+  /// **'Please enter your Student ID to proceed'**
   String get enterLRN;
 
   /// No description provided for @invalidLRN.
   ///
   /// In en, this message translates to:
-  /// **'Invalid LRN. Please try again.'**
+  /// **'Invalid Student ID. Please try again.'**
   String get invalidLRN;
 
   /// No description provided for @password.
@@ -1807,7 +1807,7 @@ abstract class AppLocalizations {
   /// No description provided for @enrollmentInfo.
   ///
   /// In en, this message translates to:
-  /// **'Give the username and LRN to the parent/student for login.'**
+  /// **'Give the username and Student ID to the parent/student for login.'**
   String get enrollmentInfo;
 
   /// No description provided for @fillAllFields.
@@ -2053,7 +2053,7 @@ abstract class AppLocalizations {
   /// No description provided for @monthName.
   ///
   /// In en, this message translates to:
-  /// **'Not set'**
+  /// **'Month {month}'**
   String monthName(int month);
 
   /// No description provided for @notSet.
@@ -2647,13 +2647,13 @@ abstract class AppLocalizations {
   /// No description provided for @artworksLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mga Obra'**
+  /// **'Artworks'**
   String get artworksLabel;
 
   /// No description provided for @attemptsLabel.
   ///
   /// In en, this message translates to:
-  /// **'Mga Subukan'**
+  /// **'Attempts'**
   String get attemptsLabel;
 
   /// No description provided for @pagesLabel.
@@ -3577,7 +3577,7 @@ abstract class AppLocalizations {
   /// No description provided for @awardsWaiting.
   ///
   /// In en, this message translates to:
-  /// **'{earned} earned, {remaining} waiting to claim!'**
+  /// **'{earned} earned, {remaining} waiting to be claimed!'**
   String awardsWaiting(int earned, int remaining);
 }
 

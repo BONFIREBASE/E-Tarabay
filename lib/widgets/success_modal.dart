@@ -110,8 +110,9 @@ class _SuccessModalState extends State<SuccessModal> {
                   children: List.generate(3, (index) {
                     final bool isFull = index < widget.stars;
                     return Icon(
-                      isFull ? LucideIcons.star : LucideIcons.star,
-                      color: Colors.amber,
+                      LucideIcons.star,
+                      color: isFull ? const Color(0xFFFFD700) : Colors.grey.shade300,
+                      fill: isFull ? 1.0 : 0.0,
                       size: 48,
                     )
                         .animate(delay: (400 + (index * 150)).ms)

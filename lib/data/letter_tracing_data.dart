@@ -1177,20 +1177,22 @@ const List<LetterData> numberLetters = [
       color: Colors.cyan,
       difficulty: 3,
       points: [
-        Offset(78, 80),
-        Offset(95, 65),
-        Offset(95, 185),
-        Offset(130, 62),
-        Offset(112, 75),
-        Offset(108, 110),
-        Offset(112, 148),
-        Offset(132, 172),
-        Offset(158, 172),
-        Offset(175, 148),
-        Offset(178, 110),
-        Offset(172, 75),
-        Offset(150, 62),
-        Offset(130, 62)
+        Offset(94, 82),
+        Offset(110, 66),
+        Offset(110, 186),
+        Offset(180, 62),
+        Offset(155, 68),
+        Offset(142, 85),
+        Offset(138, 124),
+        Offset(142, 163),
+        Offset(155, 180),
+        Offset(180, 186),
+        Offset(205, 180),
+        Offset(218, 163),
+        Offset(222, 124),
+        Offset(218, 85),
+        Offset(205, 68),
+        Offset(180, 62)
       ]),
 ];
 
@@ -1452,9 +1454,9 @@ const Map<String, List<List<Offset>>> numberStrokes = {
   ],
   '10': [
     // "1" — small flag then a straight downstroke (left digit).
-    [Offset(96, 82), Offset(112, 66), Offset(112, 186)],
-    // "0" — oval (right digit), spaced a little apart from the "1".
-    [Offset(176, 68), Offset(156, 74), Offset(144, 96), Offset(140, 126), Offset(148, 156), Offset(170, 174), Offset(192, 158), Offset(200, 126), Offset(194, 96), Offset(180, 74), Offset(176, 68)],
+    [Offset(94, 82), Offset(110, 66), Offset(110, 186)],
+    // "0" — smooth oblong / stadium shape (right digit), matching height of "1".
+    [Offset(180, 62), Offset(155, 68), Offset(142, 85), Offset(138, 124), Offset(142, 163), Offset(155, 180), Offset(180, 186), Offset(205, 180), Offset(218, 163), Offset(222, 124), Offset(218, 85), Offset(205, 68), Offset(180, 62)],
   ],
 };
 

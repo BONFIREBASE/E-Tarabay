@@ -1,5 +1,6 @@
 class UserProfile {
   String name;
+  String middleName;
   String gender;
   DateTime? birthday;
   DateTime? createdAt;
@@ -27,6 +28,7 @@ class UserProfile {
 
   UserProfile({
     required this.name,
+    this.middleName = '',
     required this.gender,
     this.birthday,
     this.createdAt,
@@ -46,6 +48,7 @@ class UserProfile {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'middleName': middleName,
       'gender': gender,
       'birthday': birthday?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
@@ -61,14 +64,38 @@ class UserProfile {
     };
   }
 
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+    try {
+      if (value is Map && value.containsKey('seconds')) {
+        final secs = value['seconds'];
+        if (secs is int) {
+          return DateTime.fromMillisecondsSinceEpoch(secs * 1000);
+        }
+      }
+      final str = value.toString();
+      if (str.contains('seconds=')) {
+        final match = RegExp(r'seconds=(\d+)').firstMatch(str);
+        if (match != null) {
+          final secs = int.parse(match.group(1)!);
+          return DateTime.fromMillisecondsSinceEpoch(secs * 1000);
+        }
+      }
+      return DateTime.tryParse(str);
+    } catch (_) {
+      return null;
+    }
+  }
+
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       name: json['name']?.toString() ?? '',
+      middleName: json['middleName']?.toString() ?? '',
       gender: json['gender']?.toString() ?? '',
-      birthday:
-          json['birthday'] != null ? DateTime.tryParse(json['birthday'].toString()) : null,
-      createdAt:
-          json['createdAt'] != null ? DateTime.tryParse(json['createdAt'].toString()) : null,
+      birthday: _parseDateTime(json['birthday']),
+      createdAt: _parseDateTime(json['createdAt']),
       parentName: json['parentName']?.toString() ?? '',
       parentContact: json['parentContact']?.toString() ?? '',
       lrn: json['lrn']?.toString() ?? '',

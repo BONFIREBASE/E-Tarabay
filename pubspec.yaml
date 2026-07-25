@@ -1,7 +1,7 @@
 name: e_tarabay
 description: "Ang Kabataan ay Pagasa ng Bayan"
 publish_to: 'none'
-version: 1.0.4
+version: 1.0.5
 
 environment:
   sdk: ^3.5.4
@@ -49,7 +49,6 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
-    - assets/images/splash_logo.png
     - assets/images/bg_home.jpg
     - assets/images/bg_lesson.jpg
     - assets/images/bg_awards.jpg
@@ -89,17 +88,21 @@ flutter:
     - assets/images/song6.png
     - assets/images/song7.png
     - assets/images/song8.png
-    - assets/images/logo.png
+    - assets/images/app_logo.jpg
+    - assets/images/app_logo-transparent.png
     - assets/audio/tunog.mp3
     - assets/audio/Ania ti Nagan Mo by Kurtjam Kyle Silva Nono.mp3
     - assets/audio/modules_bg/
 flutter_launcher_icons:
-  android: "launcher_icon"
+  android: true
   ios: true
-  image_path: "assets/images/logo.png"
-  min_sdk_android: 21 # android min sdk min:16, default 21
+  image_path: "assets/images/app_logo.jpg"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/app_logo-transparent.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
   web:
     generate: true
-    image_path: "assets/images/logo.png"
-    background_color: "#hexcode"
-    theme_color: "#hexcode"
+    image_path: "assets/images/app_logo.jpg"
+    background_color: "#5C52E5"
+    theme_color: "#5C52E5"

@@ -14,6 +14,38 @@ class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   String _getMonthName(BuildContext context, int month) {
+    const en = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    const fil = [
+      'Enero',
+      'Pebrero',
+      'Marso',
+      'Abril',
+      'Mayo',
+      'Hunyo',
+      'Hulyo',
+      'Agosto',
+      'Setyembre',
+      'Oktubre',
+      'Nobyembre',
+      'Disyembre'
+    ];
+    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
+    if (month >= 1 && month <= 12) {
+      return (lang == 'fil' || lang == 'ilo') ? fil[month - 1] : en[month - 1];
+    }
     return AppLocalizations.of(context)!.monthName(month);
   }
 
@@ -155,9 +187,12 @@ class ProfileScreen extends StatelessWidget {
                         // Member Since
                         _buildProfileField(
                           AppLocalizations.of(context)!.memberSince,
-                          userProfile.createdAt != null
-                              ? _formatBirthday(context, userProfile.createdAt)
-                              : AppLocalizations.of(context)!.notSet,
+                          _formatBirthday(
+                            context,
+                            userProfile.createdAt ??
+                                userProfile.birthday ??
+                                DateTime.now(),
+                          ),
                           LucideIcons.calendar,
                         ),
                       ],
@@ -357,10 +392,15 @@ class ProfileScreen extends StatelessWidget {
                         color: AppColors.textDark)),
                 trailing: const Icon(LucideIcons.chevron_right),
                 onTap: () async {
+                  final initialToUse = (selectedDate != null &&
+                          !selectedDate!.isBefore(DateTime(1900)) &&
+                          !selectedDate!.isAfter(DateTime.now()))
+                      ? selectedDate!
+                      : DateTime(2015);
                   final picked = await showDatePicker(
                     context: context,
-                    initialDate: selectedDate ?? DateTime(2020),
-                    firstDate: DateTime(2010),
+                    initialDate: initialToUse,
+                    firstDate: DateTime(1900),
                     lastDate: DateTime.now(),
                   );
                   if (picked != null) {

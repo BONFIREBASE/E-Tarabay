@@ -466,7 +466,12 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
             ),
           ),
           ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: 120,
+            ),
             children: [
               StaggeredEntrance(
                 index: 0,
@@ -509,7 +514,7 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
               ),
               const SizedBox(height: 20),
               StaggeredEntrance(
-                index: 1,
+                index: 2,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -647,39 +652,53 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               StaggeredEntrance(
                 index: 5,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader('About'),
+                    Card.filled(
+                      clipBehavior: Clip.antiAlias,
+                      child: ListTile(
+                        leading: const _IconBadge(icon: LucideIcons.info),
+                        title: Text(loc.version),
+                        trailing: const Text(
+                          '1.0.5',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Bottom Transparent Logo
+              StaggeredEntrance(
+                index: 6,
                 child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipOval(
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          width: 56,
-                          height: 56,
-                          fit: BoxFit.cover,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'E-Tarabay',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${loc.version} 1.0.4++',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textLight,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Image.asset(
+                      'assets/images/app_logo-transparent.png',
+                      width: 112,
+                      height: 112,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
@@ -690,6 +709,8 @@ class _TeacherSettingsScreenState extends State<TeacherSettingsScreen> {
       ),
     );
   }
+
+
 
   Widget _sectionHeader(String label) {
     return Padding(

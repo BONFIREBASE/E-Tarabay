@@ -78,7 +78,7 @@ class _TracePainter extends CustomPainter {
   }
 
   void _drawLetter(Canvas canvas, Size size) {
-    final fontSize = 210 * scale;
+    final fontSize = (_letter.length > 1 ? 165.0 : 210.0) * scale;
     final full = Rect.fromLTWH(0, 0, size.width, size.height);
 
     // Filled glyph used as a mask so the dashes stay inside the letter.

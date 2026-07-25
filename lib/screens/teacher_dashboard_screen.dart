@@ -47,6 +47,44 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   /// Back button on the dashboard prompts to log out (there is no previous
   /// route since the dashboard replaced the login screen).
+  String _formatDateWord(BuildContext context, DateTime date) {
+    const en = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    const fil = [
+      'Enero',
+      'Pebrero',
+      'Marso',
+      'Abril',
+      'Mayo',
+      'Hunyo',
+      'Hulyo',
+      'Agosto',
+      'Setyembre',
+      'Oktubre',
+      'Nobyembre',
+      'Disyembre'
+    ];
+    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
+    final mName = (date.month >= 1 && date.month <= 12)
+        ? ((lang == 'fil' || lang == 'ilo')
+            ? fil[date.month - 1]
+            : en[date.month - 1])
+        : 'Month ${date.month}';
+    return '$mName ${date.day}, ${date.year}';
+  }
+
   Future<void> _confirmLogout() async {
     final loc = AppLocalizations.of(context)!;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -120,6 +158,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   void _showEnrollSheet() {
     final firstNameController = TextEditingController();
+    final middleNameController = TextEditingController();
     final lastNameController = TextEditingController();
     final lrnController = TextEditingController();
     final usernameController = TextEditingController();
@@ -181,6 +220,12 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       ),
                       const SizedBox(height: 14),
                       _buildTextField(
+                        controller: middleNameController,
+                        label: 'Middle Name',
+                        icon: LucideIcons.user,
+                      ),
+                      const SizedBox(height: 14),
+                      _buildTextField(
                         controller: lastNameController,
                         label: AppLocalizations.of(context)!.lastName,
                         icon: LucideIcons.user,
@@ -188,11 +233,16 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       const SizedBox(height: 14),
                       InkWell(
                         onTap: () async {
+                          final initialToUse = (selectedBirthday != null &&
+                                  !selectedBirthday!.isBefore(DateTime(1900)) &&
+                                  !selectedBirthday!.isAfter(DateTime.now()))
+                              ? selectedBirthday!
+                              : DateTime.now()
+                                  .subtract(const Duration(days: 365 * 4));
                           final picked = await showDatePicker(
                             context: sheetStateContext,
-                            initialDate: DateTime.now()
-                                .subtract(const Duration(days: 365 * 4)),
-                            firstDate: DateTime(2000),
+                            initialDate: initialToUse,
+                            firstDate: DateTime(1900),
                             lastDate: DateTime.now(),
                           );
                           if (picked != null) {
@@ -207,7 +257,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                           child: Text(
                             selectedBirthday == null
                                 ? AppLocalizations.of(context)!.notSet
-                                : "${selectedBirthday!.month}/${selectedBirthday!.day}/${selectedBirthday!.year}",
+                                : _formatDateWord(context, selectedBirthday!),
                             style: TextStyle(
                               color: selectedBirthday == null
                                   ? Colors.grey.shade500
@@ -283,12 +333,31 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   children: [
                     _buildSectionHeader('Login Credentials'),
                     _buildCard([
-                      _buildTextField(
-                        controller: lrnController,
-                        label: AppLocalizations.of(context)!.lRN,
-                        icon: LucideIcons.badge,
-                        keyboardType: TextInputType.number,
-                        onChanged: (_) => setSheetState(() {}),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTextField(
+                              controller: lrnController,
+                              label: 'Student ID (Format: DC-2026-0001)',
+                              icon: LucideIcons.badge,
+                              hintText: 'DC-2026-0001',
+                              onChanged: (_) => setSheetState(() {}),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.filledTonal(
+                            icon: const Icon(LucideIcons.sparkles),
+                            tooltip: 'Auto-generate Student ID',
+                            onPressed: () {
+                              setSheetState(() {
+                                final year = DateTime.now().year;
+                                final rand =
+                                    (Random().nextInt(9000) + 1000).toString();
+                                lrnController.text = 'DC-$year-$rand';
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ]),
                     const SizedBox(height: 16),
@@ -310,7 +379,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       _buildCredentialRow(
                         label: AppLocalizations.of(context)!.passwordLabel,
                         value: lrnController.text.isEmpty
-                            ? 'Enter LRN above'
+                            ? 'Enter DC-2026-0001 format above'
                             : lrnController.text,
                         icon: LucideIcons.lock,
                         color: AppColors.textDark,
@@ -322,19 +391,23 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           }
 
           Future<void> submit() async {
-            if (lrnController.text.trim().isEmpty) {
+            final passValidation = AuthService.validateDcPasswordFormat(lrnController.text.trim());
+            if (!passValidation['isValid']) {
               _showStatusDialog(
-                AppLocalizations.of(context)!.fillAllFields,
+                passValidation['message'] ?? AppLocalizations.of(context)!.fillAllFields,
                 LucideIcons.triangle_alert,
                 Colors.orange,
               );
               return;
             }
             Navigator.pop(sheetContext);
-            final fullName =
-                '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
+            final mid = middleNameController.text.trim();
+            final fullName = mid.isNotEmpty
+                ? '${firstNameController.text.trim()} $mid ${lastNameController.text.trim()}'
+                : '${firstNameController.text.trim()} ${lastNameController.text.trim()}';
             final result = await _authService.enrollStudent(
               name: fullName,
+              middleName: mid,
               lrn: lrnController.text.trim(),
               gender: selectedGender,
               username: usernameController.text,
@@ -382,6 +455,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   Colors.orange,
                 );
                 return;
+              }
+              if (lrnController.text.trim().isEmpty) {
+                final year = DateTime.now().year;
+                final rand = (Random().nextInt(9000) + 1000).toString();
+                lrnController.text = 'DC-$year-$rand';
               }
             }
             FocusScope.of(sheetStateContext).unfocus();
@@ -669,8 +747,9 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
         text: studentData['parentContact'] ??
             (studentData['profile']?['parentContact'] ?? ''));
     DateTime? selectedBirthday;
-    if (studentData['birthday'] != null)
+    if (studentData['birthday'] != null) {
       selectedBirthday = DateTime.tryParse(studentData['birthday']);
+    }
     final username = studentData['username'] ?? '';
     String selectedGender =
         studentData['gender'] ?? (studentData['profile']?['gender'] ?? 'Male');
@@ -714,12 +793,16 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       const SizedBox(height: 14),
                       InkWell(
                         onTap: () async {
+                          final initialToUse = (selectedBirthday != null &&
+                                  !selectedBirthday!.isBefore(DateTime(1900)) &&
+                                  !selectedBirthday!.isAfter(DateTime.now()))
+                              ? selectedBirthday!
+                              : DateTime.now()
+                                  .subtract(const Duration(days: 365 * 4));
                           final picked = await showDatePicker(
                             context: sheetStateContext,
-                            initialDate: selectedBirthday ??
-                                DateTime.now()
-                                    .subtract(const Duration(days: 365 * 4)),
-                            firstDate: DateTime(2000),
+                            initialDate: initialToUse,
+                            firstDate: DateTime(1900),
                             lastDate: DateTime.now(),
                           );
                           if (picked != null) {

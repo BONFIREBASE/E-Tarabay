@@ -161,6 +161,41 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  String _formatDisplayName(String fullName, String middleName) {
+    final trimmedFull = fullName.trim();
+    final trimmedMid = middleName.trim();
+    if (trimmedFull.isEmpty) return 'Student';
+
+    if (trimmedMid.isNotEmpty) {
+      final initial = '${trimmedMid[0].toUpperCase()}.';
+      final midRegExp = RegExp(RegExp.escape(trimmedMid), caseSensitive: false);
+
+      if (midRegExp.hasMatch(trimmedFull)) {
+        return trimmedFull
+            .replaceAll(midRegExp, initial)
+            .replaceAll(RegExp(r'\s+'), ' ');
+      }
+
+      final words = trimmedFull.split(RegExp(r'\s+'));
+      if (words.length == 1) {
+        return '${words.first} $initial';
+      }
+      final firstPart = words.first;
+      final lastPart = words.sublist(1).join(' ');
+      return '$firstPart $initial $lastPart';
+    }
+
+    final words = trimmedFull.split(RegExp(r'\s+'));
+    if (words.length >= 3) {
+      final midIndex = words.length - 2;
+      final initial = '${words[midIndex][0].toUpperCase()}.';
+      words[midIndex] = initial;
+      return words.join(' ');
+    }
+
+    return trimmedFull;
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
@@ -173,13 +208,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final stats = _getStats(userProvider);
-    final size = MediaQuery.of(context).size;
-    final padding = MediaQuery.of(context).padding;
-    final safeHeight = size.height - padding.top - padding.bottom;
 
     // Get user info with null safety
     final profile = userProvider.userProfile;
-    String userName = profile?.name ?? 'Noel';
+    String rawName = profile?.name ?? 'Noel';
+    String midName = profile?.middleName ?? '';
+    String userName = _formatDisplayName(rawName, midName);
     int userAge = profile?.age ?? 2;
     final avatar = profile?.avatar ?? '';
 
@@ -199,11 +233,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Header Section
               Container(
-                height: safeHeight * 0.16,
                 margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 10,
+                  vertical: 12,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.92),
@@ -218,7 +251,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Profile Row
                     Row(
@@ -331,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // For Parents moved to the center of the bottom nav bar.
                       ],
                     ),
+                    const SizedBox(height: 10),
 
                     // Stats Row
                     Row(

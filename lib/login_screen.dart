@@ -195,266 +195,238 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight,
-                      ),
-                      child: IntrinsicHeight(
-                        child: Column(
-                          children: [
-                            // Top decorative header
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.only(
-                                top: 48,
-                                bottom: 80,
-                                left: 32,
-                                right: 32,
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 32),
+
+                        // Centered Brand Logo & Title
+                        Center(
+                          child: Column(
+                            children: [
+                              Image.asset(
+                                'assets/images/app_logo-transparent.png',
+                                width: 130,
+                                height: 130,
+                                fit: BoxFit.contain,
                               ),
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppColors.primary,
-                                    Color(0xFF5B8DEF),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.vertical(
-                                  bottom: Radius.circular(40),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'E-Tarabay',
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textDark,
+                                  letterSpacing: 0.5,
                                 ),
                               ),
-                              child: Column(
-                                children: [
-                                  // Logo
-                                  Container(
-                                    width: 72,
-                                    height: 72,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    padding: const EdgeInsets.all(10),
-                                    child: Image.asset(
-                                      'assets/images/splash_logo.png',
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  const Text(
-                                    'E-Tarabay',
-                                    style: TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
+                              const SizedBox(height: 4),
+                              Text(
+                                AppLocalizations.of(context)!.welcome,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  color: AppColors.textLight,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 36),
+
+                        // Login Form Prompt
+                        Text(
+                          AppLocalizations.of(context)!.loginPrompt,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textLight,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Username field
+                        TextField(
+                          controller: _usernameController,
+                          decoration: _modernInputDecoration(
+                            label: AppLocalizations.of(context)!.username,
+                            icon: LucideIcons.user,
+                          ),
+                          textInputAction: TextInputAction.next,
+                          style: const TextStyle(fontSize: 15),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Password field (Student ID)
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          decoration: _modernInputDecoration(
+                            label: 'Student ID (Format: DC-2026-0001)',
+                            icon: LucideIcons.lock,
+                            suffix: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? LucideIcons.eye_off
+                                    : LucideIcons.eye,
+                                color: Colors.grey.shade400,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                          ),
+                          textInputAction: TextInputAction.done,
+                          onSubmitted: (_) => _loginStudent(),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        // Gradient Login Button
+                        Container(
+                          width: double.infinity,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF5C52E5),
+                                Color(0xFF4F46E5),
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    const Color(0xFF5C52E5).withOpacity(0.25),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _loginStudent,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
                                       color: Colors.white,
-                                      letterSpacing: 1,
+                                    ),
+                                  )
+                                : Text(
+                                    AppLocalizations.of(context)!.loginButton,
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                          ),
+                        ),
+
+                        // Biometric quick-login
+                        if (_biometricEnabled) ...[
+                          const SizedBox(height: 16),
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: _biometricLogin,
+                              icon: const Icon(
+                                LucideIcons.fingerprint_pattern,
+                                color: AppColors.primary,
+                                size: 22,
+                              ),
+                              label: Text(
+                                _biometricName.isNotEmpty
+                                    ? 'Sign in as $_biometricName'
+                                    : 'Use fingerprint / face',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+
+                        const Spacer(),
+
+                        // Continue as Teacher Pill Switch
+                        Center(
+                          child: InkWell(
+                            onTap: () {
+                              context.pushPremium(
+                                const TeacherLoginScreen(),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    LucideIcons.graduation_cap,
+                                    size: 18,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    AppLocalizations.of(context)!.welcome,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white.withOpacity(0.9),
-                                      fontWeight: FontWeight.w500,
+                                    AppLocalizations.of(context)!
+                                        .teacherLoginButton,
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-
-                            // Form card overlapping the header
-                            Transform.translate(
-                              offset: const Offset(0, -48),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 24),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(28),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(28),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.06),
-                                        blurRadius: 24,
-                                        offset: const Offset(0, 8),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        AppLocalizations.of(context)!
-                                            .loginPrompt,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey.shade500,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 24),
-
-                                      // Username field
-                                      TextField(
-                                        controller: _usernameController,
-                                        decoration: _modernInputDecoration(
-                                          label: AppLocalizations.of(context)!
-                                              .username,
-                                          icon: LucideIcons.user,
-                                        ),
-                                        textInputAction: TextInputAction.next,
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-
-                                      const SizedBox(height: 16),
-
-                                      // Password field (LRN)
-                                      TextField(
-                                        controller: _passwordController,
-                                        obscureText: _obscurePassword,
-                                        decoration: _modernInputDecoration(
-                                          label:
-                                              '${AppLocalizations.of(context)!.password} (LRN)',
-                                          icon: LucideIcons.lock,
-                                          suffix: IconButton(
-                                            icon: Icon(
-                                              _obscurePassword
-                                                  ? LucideIcons.eye_off
-                                                  : LucideIcons.eye,
-                                              color: Colors.grey.shade400,
-                                              size: 20,
-                                            ),
-                                            onPressed: () {
-                                              setState(() {
-                                                _obscurePassword =
-                                                    !_obscurePassword;
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                        textInputAction: TextInputAction.done,
-                                        onSubmitted: (_) => _loginStudent(),
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-
-                                      const SizedBox(height: 28),
-
-                                      // Login Button
-                                      SizedBox(
-                                        width: double.infinity,
-                                        height: 56,
-                                        child: ElevatedButton(
-                                          onPressed:
-                                              _isLoading ? null : _loginStudent,
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.primary,
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                            ),
-                                          ),
-                                          child: _isLoading
-                                              ? const SizedBox(
-                                                  width: 22,
-                                                  height: 22,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    strokeWidth: 2.5,
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : Text(
-                                                  AppLocalizations.of(context)!
-                                                      .loginButton,
-                                                  style: const TextStyle(
-                                                    fontSize: 17,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                        ),
-                                      ),
-
-                                      // Biometric quick-login
-                                      if (_biometricEnabled) ...[
-                                        const SizedBox(height: 14),
-                                        Center(
-                                          child: TextButton.icon(
-                                            onPressed: _biometricLogin,
-                                            icon: const Icon(
-                                              LucideIcons.fingerprint_pattern,
-                                              color: AppColors.primary,
-                                              size: 22,
-                                            ),
-                                            label: Text(
-                                              _biometricName.isNotEmpty
-                                                  ? 'Sign in as $_biometricName'
-                                                  : 'Use fingerprint / face',
-                                              style: const TextStyle(
-                                                color: AppColors.primary,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const Spacer(),
-
-                            // Continue as Teacher
-                            Transform.translate(
-                              offset: const Offset(0, -24),
-                              child: TextButton.icon(
-                                onPressed: () {
-                                  context.pushPremium(
-                                    const TeacherLoginScreen(),
-                                  );
-                                },
-                                icon: const Icon(
-                                  LucideIcons.graduation_cap,
-                                  size: 18,
-                                  color: AppColors.primary,
-                                ),
-                                label: Text(
-                                  AppLocalizations.of(context)!
-                                      .teacherLoginButton,
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 10,
-                                  ),
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 20),
-                          ],
+                          ),
                         ),
-                      ),
+
+                        const SizedBox(height: 24),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                ),
               ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -86,9 +86,9 @@ class _SplashScreenState extends State<SplashScreen> {
         backgroundColor: Colors.white,
         body: Center(
           child: Image.asset(
-            'assets/images/splash_logo.png',
-            width: 250,
-            height: 250,
+            'assets/images/app_logo-transparent.png',
+            width: 240,
+            height: 240,
             fit: BoxFit.contain,
           )
               .animate(onPlay: (controller) => controller.repeat(reverse: true))

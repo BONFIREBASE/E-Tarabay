@@ -10,6 +10,7 @@ import '../widgets/custom_header_app_bar.dart';
 import '../widgets/floating_bottom_nav_bar.dart';
 import '../widgets/staggered_entrance.dart';
 import '../utils/page_transitions.dart';
+import '../utils/constants.dart';
 import 'lessons_screen.dart';
 import 'awards_screen.dart';
 
@@ -109,150 +110,178 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: [
-          StaggeredEntrance(
-            index: 0,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionHeader(loc.language),
-                Card.filled(
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    children: [
-                      _LanguageTile(
-                        label: 'English',
-                        code: 'en',
-                        isSelected:
-                            languageProvider.currentLanguageCode == 'en',
-                        onTap: () => _setLanguage('en'),
-                      ),
-                      const Divider(height: 0, indent: 72),
-                      _LanguageTile(
-                        label: 'Filipino',
-                        code: 'fil',
-                        isSelected:
-                            languageProvider.currentLanguageCode == 'fil',
-                        onTap: () => _setLanguage('fil'),
-                      ),
-                      const Divider(height: 0, indent: 72),
-                      _LanguageTile(
-                        label: 'Ilokano',
-                        code: 'ilo',
-                        isSelected:
-                            languageProvider.currentLanguageCode == 'ilo',
-                        onTap: () => _setLanguage('ilo'),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: 120,
             ),
-          ),
-          const SizedBox(height: 20),
-          StaggeredEntrance(
-            index: 1,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionHeader('Audio'),
-                Card.filled(
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    children: [
-                      SwitchListTile(
-                        secondary: _IconBadge(icon: LucideIcons.volume_2),
-                        title: Text(loc.sound),
-                        value: _soundEnabled,
+            children: [
+              // Language Section
+              StaggeredEntrance(
+                index: 0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader(loc.language),
+                    Card.filled(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          _LanguageTile(
+                            label: 'English',
+                            code: 'en',
+                            isSelected:
+                                languageProvider.currentLanguageCode == 'en',
+                            onTap: () => _setLanguage('en'),
+                          ),
+                          const Divider(height: 0, indent: 72),
+                          _LanguageTile(
+                            label: 'Filipino',
+                            code: 'fil',
+                            isSelected:
+                                languageProvider.currentLanguageCode == 'fil',
+                            onTap: () => _setLanguage('fil'),
+                          ),
+                          const Divider(height: 0, indent: 72),
+                          _LanguageTile(
+                            label: 'Ilokano',
+                            code: 'ilo',
+                            isSelected:
+                                languageProvider.currentLanguageCode == 'ilo',
+                            onTap: () => _setLanguage('ilo'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              StaggeredEntrance(
+                index: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader('Audio'),
+                    Card.filled(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          SwitchListTile(
+                            secondary:
+                                const _IconBadge(icon: LucideIcons.volume_2),
+                            title: Text(loc.sound),
+                            value: _soundEnabled,
+                            onChanged: (value) {
+                              setState(() => _soundEnabled = value);
+                              SharedPreferences.getInstance().then(
+                                (prefs) =>
+                                    prefs.setBool('sound_enabled', value),
+                              );
+                            },
+                          ),
+                          const Divider(height: 0, indent: 72),
+                          SwitchListTile(
+                            secondary:
+                                const _IconBadge(icon: LucideIcons.music),
+                            title: Text(loc.music),
+                            value: _musicEnabled,
+                            onChanged: _toggleMusic,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              StaggeredEntrance(
+                index: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader(loc.notifications),
+                    Card.filled(
+                      clipBehavior: Clip.antiAlias,
+                      child: SwitchListTile(
+                        secondary: const _IconBadge(icon: LucideIcons.bell),
+                        title: Text(loc.notifications),
+                        value: _notificationsEnabled,
                         onChanged: (value) {
-                          setState(() => _soundEnabled = value);
+                          setState(() => _notificationsEnabled = value);
                           SharedPreferences.getInstance().then(
-                            (prefs) => prefs.setBool('sound_enabled', value),
+                            (prefs) =>
+                                prefs.setBool('notifications_enabled', value),
                           );
                         },
                       ),
-                      const Divider(height: 0, indent: 72),
-                      SwitchListTile(
-                        secondary: _IconBadge(icon: LucideIcons.music),
-                        title: Text(loc.music),
-                        value: _musicEnabled,
-                        onChanged: _toggleMusic,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              StaggeredEntrance(
+                index: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionHeader('About'),
+                    Card.filled(
+                      clipBehavior: Clip.antiAlias,
+                      child: ListTile(
+                        leading: const _IconBadge(icon: LucideIcons.info),
+                        title: Text(loc.version),
+                        trailing: const Text(
+                          '1.0.5',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Bottom Transparent Logo
+              StaggeredEntrance(
+                index: 4,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          'assets/images/app_logo-transparent.png',
+                          width: 112,
+                          height: 112,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      if (audioManager.isPlaying) ...[
+                        const SizedBox(height: 10),
+                        _MusicPill(text: loc.backgroundMusicPlaying),
+                      ],
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          StaggeredEntrance(
-            index: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionHeader(loc.notifications),
-                Card.filled(
-                  clipBehavior: Clip.antiAlias,
-                  child: SwitchListTile(
-                    secondary: _IconBadge(icon: LucideIcons.bell),
-                    title: Text(loc.notifications),
-                    value: _notificationsEnabled,
-                    onChanged: (value) {
-                      setState(() => _notificationsEnabled = value);
-                      SharedPreferences.getInstance().then(
-                        (prefs) =>
-                            prefs.setBool('notifications_enabled', value),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          StaggeredEntrance(
-            index: 3,
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipOval(
-                    child: Image.asset(
-                      'assets/images/logo.png',
-                      width: 56,
-                      height: 56,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'E-Tarabay',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '1.0.4++',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  if (audioManager.isPlaying) ...[
-                    const SizedBox(height: 10),
-                    _MusicPill(text: loc.backgroundMusicPlaying),
-                  ],
-                ],
               ),
-            ),
+              const SizedBox(height: 24),
+            ],
           ),
-          const SizedBox(height: 24),
-        ],
-      ),
         ],
       ),
     );

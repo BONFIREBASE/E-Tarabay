@@ -363,8 +363,11 @@ class AchievementsScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      isCompleted ? LucideIcons.star : LucideIcons.star,
-                      color: Colors.amber,
+                      LucideIcons.star,
+                      color: isCompleted
+                          ? const Color(0xFFFFD700)
+                          : Colors.grey.shade300,
+                      fill: isCompleted ? 1.0 : 0.0,
                       size: 16,
                     ),
                   ],

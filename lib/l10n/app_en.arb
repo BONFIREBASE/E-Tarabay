@@ -126,7 +126,7 @@
   "correctOrder": "Correct order",
   "selected": "Selected",
   "tapAnotherToSwap": "tap another to swap",
-  "whatsMissing": "What\\'s missing?",
+  "whatsMissing": "What's missing?",
   "noGames": "No games available",
   "howMany": "How many {item}?",
   "@howMany": {
@@ -187,7 +187,7 @@
   "dailyRoutinesSubtitle": "Learn daily activities",
   "myPreferencesSubtitle": "What do you like?",
   "familyMembersSubtitle": "Who are your family members?",
-  "familyRolesSubtitle": "What is everyone\\'s job?",
+  "familyRolesSubtitle": "What is everyone's job?",
   "familyActivitiesSubtitle": "What do you do together?",
   "familyTreeSubtitle": "Who are your relatives?",
   "myHomeSubtitle": "Where do you live?",
@@ -230,14 +230,11 @@
   "giveArtworkName": "Give your artwork a name...",
   "colorSomethingFirst": "Color something first!",
   "justNow": "just now",
-  "timeAgo": "${amount}m ago",
+  "timeAgo": "{amount}m ago",
   "@timeAgo": {
     "placeholders": {
       "amount": {
         "type": "int"
-      },
-      "unit": {
-        "type": "String"
       }
     }
   },
@@ -305,7 +302,7 @@
       }
     }
   },
-  "tooHardSwitch": "Too hard? Let\\'s try the next one!",
+  "tooHardSwitch": "Too hard? Let's try the next one!",
   "reTrace": "Re-trace",
   "forParentsTitle": "For Parents",
   "overallProgress": "Overall Progress",
@@ -387,7 +384,7 @@
   "enrollStudent": "Enroll Student",
   "firstName": "First Name",
   "lastName": "Last Name",
-  "lRN": "LRN (Password)",
+  "lRN": "Student ID (Password)",
   "usernameLabel": "Username (Auto-generated)",
   "genderLabel": "Gender",
   "studentInfo": "Student Info",
@@ -395,11 +392,11 @@
   "progressLabel": "Progress",
   "logout": "Logout",
   "confirmLogout": "Are you sure you want to log out?",
-  "verifyLRN": "Verify LRN",
-  "enterLRN": "Please enter your LRN to proceed",
-  "invalidLRN": "Invalid LRN. Please try again.",
+  "verifyLRN": "Verify Student ID",
+  "enterLRN": "Please enter your Student ID to proceed",
+  "invalidLRN": "Invalid Student ID. Please try again.",
   "password": "Password",
-  "enrollmentInfo": "Give the username and LRN to the parent/student for login.",
+  "enrollmentInfo": "Give the username and Student ID to the parent/student for login.",
   "fillAllFields": "Please fill in all fields.",
   "parentsInfo": "Parents Info",
   "parentNameLabel": "Parent's Name",
@@ -468,7 +465,7 @@
   "teacherLoginPrompt": "Enter your teacher credentials to continue",
   "teacherLoginButtonLabel": "Log In as Teacher",
   "invalidTeacherCredentials": "Invalid teacher credentials. Please try again.",
-  "monthName": "Not set",
+  "monthName": "Month {month}",
   "@monthName": {
     "placeholders": {
       "month": {
@@ -574,8 +571,8 @@
   "sundanMoTab": "Sundan Mo",
   "magbasaTab": "Magbasa",
   "matematikaTab": "Matematika",
-  "artworksLabel": "Mga Obra",
-  "attemptsLabel": "Mga Subukan",
+  "artworksLabel": "Artworks",
+  "attemptsLabel": "Attempts",
   "pagesLabel": "pages",
   "lettersLabel": "letters",
   "diffEasy": "Easy",
@@ -807,7 +804,7 @@
       }
     }
   },
-  "awardsWaiting": "{earned} earned, {remaining} waiting to claim!",
+  "awardsWaiting": "{earned} earned, {remaining} waiting to be claimed!",
   "@awardsWaiting": {
     "placeholders": {
       "earned": {

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui' as ui;
 import '../widgets/custom_back_button.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
@@ -123,13 +122,7 @@ class MyCreation {
   String getTimeAgoLocalized(BuildContext context) {
     final diff = DateTime.now().difference(date);
     if (diff.inMinutes < 1) return AppLocalizations.of(context)!.justNow;
-    if (diff.inMinutes < 60) {
-      return AppLocalizations.of(context)!.timeAgo(diff.inMinutes, 'm');
-    }
-    if (diff.inHours < 24) {
-      return AppLocalizations.of(context)!.timeAgo(diff.inHours, 'h');
-    }
-    return AppLocalizations.of(context)!.timeAgo(diff.inDays, 'd');
+    return AppLocalizations.of(context)!.timeAgo(diff.inMinutes);
   }
 }
 
@@ -785,13 +778,12 @@ class _KulayScreenState extends State<KulayScreen>
                       duration: const Duration(milliseconds: 150),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       child: Icon(
-                        idx <= selectedStars
-                            ? LucideIcons.star
-                            : LucideIcons.star,
+                        LucideIcons.star,
                         size: 40,
                         color: idx <= selectedStars
-                            ? const Color(0xFFFFB800)
+                            ? const Color(0xFFFFD700)
                             : Colors.grey.shade300,
+                        fill: idx <= selectedStars ? 1.0 : 0.0,
                       ),
                     ),
                   );
@@ -2090,13 +2082,12 @@ class _KulayScreenState extends State<KulayScreen>
                     ...List.generate(
                         5,
                         (i) => Icon(
-                              i < creation.stars!
-                                  ? LucideIcons.star
-                                  : LucideIcons.star,
+                              LucideIcons.star,
                               size: 14,
                               color: i < creation.stars!
-                                  ? const Color(0xFFFFB800)
+                                  ? const Color(0xFFFFD700)
                                   : Colors.grey.shade300,
+                              fill: i < creation.stars! ? 1.0 : 0.0,
                             )),
                   ],
                 )
@@ -2159,13 +2150,12 @@ class _KulayScreenState extends State<KulayScreen>
                   children: List.generate(
                       5,
                       (i) => Icon(
-                            i < creation.stars!
-                                ? LucideIcons.star
-                                : LucideIcons.star,
+                            LucideIcons.star,
                             size: 28,
                             color: i < creation.stars!
-                                ? const Color(0xFFFFB800)
+                                ? const Color(0xFFFFD700)
                                 : Colors.grey.shade300,
+                            fill: i < creation.stars! ? 1.0 : 0.0,
                           )),
                 ),
               ),

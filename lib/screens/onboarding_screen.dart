@@ -259,7 +259,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           Expanded(
             child: Image.asset(
-              'assets/images/splash_logo.png',
+              'assets/images/app_logo.jpg',
               fit: BoxFit.contain,
             ).animate().scale(duration: 500.ms).fadeIn(),
           ),

@@ -286,6 +286,7 @@ class UserProvider extends ChangeNotifier {
   Future<void> createUserProfile(
     String name,
     String gender, {
+    String middleName = '',
     DateTime? birthday,
     String? parentName,
     String? parentContact,
@@ -294,6 +295,7 @@ class UserProvider extends ChangeNotifier {
     await _ensureInitialized();
     _userProfile = UserProfile(
       name: name,
+      middleName: middleName,
       gender: gender,
       birthday: birthday,
       createdAt: DateTime.now(),
@@ -310,6 +312,7 @@ class UserProvider extends ChangeNotifier {
 
   Future<void> updateUserProfile({
     String? name,
+    String? middleName,
     String? gender,
     DateTime? birthday,
     String? parentName,
@@ -321,6 +324,7 @@ class UserProvider extends ChangeNotifier {
 
     _userProfile = UserProfile(
       name: name ?? _userProfile!.name,
+      middleName: middleName ?? _userProfile!.middleName,
       gender: gender ?? _userProfile!.gender,
       birthday: birthday ?? _userProfile!.birthday,
       parentName: parentName ?? _userProfile!.parentName,

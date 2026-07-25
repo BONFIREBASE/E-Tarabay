@@ -273,7 +273,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapAnotherToSwap => 'tap another to swap';
 
   @override
-  String get whatsMissing => 'What\\\'s missing?';
+  String get whatsMissing => 'What\'s missing?';
 
   @override
   String get noGames => 'No games available';
@@ -402,7 +402,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyMembersSubtitle => 'Who are your family members?';
 
   @override
-  String get familyRolesSubtitle => 'What is everyone\\\'s job?';
+  String get familyRolesSubtitle => 'What is everyone\'s job?';
 
   @override
   String get familyActivitiesSubtitle => 'What do you do together?';
@@ -512,8 +512,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get justNow => 'just now';
 
   @override
-  String timeAgo(int amount, String unit) {
-    return '\$${amount}m ago';
+  String timeAgo(int amount) {
+    return '${amount}m ago';
   }
 
   @override
@@ -652,7 +652,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get tooHardSwitch => 'Too hard? Let\\\'s try the next one!';
+  String get tooHardSwitch => 'Too hard? Let\'s try the next one!';
 
   @override
   String get reTrace => 'Re-trace';
@@ -860,7 +860,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lastName => 'Last Name';
 
   @override
-  String get lRN => 'LRN (Password)';
+  String get lRN => 'Student ID (Password)';
 
   @override
   String get usernameLabel => 'Username (Auto-generated)';
@@ -884,20 +884,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmLogout => 'Are you sure you want to log out?';
 
   @override
-  String get verifyLRN => 'Verify LRN';
+  String get verifyLRN => 'Verify Student ID';
 
   @override
-  String get enterLRN => 'Please enter your LRN to proceed';
+  String get enterLRN => 'Please enter your Student ID to proceed';
 
   @override
-  String get invalidLRN => 'Invalid LRN. Please try again.';
+  String get invalidLRN => 'Invalid Student ID. Please try again.';
 
   @override
   String get password => 'Password';
 
   @override
   String get enrollmentInfo =>
-      'Give the username and LRN to the parent/student for login.';
+      'Give the username and Student ID to the parent/student for login.';
 
   @override
   String get fillAllFields => 'Please fill in all fields.';
@@ -1032,7 +1032,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String monthName(int month) {
-    return 'Not set';
+    return 'Month $month';
   }
 
   @override
@@ -1339,10 +1339,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matematikaTab => 'Matematika';
 
   @override
-  String get artworksLabel => 'Mga Obra';
+  String get artworksLabel => 'Artworks';
 
   @override
-  String get attemptsLabel => 'Mga Subukan';
+  String get attemptsLabel => 'Attempts';
 
   @override
   String get pagesLabel => 'pages';
@@ -1844,6 +1844,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String awardsWaiting(int earned, int remaining) {
-    return '$earned earned, $remaining waiting to claim!';
+    return '$earned earned, $remaining waiting to be claimed!';
   }
 }

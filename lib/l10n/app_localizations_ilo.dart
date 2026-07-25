@@ -96,19 +96,19 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get kulaySaya => 'KOLOR-SAYA';
 
   @override
-  String get magkulayTayo => 'AGKOLORTANTAY!';
+  String get magkulayTayo => 'MAGKULAY TAYO!';
 
   @override
   String get sundanMo => 'SUROTEM,';
 
   @override
-  String get magbasaTitle => 'Agbasatayo';
+  String get magbasaTitle => 'Magbasa Tayo';
 
   @override
-  String get alpabetoAtMgaSalita => 'DANIW, SARITA KEN KANKANTA';
+  String get alpabetoAtMgaSalita => 'DAGITI TULA, KWENTO KEN KANTA';
 
   @override
-  String get home => 'Balay';
+  String get home => 'Tahanan';
 
   @override
   String get profile => 'Profil';
@@ -117,31 +117,31 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get videoDance => 'Sayaw Video';
 
   @override
-  String get settingsTitle => 'Pangpaandar';
+  String get settingsTitle => 'Mga Setting';
 
   @override
-  String get totalProgress => 'Dagup a Progress';
+  String get totalProgress => 'Kabuuang Progress';
 
   @override
-  String get poems => 'Daniw';
+  String get poems => 'Dagiti Tula';
 
   @override
-  String get stories => 'Sarita';
+  String get stories => 'Dagiti Kwento';
 
   @override
-  String get songs => 'Kankanta';
+  String get songs => 'Dagiti Kanta';
 
   @override
-  String get readStory => 'Basaen ti Sarita';
+  String get readStory => 'Basaen ti Kwento';
 
   @override
   String get listenToSong => 'Denggen ti Kanta';
 
   @override
-  String get readPoem => 'Basaen ti Daniw';
+  String get readPoem => 'Basaen ti Tula';
 
   @override
-  String get swipeToRead => 'I-swipe tapno basaen';
+  String get swipeToRead => 'I-swipe tapno agbasa';
 
   @override
   String get tune => 'Tono';
@@ -150,48 +150,48 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get action => 'Galaw';
 
   @override
-  String get counting => 'Bilangen dagiti Banag';
+  String get counting => 'Bibilangen dagiti Bagay';
 
   @override
-  String get dragNumber => 'Iyalis ti Numero';
+  String get dragNumber => 'I-drag ti Numero';
 
   @override
-  String get lineMatch => 'Itugma iti Linia';
+  String get lineMatch => 'Itugma iti Linya';
 
   @override
-  String get popBalloon => 'Paspiaran ti Balloon';
+  String get popBalloon => 'I-pop ti Balloon';
 
   @override
   String get moreOrLess => 'Adu wenno Bassit?';
 
   @override
-  String get numberPuzzle => 'Numero a Puzzle';
+  String get numberPuzzle => 'Palaisipan ti Numero';
 
   @override
-  String get numberSequence => 'Panagsasaruno ti Numero';
+  String get numberSequence => 'Panagsusurot ti Numero';
 
   @override
   String get chooseAnswer => 'Piliem ti umiso a sungbat:';
 
   @override
-  String get check => 'Kitaen';
+  String get check => 'Suriin';
 
   @override
-  String get correct => 'Naimbag!';
+  String get correct => 'Umiso!';
 
   @override
-  String get wrong => 'Biddot! Padasem manen!';
+  String get wrong => 'Saan nga umiso! Padasen manen!';
 
   @override
-  String get timeOut => 'Nalpas ti oras! Padasem manen.';
+  String get timeOut => 'Nalpasen ti oras! Padasen manen.';
 
   @override
   String level(int level) {
-    return 'Level $level';
+    return 'Antas $level';
   }
 
   @override
-  String get levelShort => 'L';
+  String get levelShort => 'A';
 
   @override
   String get perfect => 'Perpekto!';
@@ -200,68 +200,68 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get great => 'Nagsayaat!';
 
   @override
-  String get good => 'Nasayaat!';
+  String get good => 'Naimbag!';
 
   @override
   String mathPoints(int points) {
-    return '+$points a puntos';
+    return '+$points puntos';
   }
 
   @override
   String streak(int streak) {
-    return '$streak nga aldaw a strek!';
+    return '$streak nga aldaw a streak!';
   }
 
   @override
-  String get mathTotalScore => 'Dagup a Puntos';
+  String get mathTotalScore => 'Kabuuang Puntos';
 
   @override
-  String get mathTotalStars => 'Dagup a Bituen';
+  String get mathTotalStars => 'Kabuuang Bituin';
 
   @override
-  String get repeat => 'Uliten';
+  String get repeat => 'Ulitin';
 
   @override
   String get nextLevel => 'Sumaruno a Level';
 
   @override
-  String get congratulations => 'Kablaaw!';
+  String get congratulations => 'Ipagpannakkel Ka!';
 
   @override
-  String get completedAllLevels => 'Nalpasmo amin a level!';
+  String get completedAllLevels => 'Nalpasem amin dagiti levels!';
 
   @override
-  String get chooseFirst => 'Piliem ti sungbat nga umuna!';
+  String get chooseFirst => 'Piliem muna ti sungbat!';
 
   @override
-  String get chooseLeftFirst => 'Piliem ti numero iti igid nga umuna!';
+  String get chooseLeftFirst => 'Piliem nga una ti numero iti kanigid!';
 
   @override
-  String get dropHere => 'Ikkam ditoy!';
+  String get dropHere => 'I-drop ditoy!';
 
   @override
-  String get dragHere => 'Iyalis ditoy';
+  String get dragHere => 'I-drag ditoy';
 
   @override
-  String get tapLeftThenRight => 'Pisuen ti igid ken kanawan';
+  String get tapLeftThenRight => 'Pindutem ti kanigid ken kanawan';
 
   @override
   String get matched => 'natugma';
 
   @override
-  String get popAllBalloonsWith => 'Paspiaran amin a balloon nga addaan';
+  String get popAllBalloonsWith => 'I-pop amin a balloon a addaan';
 
   @override
-  String get left => 'Igrid';
+  String get left => 'Kanigid';
 
   @override
-  String get right => 'Kawanan';
+  String get right => 'Kanawan';
 
   @override
-  String get theyAreEqual => 'Agpapada!';
+  String get theyAreEqual => 'Pareho da!';
 
   @override
-  String get tapTwoToSwap => 'Pisuen dua nga numero tapno agsinnukat';
+  String get tapTwoToSwap => 'Pindutem ti dua a numero tapno magukat';
 
   @override
   String get correctOrder => 'Umiso nga urnos';
@@ -270,22 +270,22 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get selected => 'Napili';
 
   @override
-  String get tapAnotherToSwap => 'pisuem ti sabali tapno agsinnukat';
+  String get tapAnotherToSwap => 'pindutem ti maysa pay tapno magukat';
 
   @override
-  String get whatsMissing => 'Ania ti kurang?';
+  String get whatsMissing => 'Ania ti agkurang?';
 
   @override
   String get noGames => 'Awan ti ay-ayam';
 
   @override
   String howMany(String item) {
-    return 'Mano nga $item?';
+    return 'Mano ti $item?';
   }
 
   @override
   String matchWithNumber(String category) {
-    return 'Itugma dagiti $category iti husto a numero';
+    return 'Itugma dagiti $category iti umiso a numero';
   }
 
   @override
@@ -303,7 +303,7 @@ class AppLocalizationsIlo extends AppLocalizations {
   }
 
   @override
-  String get incorrectAnswer => '❌ MALI TI SUNGBAT';
+  String get incorrectAnswer => '❌ SAAN NGA UMISO TI SUNGBAT';
 
   @override
   String get selectCorrectAnswer => 'Piliem ti umiso a sungbat:';
@@ -313,7 +313,7 @@ class AppLocalizationsIlo extends AppLocalizations {
 
   @override
   String get tapLeftTapRight =>
-      'I-tap ti grupo (kaliwa) → i-tap ti numero (kanan)';
+      'I-tap ti grupo (kanigid) → i-tap ti numero (kanawan)';
 
   @override
   String get angAkingSariliTitle => 'Ti Bagik';
@@ -365,21 +365,21 @@ class AppLocalizationsIlo extends AppLocalizations {
 
   @override
   String get whatIsYourNameDescription =>
-      'Ti naganmo ket ti tawag kenka ti pamilyam ken gagayyemmo. Napateg dayta!';
+      'Ti naganmo ket isu ti awag kenka ti pamilyam ken dagiti gayyemmo. Napateg daytoy!';
 
   @override
   String get howOldAreYouDescription =>
-      'Ti tawenmo ket ti bilang dagiti tawen manipud idi nayanakka. Napateg ti selebrasyon!';
+      'Ti tawenmo ket ti bilang dagiti tawen manipud idin nayanakka. Salimetmetan ti tunggal tawen!';
 
   @override
   String get genderDescription =>
-      'Ti pannakammo no babai wenno lalaki ka ket makatulong kadakami a mangammo kenka!';
+      'Ti pannakaammo no lalaki wenno babai ka ket makatulong tapno mas maammalaanmi ka!';
 
   @override
   String get typeNameHint => 'I-type ti naganmo ditoy';
 
   @override
-  String get ageHint => 'Kas pagarigan: 5, 7, 10';
+  String get ageHint => 'Halimbawa: 5, 7, 10';
 
   @override
   String get girlLabel => '👧 Babai';
@@ -388,44 +388,44 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get boyLabel => '👦 Lalaki';
 
   @override
-  String get aboutMeSubtitle => 'Ammom ti bagim';
+  String get aboutMeSubtitle => 'Maipanggep Kaniak';
 
   @override
-  String get myEmotionsSubtitle => 'Ilawlawagmo ti riknam';
+  String get myEmotionsSubtitle => 'Ilawlawag dagiti riknam';
 
   @override
-  String get dailyRoutinesSubtitle => 'Ammuem dagiti inaldaw nga aramid';
+  String get dailyRoutinesSubtitle => 'Adalen dagiti inaldaw nga aramid';
 
   @override
-  String get myPreferencesSubtitle => 'Ania ti kayatmo?';
+  String get myPreferencesSubtitle => 'Ania ti kaykayatmo?';
 
   @override
-  String get familyMembersSubtitle => 'Sino-sino dagiti pamilyam?';
+  String get familyMembersSubtitle => 'Siasino dagiti kameng ti pamilyam?';
 
   @override
   String get familyRolesSubtitle => 'Ania ti trabaho ti tunggal maysa?';
 
   @override
   String get familyActivitiesSubtitle =>
-      'Ania ti aramidendayo a sangsangkamaysa?';
+      'Ania ti ar-aramidenyo a sangsangkamaysa?';
 
   @override
-  String get familyTreeSubtitle => 'Sino-sino dagiti kabagianmo?';
+  String get familyTreeSubtitle => 'Siasino dagiti karruba ken kadiam?';
 
   @override
-  String get myHomeSubtitle => 'Sadino kayo nagtaeng?';
+  String get myHomeSubtitle => 'Sadino ti pagtaengam?';
 
   @override
-  String get emotionHappyQuestion => 'Kaano ka NARAG-O?';
+  String get emotionHappyQuestion => 'Kaano ka NARAGSAK?';
 
   @override
-  String get emotionSadQuestion => 'Kaano ka NALUNLUNGOT?';
+  String get emotionSadQuestion => 'Kaano ka NALIDAY?';
 
   @override
-  String get emotionAngryQuestion => 'Kaano ka NAALIGUTGET?';
+  String get emotionAngryQuestion => 'Kaano ka PUNGTOT?';
 
   @override
-  String get emotionSurprisedQuestion => 'Kaano ka NASDAAW?';
+  String get emotionSurprisedQuestion => 'Kaano ka NAKIGTOT?';
 
   @override
   String get routineWakeUp => 'Agriing ti bigat';
@@ -502,51 +502,51 @@ class AppLocalizationsIlo extends AppLocalizations {
   }
 
   @override
-  String get saveYourArtwork => 'Idulin ti Artwork-mo';
+  String get saveYourArtwork => 'Idulin ti Artwork Mo';
 
   @override
-  String get giveArtworkName => 'Inaganem ti artwork-mo...';
+  String get giveArtworkName => 'Ikan ti nagan ti artwork mo...';
 
   @override
-  String get colorSomethingFirst => 'Agkolorka pay nga umuna!';
+  String get colorSomethingFirst => 'Magkulay muna ng kahit ano!';
 
   @override
-  String get justNow => 'ita laeng';
+  String get justNow => 'itan';
 
   @override
-  String timeAgo(int amount, String unit) {
-    return '\$${amount}m a napalabas';
+  String timeAgo(int amount) {
+    return '${amount}m ti naglabas';
   }
 
   @override
-  String get saved => 'Naidulinen!';
+  String get saved => 'Naidulin!';
 
   @override
-  String get others => 'Dadduma pay';
+  String get others => 'Iba pa';
 
   @override
-  String get coloringBook => 'Libro ti Panagkolor';
+  String get coloringBook => 'Libro ti Panagkulay';
 
   @override
-  String get myCreations => 'Dagiti Pinarsuak';
+  String get myCreations => 'Dagiti Likhak';
 
   @override
-  String get color => 'Kolor';
+  String get color => 'Kulor';
 
   @override
-  String get animals => 'Ay-ayup';
+  String get animals => 'Dagiti Ayup';
 
   @override
-  String get flowers => 'Sabong';
+  String get flowers => 'Dagiti Sabong';
 
   @override
-  String get fruits => 'Prutas';
+  String get fruits => 'Dagiti Bunga';
 
   @override
-  String get toys => 'Al-aliwa';
+  String get toys => 'Dagiti Ay-ayam';
 
   @override
-  String get red => 'Nalabaga';
+  String get red => 'Nalabbaga';
 
   @override
   String get blue => 'Asul';
@@ -558,13 +558,13 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get yellow => 'Duyaw';
 
   @override
-  String get orange => 'Narangha';
+  String get orange => 'Kahel';
 
   @override
   String get purple => 'Lila';
 
   @override
-  String get pink => 'Rosa';
+  String get pink => 'Rosas';
 
   @override
   String get brown => 'Kayumanggi';
@@ -579,148 +579,148 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get easy => 'Nalaka';
 
   @override
-  String get medium => 'Kalalainganna';
+  String get medium => 'Katamtaman';
 
   @override
   String get hard => 'Narigat';
 
   @override
-  String get brush => 'Brosa';
+  String get brush => 'Pinsel';
 
   @override
-  String get eraser => 'Punas';
+  String get eraser => 'Pambura';
 
   @override
-  String get undo => 'Ibangon';
+  String get undo => 'Urong';
 
   @override
-  String get redo => 'Sublien';
+  String get redo => 'Ulitin';
 
   @override
-  String get clear => 'Dalosan';
+  String get clear => 'Linisin';
 
   @override
-  String get surotemKabaelam => 'Surotem, Kabaelam!';
+  String get surotemKabaelam => 'Surotem, Kayam!';
 
   @override
-  String get upper => 'Dakkel';
+  String get upper => 'Dackel';
 
   @override
   String get lower => 'Bassit';
 
   @override
   String letterLabel(String letter) {
-    return 'Letra $letter';
+    return 'Titik $letter';
   }
 
   @override
   String get pointsLabel => 'Puntos';
 
   @override
-  String get goodJob => 'Naglaingka! 🌟';
+  String get goodJob => 'Nagsayaat! 🌟';
 
   @override
-  String get ulitin => 'Uliten';
+  String get ulitin => 'Ulitin';
 
   @override
   String get traceTitle => 'Surotem, Kayam!';
 
   @override
-  String get uppercase => 'Dakkel a Letra';
+  String get uppercase => 'Dackel a Titik';
 
   @override
-  String get lowercase => 'Bassit a Letra';
+  String get lowercase => 'Bassit a Titik';
 
   @override
-  String get numbers => 'Numero';
+  String get numbers => 'Dagiti Numero';
 
   @override
   String letter(String letter) {
-    return 'Letra $letter';
+    return 'Titik $letter';
   }
 
   @override
   String get sundanPoints => 'Puntos';
 
   @override
-  String get reset => 'Ireser';
+  String get reset => 'Ulitin';
 
   @override
-  String get finishedThisLetter => 'Nalpasem daytoy nga letra!';
+  String get finishedThisLetter => 'Nalpasem daytoy a titik!';
 
   @override
   String goodJobPoints(int points) {
-    return '🌟 Nagsayaat! +$points a puntos';
+    return '🌟 Nagsayaat! +$points puntos';
   }
 
   @override
-  String get tooHardSwitch => 'Narigat unay? Padasentayo ti sumaruno!';
+  String get tooHardSwitch => 'Masyadong mahirap? Lipat tayo sa susunod!';
 
   @override
-  String get reTrace => 'Uliten';
+  String get reTrace => 'Bakas muli';
 
   @override
-  String get forParentsTitle => 'Para kadagiti Nagannak';
+  String get forParentsTitle => 'Para kadagiti NAKATATAKENG';
 
   @override
-  String get overallProgress => 'Dagup a Progress';
+  String get overallProgress => 'Kabuuang Progress';
 
   @override
-  String get tula => 'Daniw';
+  String get tula => 'Tula';
 
   @override
-  String get kwento => 'Sarita';
+  String get kwento => 'Kwento';
 
   @override
   String get kanta => 'Kanta';
 
   @override
-  String get uppercaseProgress => 'Dakkel a Letra';
+  String get uppercaseProgress => 'Dackel a Titik';
 
   @override
-  String get lowercaseProgress => 'Bassit a Letra';
+  String get lowercaseProgress => 'Bassit a Titik';
 
   @override
-  String get numbersProgress => 'Numero';
+  String get numbersProgress => 'Dagiti Numero';
 
   @override
-  String get basicColors => 'Batayan a Kolor';
+  String get basicColors => 'Dagiti Kangrunaan a Kulor';
 
   @override
-  String get colorMixing => 'Panaglaok ti Kolor';
+  String get colorMixing => 'Panagkaiwanen ti Kulor';
 
   @override
-  String get colorObjects => 'Kolor dagiti Banag';
+  String get colorObjects => 'Kulor dagiti Bagay';
 
   @override
-  String get completedLevels => 'Nalpas a Level';
+  String get completedLevels => 'Nalpas a Levels';
 
   @override
   String get gamesCompleted => 'Nalpas nga Ay-ayam';
 
   @override
-  String get parentsTotalScore => 'Dagup a Puntos';
+  String get parentsTotalScore => 'Kabuuang Puntos';
 
   @override
-  String get currentStreak => 'Taudan a Streak';
+  String get currentStreak => 'Kasalukuyang Streak';
 
   @override
   String days(int days) {
-    return '$days nga aldaw';
+    return '$days aldaw';
   }
 
   @override
-  String get parentsTotalStars => 'Dagup a Bituen';
+  String get parentsTotalStars => 'Kabuuang Bituin';
 
   @override
-  String get badges => 'badges';
+  String get badges => 'dagiti badge';
 
   @override
-  String get myProfile => 'Profilko';
+  String get myProfile => 'Ti Profilko';
 
   @override
   String yearsOld(int age) {
-    return '$age a tawen';
+    return '$age tawen';
   }
 
   @override
@@ -736,43 +736,43 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get profileAge => 'Tawen';
 
   @override
-  String get gender => 'Sekso';
+  String get gender => 'Kasarian';
 
   @override
-  String get memberSince => 'Kameng Nanipud';
+  String get memberSince => 'Kameng Manipud';
 
   @override
-  String get editProfile => 'Baliwan ti Profil';
+  String get editProfile => 'I-edit ti Profil';
 
   @override
-  String get noProfileData => 'Awan datos ti profil';
+  String get noProfileData => 'Awan ti data ti profil';
 
   @override
-  String get comingSoon => 'Umayto!';
+  String get comingSoon => 'Urayem manen!';
 
   @override
-  String get settings => 'Pangpaandar';
+  String get settings => 'Mga Setting';
 
   @override
-  String get language => 'Pagsasao';
+  String get language => 'Wika';
 
   @override
-  String get sound => 'Uni';
+  String get sound => 'Tunog';
 
   @override
   String get music => 'Musika';
 
   @override
-  String get notifications => 'Pakaammo';
+  String get notifications => 'Mga Abiso';
 
   @override
-  String get achievements => 'Nagun-od';
+  String get achievements => 'Mga Natamo';
 
   @override
-  String get firstSteps => 'Umuna nga Addang';
+  String get firstSteps => 'Unang Hakbang';
 
   @override
-  String get alphabetMaster => 'Master ti Alpabeto';
+  String get alphabetMaster => 'Alphabet Master';
 
   @override
   String get numberWizard => 'Number Wizard';
@@ -805,59 +805,60 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get songbird => 'Songbird';
 
   @override
-  String get perfectScore => 'Perpekto nga Puntos';
+  String get perfectScore => 'Perpektong Puntos';
 
   @override
-  String get firstStepsDesc => 'Lpasen ti umuna nga aktibidad';
+  String get firstStepsDesc => 'Kumpletuhin ang unang aktibidad';
 
   @override
-  String get alphabetMasterDesc => 'Lpasen amin nga aktibidad ti Magbasa Tayo';
+  String get alphabetMasterDesc =>
+      'Kumpletuhin lahat ng Magbasa Tayo activities';
 
   @override
-  String get numberWizardDesc => 'Lpasen ti 20 nga ay-ayam ti Matematika';
+  String get numberWizardDesc => 'Kumpletuhin ang 20 Matematika games';
 
   @override
-  String get colorArtistDesc => 'Lpasen amin nga aktibidad ti Kulay-Saya';
+  String get colorArtistDesc => 'Kumpletuhin lahat ng Kulay-Saya activities';
 
   @override
-  String get shapeCreatorDesc => 'Lpasen amin a dakkel a letra';
+  String get shapeCreatorDesc => 'Kumpletuhin lahat ng dackel a titik';
 
   @override
-  String get animalFriendDesc => 'Lpasen amin a bassit a letra';
+  String get animalFriendDesc => 'Kumpletuhin lahat ng bassit a titik';
 
   @override
-  String get bookwormDesc => 'Lpasen amin a sarita';
+  String get bookwormDesc => 'Kumpletuhin lahat ng kwento';
 
   @override
-  String get starStudentDesc => 'Lpasen ti 20 nga ay-ayam ti Ang Aking Sarili';
+  String get starStudentDesc => 'Kumpletuhin ang 20 Ang Aking Sarili games';
 
   @override
-  String get familyHeroDesc => 'Lpasen amin a family level';
+  String get familyHeroDesc => 'Kumpletuhin lahat ng family levels';
 
   @override
-  String get writingStarDesc => 'Suroten amin a letra ken numero';
+  String get writingStarDesc => 'Suroten lahat ng titik ken numero';
 
   @override
-  String get songbirdDesc => 'Adalen amin a 13 a kanta';
+  String get songbirdDesc => 'Matutunan lahat ng 13 kanta';
 
   @override
-  String get perfectScoreDesc => 'Agperpekto iti 3 nga ay-ayam';
+  String get perfectScoreDesc => 'Mag-perpekto sa 3 laro';
 
   @override
-  String get noAwardsYet => 'Awan pay ti Premio';
+  String get noAwardsYet => 'Awan ti Premio Pay';
 
   @override
   String get completeActivitiesToEarn =>
-      'Lpasen dagiti aktibidad tapno makapremio!';
+      'Lippasen dagiti aktibidad tapno makagun-od iti premio!';
 
   @override
-  String get teacherDashboard => 'Dashboard ti Mistra';
+  String get teacherDashboard => 'Dashboard ti Guro';
 
   @override
   String get enrollStudent => 'Ilista ti Estudiante';
 
   @override
-  String get firstName => 'Umuna a Nagan';
+  String get firstName => 'Unang Nagan';
 
   @override
   String get lastName => 'Apelyido';
@@ -869,120 +870,120 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get usernameLabel => 'Username (Auto-generated)';
 
   @override
-  String get genderLabel => 'Sekso';
+  String get genderLabel => 'Kasarian';
 
   @override
-  String get studentInfo => 'Informasyon ti Estudiante';
+  String get studentInfo => 'Impormasyon ti Estudiante';
 
   @override
-  String get removeStudent => 'Iruuar ti Estudiante?';
+  String get removeStudent => 'Ikkaton ti Estudiante?';
 
   @override
   String get progressLabel => 'Progress';
 
   @override
-  String get logout => 'Agruuar';
+  String get logout => 'Mag-logout';
 
   @override
-  String get confirmLogout => 'Sigurado ka kadi a kayatmo ti agruuar?';
+  String get confirmLogout => 'Sigurado ka a kayatmo ti mag-logout?';
 
   @override
   String get verifyLRN => 'I-verify ti LRN';
 
   @override
-  String get enterLRN => 'Isuurat ti LRN tapno agtuloy';
+  String get enterLRN => 'Mangyaring ilagay ang iyong LRN para magpatuloy';
 
   @override
-  String get invalidLRN => 'Madi a LRN. Padasen manen.';
+  String get invalidLRN => 'Saan nga umiso a LRN. Padasen manen.';
 
   @override
   String get password => 'Password';
 
   @override
   String get enrollmentInfo =>
-      'Ited ti username ken LRN ti nagannak/estudiante tapno makapag-login.';
+      'Ikan ti username ken LRN iti nakatatakeng/estudiante para iti login.';
 
   @override
-  String get fillAllFields => 'Pakiusapan a punnuan amin a field.';
+  String get fillAllFields => 'Pakisuyong punan ang lahat ng fields.';
 
   @override
-  String get parentsInfo => 'Informasyon ti Nagannak';
+  String get parentsInfo => 'Impormasyon dagiti Nakatatakeng';
 
   @override
-  String get parentNameLabel => 'Nagan ti Nagannak';
+  String get parentNameLabel => 'Nagan ti Nakatatakeng';
 
   @override
-  String get parentContactLabel => 'Contact ti Nagannak (11 digits)';
+  String get parentContactLabel => 'Contact ti Nakatatakeng (11 digits)';
 
   @override
   String get contactLengthError =>
-      'Ti numero ti contact ket masapul nga 11 a numero.';
+      'Ang numero ng contact ay dapat eksaktong 11 digits.';
 
   @override
   String birthdayGreeting(String name) {
-    return 'Naimbag a Panagkasangay, $name!';
+    return 'Naragsak a Kasangay, $name!';
   }
 
   @override
-  String get swipeToDeleteGuide => 'I-swipe iti kannigid tapno maikkat';
+  String get swipeToDeleteGuide => 'I-swipe pakigid tapno maikkat';
 
   @override
-  String get enrollmentFailed => 'Saanko a nairehistro.';
+  String get enrollmentFailed => 'Bigo ang pag-enroll.';
 
   @override
   String get enroll => 'Ilista';
 
   @override
-  String get studentEnrolled => 'Nairehistro ti Estudiante!';
+  String get studentEnrolled => 'Nailista ti Estudiante!';
 
   @override
   String studentEnrolledSuccessfully(String name) {
-    return 'Nairehistro ni $name a naimbag.';
+    return 'Nailistan ni $name.';
   }
 
   @override
-  String get loginCredentials => 'Credentials ti Login:';
+  String get loginCredentials => 'Mga Kredensyal sa Pag-login:';
 
   @override
   String get userLabel => 'User:';
 
   @override
-  String get usernameCopied => 'Username ket nakopia!';
+  String get usernameCopied => 'Nakopya ti Username!';
 
   @override
   String get passwordLabel => 'Pass:';
 
   @override
-  String get passwordCopied => 'Password ket nakopia!';
+  String get passwordCopied => 'Nakopya ti Password!';
 
   @override
-  String get fullName => 'Intero a Nagan';
+  String get fullName => 'Daplis a Nagan';
 
   @override
   String get lRNPassword => 'LRN (Password)';
 
   @override
   String get confirmRemoveStudent =>
-      'Sigurado ka kadi a kayatmo nga ikkaten daytoy nga estudiante? Saanto a mabalin a masubli.';
+      'Sigurado ka a kayatmo nga ikkaton daytoy nga estudiante? Saanen a maibabawi.';
 
   @override
-  String get remove => 'Ikkaten';
+  String get remove => 'Ikkaton';
 
   @override
-  String get update => 'E-update';
+  String get update => 'I-update';
 
   @override
-  String get refresh => 'E-refresh';
+  String get refresh => 'I-refresh';
 
   @override
-  String get copied => 'Nakopia!';
+  String get copied => 'Nakopya!';
 
   @override
-  String get noStudentsEnrolled => 'Awan pay ti estudiante nga nairehistro.';
+  String get noStudentsEnrolled => 'Awan ti nailista nga estudiante pay.';
 
   @override
   String get tapToEnroll =>
-      'Pisuen ti \"Ilista ti Estudiante\" tapno manginayon.';
+      'I-tap ti \"Ilista ti Estudiante\" tapno manginayon.';
 
   @override
   String get usernameHeader => 'Username:';
@@ -1001,278 +1002,277 @@ class AppLocalizationsIlo extends AppLocalizations {
   }
 
   @override
-  String get welcome => 'Naragsak nga Panagsubli';
+  String get welcome => 'Naragsak a Panagsubli!';
 
   @override
-  String get loginPrompt => 'Ag-login tapno ituloy ti adalmo';
+  String get loginPrompt => 'Mag-login tapno ituloy ti panag-adalo';
 
   @override
-  String get loginButton => 'Ag-login';
+  String get loginButton => 'Mag-login';
 
   @override
-  String get teacherLoginButton => 'Ituloy a kas Mistra';
+  String get teacherLoginButton => 'Magpatuloy bilang Guro';
 
   @override
   String get enterUsernamePassword =>
-      'Pakiusapan a isurat ti username ken password.';
+      'Pakisuyong ilagay ang username at password.';
 
   @override
-  String get loginError => 'Saanko a makapag-login. Padasen manen.';
+  String get loginError => 'Bigo ti pag-login. Padasen manen.';
 
   @override
   String get username => 'Username';
 
   @override
-  String get teacherLoginTitle => 'Login ti Mistra';
+  String get teacherLoginTitle => 'Login ti Guro';
 
   @override
   String get teacherLoginPrompt =>
-      'Isurat ti credentials ti mistra tapno agtuloy';
+      'Ipasok ang iyong teacher credentials para magpatuloy';
 
   @override
-  String get teacherLoginButtonLabel => 'Ag-login a kas Mistra';
+  String get teacherLoginButtonLabel => 'Mag-login bilang Guro';
 
   @override
   String get invalidTeacherCredentials =>
-      'Madi a credentials ti mistra. Padasen manen.';
+      'Saan nga umiso a teacher credentials. Padasen manen.';
 
   @override
   String monthName(int month) {
-    return 'Saan a naiset';
+    return 'Bulan $month';
   }
 
   @override
-  String get notSet => 'Saan a Nakabuklan';
+  String get notSet => 'Saan a Nakatakda';
 
   @override
-  String get saveChanges => 'I-save ti Binaliw';
+  String get saveChanges => 'Idulin dagiti Pagbabago';
 
   @override
-  String get enterName => 'Isurat ti naganmo';
+  String get enterName => 'I-type ti naganmo';
 
   @override
-  String get chooseLanguage => 'Piliem ti Pagsasao';
+  String get chooseLanguage => 'Pumili ti Wika';
 
   @override
-  String get getStarted => 'Irugi';
+  String get getStarted => 'Magsimula';
 
   @override
-  String get nextLevelLearningTitle => 'Sumaruno a Tukad ti Panagadal';
+  String get nextLevelLearningTitle => 'Sumaruno nga Antas ti Panag-adal';
 
   @override
   String get nextLevelLearningDesc =>
-      'Nakaragsak ken interaktibo nga ay-ayam para kadagiti ubbing tapno makaadal ken dumakkel.';
+      'Kapakapa ken interactive nga ay-ayam para kadagiti ubbing tapno matuto ken dumakkel.';
 
   @override
-  String get learnAnywhereTitle => 'Agadal iti Sadinoman';
+  String get learnAnywhereTitle => 'Matuto Kahit Saan';
 
   @override
   String get learnAnywhereDesc =>
-      'Maala dagiti adal uray offline ken ituloy ti agadal sadiay man.';
+      'I-access ang mga aralin kahit offline at ituloy ang pag-aaral kahit nasaan mang dako.';
 
   @override
-  String get trackProgressTitle => 'Suroten ti Panagrang-ay';
+  String get trackProgressTitle => 'Subaybayan ti Panag-unlad';
 
   @override
   String get trackProgressDesc =>
-      'Kitaem no kasano ti panagrang-ay ti anakmo babaen ti smart progress tracking.';
+      'Tignan kung gaano kagaling ang iyong anak sa pamamagitan ng smart progress tracking.';
 
   @override
-  String get welcomeOnboardingTitle => 'Naragsak a Isasangbay iti E-Tarabay';
+  String get welcomeOnboardingTitle => 'Naragsak a Panagumay iti E-Tarabay';
 
   @override
   String get welcomeOnboardingDesc =>
-      'Ti nasaririt a kaduam iti panagadal ken panangdiskobre ti lubong.';
+      'Ti matalino nga kabsatmo iti panag-adal ken panagduktal iti lubong.';
 
   @override
-  String get continueText => 'Ituloy';
+  String get continueText => 'Magpatuloy';
 
   @override
-  String get forParents => 'Para kadagiti Nagannak';
+  String get forParents => 'Para kadagiti Nakatatakeng';
 
   @override
-  String get hello => 'Kumusta!';
+  String get hello => 'Kablaaw!';
 
   @override
-  String get kulaySayaProgress => 'Kulay-Saya a Progress';
+  String get kulaySayaProgress => 'Kulay-Saya Progress';
 
   @override
-  String get totalSaved => 'Dagup a Naidulin';
+  String get totalSaved => 'Kabuuang Naidulin';
 
   @override
-  String get sundanMoProgress => 'Sundan Mo a Progress';
+  String get sundanMoProgress => 'Sundan Mo Progress';
 
   @override
-  String get magbasaProgress => 'Magbasa a Progress';
+  String get magbasaProgress => 'Magbasa Progress';
 
   @override
-  String get matematikaProgress => 'Matematika a Progress';
+  String get matematikaProgress => 'Matematika Progress';
 
   @override
   String get noResults => 'Awan ti resulta';
 
   @override
-  String get greatWorkKulay => 'Nalpas! Nagsayaat! 🌟';
+  String get greatWorkKulay => 'Nalpasen! Nagsayaat! 🌟';
 
   @override
-  String get imageNotFound => 'Saan a nabirukan ti ladawan';
+  String get imageNotFound => 'Saan a nahanap ti rupa';
 
   @override
-  String get clearCanvasQuestion => 'Dalosan ti Canvas?';
+  String get clearCanvasQuestion => 'Linisin ti Canvas?';
 
   @override
-  String get eraseColoringWarning => 'Punasenna amin a kinulormo daytoy.';
+  String get eraseColoringWarning =>
+      'Buburahin nito ang lahat ng iyong kinulayan.';
 
   @override
-  String get noArtworksYet => 'Awan pay dagiti pinarsua.';
+  String get noArtworksYet => 'Awan ti ginawa pay.';
 
   @override
-  String get colorPagePrompt =>
-      'Kulayan ti maysa a pahina\nket idulin ti artwork mo!';
+  String get colorPagePrompt => 'Magkulay ng pahina\nat i-save ang iyong gawa!';
 
   @override
-  String get startColoring => 'Mangrugi a Mangulor';
+  String get startColoring => 'Simulan ti Panagkulay';
 
   @override
   String get edit => 'I-edit';
 
   @override
   String get lessonFinishedPrompt =>
-      'Nalpasmo daytoy a lesson! Naimbag! Pumili manen iti sabali nga ay-ayam.';
+      'Nalpasem daytoy nga adal! Nagsayaat! Pumili ng ibang laro.';
 
   @override
   String get okButton => 'OK';
 
   @override
-  String get storyFinishedGreatJob => 'Nagsayaat! Nalpasmo ti sarita!';
+  String get storyFinishedGreatJob => 'Nagsayaat! Nalpasem ti kwento!';
 
   @override
   String get finishedExclamation => 'Nalpasen!';
 
   @override
-  String get readingFinishedGood => '✓ Nalpas! Naimbag ti panagbasam!';
+  String get readingFinishedGood => '✓ Nalpasen! Nagsayaat a panagbasa!';
 
   @override
-  String get readingFinishedHappy => '✓ Nalpas! Naragsak ti panagbasam!';
+  String get readingFinishedHappy => '✓ Nalpasen! Naragsak a panagbasa!';
 
   @override
-  String get poemFinishedGreatJob => 'Nagsayaat! Nalpasmo ti daniw!';
+  String get poemFinishedGreatJob => 'Nagsayaat! Nalpasem ti tula!';
 
   @override
-  String get doneAlready => 'Nalpasem daytoyen!';
+  String get doneAlready => 'Nalpasen daytoy!';
 
   @override
-  String get checkAnswer => 'Kitaen';
+  String get checkAnswer => 'Suriin';
 
   @override
   String get noGamesAvailable2 => 'Awan ti ay-ayam';
 
   @override
   String get countAndDragCorrectNumber =>
-      'Bilangem ken iyugot ti umiso a numero!';
+      'Bilangen ken i-drag ti umiso a numero!';
 
   @override
-  String get theyAreSame => 'Parehoda!  ✓';
+  String get theyAreSame => 'Pareho da! ✓';
 
   @override
-  String get whatIsMissingNumber => 'Ania ti kurang a numero?';
+  String get whatIsMissingNumber => 'Ania ti nawawalang numero?';
 
   @override
   String get badgesWithIcon => '🏅 Dagiti Badge';
 
   @override
-  String get straightOrCorrect => 'Nalinteg!';
+  String get straightOrCorrect => 'Umiso!';
 
   @override
-  String get iKnowIt => 'Naammuak!';
+  String get iKnowIt => 'Naammangak!';
 
   @override
-  String get familyTreeTitle => 'Puno ti Pamilya';
+  String get familyTreeTitle => 'Family Tree';
 
   @override
   String get familyTreeDesc =>
-      'Ti puno ti pamilya ket nagpapakita dagiti miyembro ti pamilyam manipud iti nataengan agingga iti kaungpus.';
+      'Ti punuan ti pamilya ket agpakpakita kadagiti kameng ti pamilyam manipud kailakayan aginggana kailubingan.';
 
   @override
   String get familyTreeTapHint =>
-      '💡 Tiknapen dagiti miyembro tapno maammuan ti relasyon da!';
+      '💡 Pindutem dagiti kameng tapno maammalaan ti relasyon!';
 
   @override
-  String get iLearnedFamilyTree => 'Naammuak ti Puno ti Pamilya!';
+  String get iLearnedFamilyTree => 'Naammalaak ti Family Tree!';
 
   @override
-  String get ourHomeTitle => 'Ti Balaymi';
+  String get ourHomeTitle => 'Balaymi';
 
   @override
   String get tapEachRoomPrompt =>
-      'Tiknapen ti tunggal kuarto tapno maammuan ti aramidenyo ditoy!';
+      'Pindutem ti tunggal kwarto tapno maammalaan ti ar-aramidenyoditoy!';
 
   @override
   String get thatIsOurHome => 'Dayta ti balaymi!';
 
   @override
-  String get startOnLine => 'Mangrugi iti linia!';
+  String get startOnLine => 'Magsimula sa linya!';
 
   @override
-  String get stayInsideLine => 'Agtalinaed iti uneg ti linia!';
+  String get stayInsideLine => 'Manatili sa loob ng linya!';
 
   @override
-  String get invalidInput => 'Saan a valido a sungbat';
+  String get invalidInput => 'Di-wastong input';
 
   @override
-  String get tooShort => 'Subukanen ti naan-anay a sungbat';
+  String get tooShort => 'Masyadong maikli ang sagot';
 
   @override
   String get selectAnswer => 'Pumili ti sungbat';
 
   @override
-  String get badgeKnowMyself => 'Ammok ti Bagik';
+  String get badgeKnowMyself => 'Amangak ti Bagik';
 
   @override
-  String get badgeEmotionExpert => 'Rikna Esperto';
+  String get badgeEmotionExpert => 'Eksperto iti Rikna';
 
   @override
-  String get badgeRoutineExpert => 'Aramid Esperto';
+  String get badgeRoutineExpert => 'Eksperto iti Aramid';
 
   @override
-  String get badgePreferenceExpert => 'Ammok ti Kayatko';
+  String get badgePreferenceExpert => 'Eksperto iti Kaykayat';
 
   @override
-  String get badgeMemberExpert => 'Miyembro Esperto';
+  String get badgeMemberExpert => 'Eksperto iti Kameng';
 
   @override
-  String get badgeWorkExpert => 'Trabaho Esperto';
+  String get badgeWorkExpert => 'Eksperto iti Trabaho';
 
   @override
-  String get badgeActivityExpert => 'Aramid Esperto';
+  String get badgeActivityExpert => 'Eksperto iti Aramid';
 
   @override
-  String get badgeTreeExpert => 'Puno Esperto';
+  String get badgeTreeExpert => 'Eksperto iti Punuan';
 
   @override
-  String get badgeHouseExpert => 'Balay Esperto';
+  String get badgeHouseExpert => 'Eksperto iti Balay';
 
   @override
-  String get forParentsSubtitle =>
-      'Adda ditoy ti rang-ay ti anakyo iti E-Tarabay.';
+  String get forParentsSubtitle => 'Adtoy ti progreso ti anakyo iti E-Tarabay.';
 
   @override
-  String get artworks => 'obra';
+  String get artworks => 'dagiti likha';
 
   @override
   String get error => 'Error';
 
   @override
-  String get recentActivity => 'Kaudian nga Aramid';
+  String get recentActivity => 'Kamakailang Aramid';
 
   @override
-  String get recentColor => 'Kaudian a Kolor';
+  String get recentColor => 'Kamakailang Kulor';
 
   @override
-  String get unknownStudent => 'Saan a Nabigbig a Simmaruno';
+  String get unknownStudent => 'Saan a Amang nga Estudiante';
 
   @override
-  String get achievementFirstSteps => 'Umuna a Addang';
+  String get achievementFirstSteps => 'Unang Hakbang';
 
   @override
   String get achievementAlphabetMaster => 'Alphabet Master';
@@ -1311,38 +1311,38 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get version => 'Bersyon';
 
   @override
-  String get backgroundMusicPlaying => 'Adda agtutugtog a musika';
+  String get backgroundMusicPlaying => 'Tumutugtog ti musika';
 
   @override
-  String get myArtworkDefault => 'Siningak';
+  String get myArtworkDefault => 'Artwork-ko';
 
   @override
-  String get errorSaveLocal => 'Saan a maidulin ti obra iti device.';
+  String get errorSaveLocal => 'Saan nga ma-save ti likha iti device.';
 
   @override
-  String get finishedAlready => 'Nakompleton!';
+  String get finishedAlready => 'Nalpasen!';
 
   @override
-  String get zoomMode => 'Zoom mode: Mabalin ti multi-touch';
+  String get zoomMode => 'Zoom mode: Pinapayagan ang multi-touch';
 
   @override
-  String get brushMode => 'Brush mode: I-click tapno agkolor';
+  String get brushMode => 'Brush mode: I-click tapno magkulay';
 
   @override
   String get accessExpired =>
-      'Nalpasen ti accessyo iti app. Agkonsulta ken Teacher para iti sumaruno a addang.';
+      'Tapos na ang iyong access sa app na ito. Mangyaring kumonsulta sa iyong Teacher para sa susunod na hakbang.';
 
   @override
-  String get colorsLabel => 'kolor';
+  String get colorsLabel => 'dagiti kulor';
 
   @override
-  String get overviewTab => 'Panagkita';
+  String get overviewTab => 'Buod';
 
   @override
-  String get sundanMoTab => 'Surodem';
+  String get sundanMoTab => 'Surotem';
 
   @override
-  String get magbasaTab => 'Agbasa';
+  String get magbasaTab => 'Magbasa';
 
   @override
   String get matematikaTab => 'Matematika';
@@ -1351,40 +1351,40 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get artworksLabel => 'Dagiti Obra';
 
   @override
-  String get attemptsLabel => 'Dagiti Subokan';
+  String get attemptsLabel => 'Dagiti Subukan';
 
   @override
-  String get pagesLabel => 'panid';
+  String get pagesLabel => 'pahina';
 
   @override
-  String get lettersLabel => 'letra';
+  String get lettersLabel => 'titik';
 
   @override
   String get diffEasy => 'Nalaka';
 
   @override
-  String get diffMedium => 'Katengngaan';
+  String get diffMedium => 'Katamtaman';
 
   @override
   String get diffHard => 'Narigat';
 
   @override
-  String get catAnimals => 'Ay-ayup';
+  String get catAnimals => 'Dagiti Ayup';
 
   @override
-  String get catFlowers => 'Sabsabong';
+  String get catFlowers => 'Dagiti Sabong';
 
   @override
-  String get catFruits => 'Prutas';
+  String get catFruits => 'Dagiti Bunga';
 
   @override
-  String get catToys => 'Ay-ayam';
+  String get catToys => 'Dagiti Ay-ayam';
 
   @override
-  String get poemLabel => 'Daniw';
+  String get poemLabel => 'Tula';
 
   @override
-  String get storyLabel => 'Sarita';
+  String get storyLabel => 'Kwento';
 
   @override
   String get songLabel => 'Kanta';
@@ -1393,71 +1393,69 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get activitiesLabel => 'aktibidad';
 
   @override
-  String get gamesLabel => 'aglawlaw';
+  String get gamesLabel => 'ay-ayam';
 
   @override
   String get savedCountLabel => 'naidulin';
 
   @override
-  String get attemptsCountLabel => 'panagsubok';
+  String get attemptsCountLabel => 'subok';
 
   @override
-  String get uppercaseLettersTitle => 'Dakkel a Letra (A–Z)';
+  String get uppercaseLettersTitle => 'Dackel a Titik (A–Z)';
 
   @override
-  String get lowercaseLettersTitle => 'Bassit a Letra (a–z)';
+  String get lowercaseLettersTitle => 'Bassit a Titik (a–z)';
 
   @override
   String get numbersTitle => 'Dagiti Numero (1–10)';
 
   @override
   String levelComplete(int level) {
-    return 'Nakompleto ti Level $level!';
+    return 'Nakumpleto ti Level $level!';
   }
 
   @override
-  String get achievementFirstStepsDesc => 'Nakompleto ti umuna a gawain';
+  String get achievementFirstStepsDesc => 'Lippasen ti unang aktibidad';
 
   @override
   String get achievementAlphabetMasterDesc =>
-      'Nakompleto amin a gawain iti Magbasa';
+      'Lippasen amin a aktibidad iti Magbasa';
 
   @override
   String get achievementNumberWizardDesc =>
-      'Nakompleto ti 20 a gawain iti Matematika';
+      'Lippasen ti 20 laro iti Matematika';
 
   @override
   String get achievementColorArtistDesc =>
-      'Nakompleto amin a gawain iti Kulay-Saya';
+      'Lippasen amin a aktibidad iti Kulay-Saya';
 
   @override
-  String get achievementShapeCreatorDesc => 'Nakompleto amin a dakkel a letra';
+  String get achievementShapeCreatorDesc => 'Lippasen amin a dackel a titik';
 
   @override
-  String get achievementAnimalFriendDesc => 'Nakompleto amin a bassit a letra';
+  String get achievementAnimalFriendDesc => 'Lippasen amin a bassit a titik';
 
   @override
-  String get achievementBookwormDesc => 'Nakompleto amin a istorya';
+  String get achievementBookwormDesc => 'Lippasen amin a kwento';
 
   @override
-  String get achievementMathWhizDesc =>
-      'Nakompleto amin a level iti Matematika';
+  String get achievementMathWhizDesc => 'Lippasen amin a level iti Matematika';
 
   @override
-  String get achievementFamilyHeroDesc =>
-      'Nakompleto amin a level iti Ang Aking Sarili';
+  String get achievementFamilyHeroDesc => 'Lippasen amin a level iti Bagik';
 
   @override
-  String get achievementWritingStarDesc => 'Nakompleto amin a numero';
+  String get achievementWritingStarDesc => 'Lippasen amin a numero';
 
   @override
-  String get achievementSongbirdDesc => 'Nakompleto ti 10 a kanta';
+  String get achievementSongbirdDesc => 'Lippasen ti 10 kanta';
 
   @override
-  String get pagePuppy => 'Tutong Bassit';
+  String get pagePuppy => 'Ubbing nga Aso';
 
   @override
-  String get pageKuting => 'Kuting';
+  String get pageKuting => 'Ubbing a Kuting';
 
   @override
   String get pageElepante => 'Elepante';
@@ -1481,35 +1479,34 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get pageSodaPop => 'Soda Pop';
 
   @override
-  String get achievementStarStudentDesc =>
-      'Nakompleto ti 20 a gawain iti Ang Aking Sarili';
+  String get achievementStarStudentDesc => 'Lippasen ti 20 laro iti Bagik';
 
   @override
-  String get badgeKnowMyselfDesc => 'Nakompleto ti \'Ti Bagik\'';
+  String get badgeKnowMyselfDesc => 'Nalpas ti \'Bagik\'';
 
   @override
-  String get badgeEmotionExpertDesc => 'Nakompleto ti \'Dagiti Riknak\'';
+  String get badgeEmotionExpertDesc => 'Nalpas ti \'Dagiti Riknak\'';
 
   @override
-  String get badgeRoutineExpertDesc => 'Nakompleto ti \'Inaldaw nga Aramid\'';
+  String get badgeRoutineExpertDesc => 'Nalpas ti \'Inaldaw nga Aramid\'';
 
   @override
-  String get badgePreferenceExpertDesc => 'Nakompleto ti \'Paboritok\'';
+  String get badgePreferenceExpertDesc => 'Nalpas ti \'Dagiti Kaykayatko\'';
 
   @override
-  String get badgeMemberExpertDesc => 'Nakompleto ti \'Dagiti Miyembro\'';
+  String get badgeMemberExpertDesc => 'Nalpas ti \'Kameng ti Pamilya\'';
 
   @override
-  String get badgeWorkExpertDesc => 'Nakompleto ti \'Trabaho iti Pamilya\'';
+  String get badgeWorkExpertDesc => 'Nalpas ti \'Trabaho ti Pamilya\'';
 
   @override
-  String get badgeActivityExpertDesc => 'Nakompleto ti \'Aramid ti Pamilya\'';
+  String get badgeActivityExpertDesc => 'Nalpas ti \'Aramid ti Pamilya\'';
 
   @override
-  String get badgeTreeExpertDesc => 'Nakompleto ti \'Puno ti Pamilya\'';
+  String get badgeTreeExpertDesc => 'Nalpas ti \'Punuan ti Pamilya\'';
 
   @override
-  String get badgeHouseExpertDesc => 'Nakompleto ti \'Ti Balaymi\'';
+  String get badgeHouseExpertDesc => 'Nalpas ti \'Balayko\'';
 
   @override
   String familyRoleSentence(String member, String roles) {
@@ -1517,173 +1514,171 @@ class AppLocalizationsIlo extends AppLocalizations {
   }
 
   @override
-  String get resetAllStudents => 'I-reset Amin nga Estudyante';
+  String get resetAllStudents => 'I-reset Amin nga Estudiante';
 
   @override
   String get confirmResetAllStudents =>
-      'Sigurado ka a kayatmo a buraken amin nga naka-enroll nga estudyante? Saan a mabalin a maibalik daytoy.';
+      'Sigurado ka a kayatmo nga ikkaton amin a nailista nga estudiante? Saanen a maibabawi.';
 
   @override
-  String get confirm => 'Pasingkedan';
+  String get confirm => 'Kumpirmahin';
 
   @override
-  String get rateYourArtwork => 'Rate Artwork';
+  String get rateYourArtwork => 'I-rate ti Likha';
 
   @override
-  String get howManyStars => 'Mano a bituen ti ibagbagnam?';
+  String get howManyStars => 'Mano a bituen ti maikari?';
 
   @override
-  String get tapToView => 'Pindutan para kitaen';
+  String get tapToView => 'Pindutem tapno buyaen';
 
   @override
-  String get delete => 'Buraken';
+  String get delete => 'Ikkaton';
 
   @override
-  String get deleteArtwork => 'Buraken ti Artwork';
+  String get deleteArtwork => 'Ikkaton ti Artwork';
 
   @override
   String get confirmDeleteArtwork =>
-      'Sigurado ka a kayatmo a buraken daytoy nga artwork? Saan a mabalin a maibalik daytoy.';
+      'Sigurado ka a kayatmo nga ikkaton daytoy nga artwork? Saanen a maibabawi.';
 
   @override
-  String get artworkDeleted => 'Na-delete ti artwork.';
+  String get artworkDeleted => 'Naikkat ti artwork.';
 
   @override
   String get zoomOn => 'Zoom';
 
   @override
-  String get zoomOff => 'Balligi';
+  String get zoomOff => 'Nalpas';
 
   @override
   String get karaokeTitle => 'Karaoke';
 
   @override
-  String get karaokeSubtitle => 'Kantaantayo!';
+  String get karaokeSubtitle => 'Agkanta Tayo!';
 
   @override
-  String get greatSinging => 'Nalaing ti kantam!';
+  String get greatSinging => 'Nagsayaat nga agkanta!';
 
   @override
-  String get readFullPoemBeforeBack =>
-      'Basaem ti intero a daniw sakbay iti panagsubli.';
+  String get readFullPoemBeforeBack => 'Basaen ti buong tula bago agsubli.';
 
   @override
-  String get iReadThePoem => 'Basak ti Daniw! ✓';
+  String get iReadThePoem => 'Nabasa Ko ti Tula! ✓';
 
   @override
-  String get readFullStoryBeforeBack =>
-      'Basaem ti intero a sarita sakbay iti panagsubli.';
+  String get readFullStoryBeforeBack => 'Basaen ti buong kwento bago agsubli.';
 
   @override
-  String get iReadTheStory => 'Nabasa Kon! ✓';
+  String get iReadTheStory => 'Nabasakon! ✓';
 
   @override
-  String get tandaanTitle => 'Tandaem!';
+  String get tandaanTitle => 'Lagipem!';
 
   @override
-  String get tandaanSubtitle => 'PARISEM TI AGPADA';
+  String get tandaanSubtitle => 'ITUGMA TI PARES';
 
   @override
   String get round => 'Round';
 
   @override
-  String get matchThePairs => 'Biruken ken paresen dagiti pares!';
+  String get matchThePairs => 'Biroken ken itugma dagiti pares!';
 
   @override
   String get flipCardsToMatch =>
-      'Taklaem ti card tapno i-flip. Birukem ti dua a kapada!';
+      'Pindutem ti card tapno i-flip. Biroken ti dua a magkatulad!';
 
   @override
-  String get traceItTitle => 'Surotem - Kaya Mo!';
+  String get traceItTitle => 'Surotem - Kayam!';
 
   @override
-  String get traceItSubtitle => 'Idrawing manipud iti memorya';
+  String get traceItSubtitle => 'Idrowing manipud memorya';
 
   @override
-  String get checkTracing => 'Kitaen';
+  String get checkTracing => 'Tingnan';
 
   @override
   String get showHint => 'Tulong';
 
   @override
-  String get startAtDot => 'Rugiam iti tuldok!';
+  String get startAtDot => 'Magsimula sa tuldok!';
 
   @override
-  String get almostThere => 'Asideg pay laeng! Padasem manen!';
+  String get almostThere => 'Dandamagen! Padasen manen!';
 
   @override
   String progressPages(int done, int total) {
-    return '$done / $total a panid';
+    return '$done / $total pahina';
   }
 
   @override
   String percentComplete(int percent) {
-    return '$percent% a nakompleto';
+    return '$percent% kumpleto';
   }
 
   @override
   String get obraLabel => 'Obra';
 
   @override
-  String get strokesLabel => 'Strokes';
+  String get strokesLabel => 'Dagiti Pahid';
 
   @override
-  String get categoryProgressHeader => 'Rang-ay iti Tunggal Kategorya';
+  String get categoryProgressHeader => 'Progreso iti Tunggal Kategorya';
 
   @override
   String get savedArtworksHeader => 'Dagiti Naidulin nga Obra';
 
   @override
-  String get parentTipsHeader => 'Tips para kadagiti Nagannak';
+  String get parentTipsHeader => 'Tips para kadagiti Nakatatakeng';
 
   @override
-  String get tipKulayTitle => 'Kolor-Saya';
+  String get tipKulayTitle => 'Kulay-Saya';
 
   @override
   String get tipKulayBody =>
-      'Paregtaen ti anakyo nga agkolor iti amin a panid iti tunggal kategorya.';
+      'Panggepen ti anakyo a magkulay amin a pahina iti tunggal kategorya.';
 
   @override
   String get tipTraceItTitle => 'Surotem';
 
   @override
   String get tipTraceItBody =>
-      'Iwanwan ti anakyo a suroten ti umiso a turong ti tunggal letra.';
+      'I-guide ti anakyo a suroten ti umiso a direksyon ti tunggal letra.';
 
   @override
-  String get tipMagbasaTitle => 'Agbasa';
+  String get tipMagbasaTitle => 'Magbasa';
 
   @override
   String get tipMagbasaBody =>
-      'Basaen a napigsa kadua ti anakyo dagiti daniw, sarita ken kanta.';
+      'Basaen ti napukaw kasama ti anakyo dagiti tula, kwento ken kanta.';
 
   @override
   String get tipMatematikaTitle => 'Matematika';
 
   @override
   String get tipMatematikaBody =>
-      'Paregtaen ti anakyo a lpasen ti tunggal ay-ayam tapno rumang-ay ti kabaelanda iti bilang.';
+      'Panggepen ti anakyo a malpas ti tunggal laro tapno dumakkel ti kakayahan iti bilang.';
 
   @override
-  String get tipStudyTimeTitle => 'Oras ti Panagadal';
+  String get tipStudyTimeTitle => 'Oras ti Panag-adal';
 
   @override
   String get tipStudyTimeBody =>
-      'Agpraktis iti 15-20 a minuto iti inaldaw tapno nasayaat ti resulta.';
+      'Mag-practice iti 15-20 minuto inaldaw-aldaw para iti kasayaatan a resulta.';
 
   @override
   String progressCompleted(int done, int total) {
-    return '$done / $total a nalpas';
+    return '$done / $total nalpas';
   }
 
   @override
   String progressActivities(int done, int total) {
-    return '$done / $total nga aktibidad';
+    return '$done / $total aktibidad';
   }
 
   @override
   String progressGames(int done, int total) {
-    return '$done / $total nga ay-ayam';
+    return '$done / $total ay-ayam';
   }
 
   @override
@@ -1693,124 +1688,125 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get starsStatLabel => 'Bituen';
 
   @override
-  String get gameProgressHeader => 'Rang-ay iti Tunggal Ay-ayam';
+  String get gameProgressHeader => 'Progreso iti Tunggal Laro';
 
   @override
-  String get tipPencilGripTitle => 'Umiso a Panagiggemm ti Lapis';
+  String get tipPencilGripTitle => 'Umiso a Panagiggem ti Lapis';
 
   @override
   String get tipPencilGripBody =>
-      'Siguraduwen a husto ti panagiggemm ti anakyo iti stylus wenno ramayda bayat ti panagsursurot.';
+      'Siguraduhin a umiso ti panagiggem ti anakyo iti stylus wenno ima habang nag-tracing.';
 
   @override
-  String get tipRepeatTitle => 'Ulit-uliten';
+  String get tipRepeatTitle => 'Ulit-ulitin';
 
   @override
   String get tipRepeatBody =>
-      'Paregtaen ti anakyo nga uliten dagiti letra a saan pay a nakompleto.';
+      'Panggepen ti anakyo a ulit-ulitin dagiti letra a saan pay a nalpas.';
 
   @override
-  String get tipPraiseTitle => 'Dayawen ti Anakyo';
+  String get tipPraiseTitle => 'Ipagpannakkel ti Anakyo';
 
   @override
   String get tipPraiseBody =>
-      'Dayawen ti tunggal balligi, dakkel man wenno bassit, tapno pumigsa ti kompiansada.';
+      'Ipagpannakkel ti tunggal tagumpay, dackel man wenno bassit, tapno napagbalin ti kumpiyansa.';
 
   @override
-  String get tipTulaTitle => 'Daniw';
+  String get tipTulaTitle => 'Tula';
 
   @override
   String get tipTulaBody =>
-      'Basaen a napigsa dagiti daniw kadua ti anakyo tapno mapasayaat ti panagsaoda.';
+      'Basaen ti napukaw dagiti tula kasama ti anakyo tapno maas-asik ti pagbigkas.';
 
   @override
-  String get tipKwentoTitle => 'Sarita';
+  String get tipKwentoTitle => 'Kwento';
 
   @override
   String get tipKwentoBody =>
-      'Saludsoden ti anakyo maipanggep iti sarita kalpasan a basaen tapno pumigsa ti pannakaawatda.';
+      'Saludsoden iti anakyo ti maipanggep iti kwento pagkatapos basaen tapno maas-asik ti pag-unawa.';
 
   @override
   String get tipKantaTitle => 'Kanta';
 
   @override
   String get tipKantaBody =>
-      'Agkantaankayo a sangsangkamaysa tapno naragsak ti panagadal.';
+      'Agkanta a sangsangkamaysa dagiti kanta tapno naragsak ti panag-adal.';
 
   @override
   String get tipCountingTitle => 'Panagbilang';
 
   @override
   String get tipCountingBody =>
-      'Usaren dagiti pudno a banag kas prutas wenno al-aliwa tapno matulongan ti anakyo a mangbilang.';
+      'Gumamit ti tunay a bagay kasla bunga wenno ay-ayam tapno makatulong iti anakyo a magbilang.';
 
   @override
-  String get tipPraiseMatTitle => 'Pammadayaw';
+  String get tipPraiseMatTitle => 'Papuri';
 
   @override
   String get tipPraiseMatBody =>
-      'Dayawen ti anakyo iti tunggal umiso a sungbat tapno pumigsa ti kompiansada iti matematika.';
+      'Ipagpannakkel ti anakyo iti tunggal umiso a sungbat tapno napagbalin ti kumpiyansa iti matematika.';
 
   @override
   String get tipGameFunTitle => 'Ay-ayam';
 
   @override
   String get tipGameFunBody =>
-      'Dagiti ay-ayam ket naaramid tapno naragsak — palubosan ti anakyo a mag-enjoy iti panagadal.';
+      'Dagiti ay-ayam ket dinisenyo tapno naragsak — palubosan ti anakyo a mag-enjoy iti panag-adal.';
 
   @override
-  String get badgeFirstStepsTitle => 'Umuna a Addang';
+  String get badgeFirstStepsTitle => 'Unang Hakbang';
 
   @override
-  String get badgeFirstStepsHint => 'Lippasen ti 1 nga aktibidad';
+  String get badgeFirstStepsHint => 'Lippasen ti 1 nga aramid';
 
   @override
-  String get badgeAlphabetTitle => 'Maestro ti Alpabeto';
+  String get badgeAlphabetTitle => 'Master ti Alpabeto';
 
   @override
-  String get badgeAlphabetHint => 'Lippasen ti 12 nga aktibidad ti panagbasa';
+  String get badgeAlphabetHint => 'Lippasen ti 12 nga aramid iti panagbasa';
 
   @override
   String get badgeNumbersTitle => 'Salamangkero ti Numero';
 
   @override
-  String get badgeNumbersHint => 'Agay-ayam ti 20 a math games';
+  String get badgeNumbersHint => 'Agay-ayam ti 20 nga ay-ayam iti matematika';
 
   @override
-  String get badgeColorsTitle => 'Artista ti Kolor';
+  String get badgeColorsTitle => 'Artista ti Kulor';
 
   @override
-  String get badgeColorsHint => 'Lippasen ti 4 nga aktibidad ti panagkolor';
+  String get badgeColorsHint => 'Lippasen ti 4 nga aramid iti panagkulay';
 
   @override
-  String get badgeShapesTitle => 'Manangparsua ti Sukog';
+  String get badgeShapesTitle => 'Tagalikha ti Hugis';
 
   @override
-  String get badgeShapesHint => 'Suroten ti 26 a dadakkel a letra';
+  String get badgeShapesHint => 'Suroten ti 26 a dackel a titik';
 
   @override
-  String get badgeAnimalsTitle => 'Gayyem dagiti Ayup';
+  String get badgeAnimalsTitle => 'Gayyem ti Ayup';
 
   @override
-  String get badgeAnimalsHint => 'Suroten ti 26 a babassit a letra';
+  String get badgeAnimalsHint => 'Suroten ti 26 a bassit a titik';
 
   @override
-  String get badgeBookwormTitle => 'Mannakabasa';
+  String get badgeBookwormTitle => 'Mahilig Magbasa';
 
   @override
-  String get badgeBookwormHint => 'Agbasa ti 4 a sarita';
+  String get badgeBookwormHint => 'Basaen ti 4 a kwento';
 
   @override
   String get badgeStarStudentTitle => 'Bituen nga Estudiante';
 
   @override
-  String get badgeStarStudentHint => 'Agay-ayam ti 20 a pamilya games';
+  String get badgeStarStudentHint =>
+      'Agay-ayam ti 20 nga ay-ayam maipanggep iti pamilya';
 
   @override
   String get badgeMathWhizTitle => 'Henyo iti Matematika';
 
   @override
-  String get badgeMathWhizHint => 'Lippasen ti 7 a level ti matematika';
+  String get badgeMathWhizHint => 'Lippasen ti 7 a level iti matematika';
 
   @override
   String get badgeFamilyHeroTitle => 'Bannuar ti Pamilia';
@@ -1853,7 +1849,7 @@ class AppLocalizationsIlo extends AppLocalizations {
 
   @override
   String plusStarsLabel(int stars) {
-    return '+$stars a Bituen';
+    return '+$stars a Bituin';
   }
 
   @override
