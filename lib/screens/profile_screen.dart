@@ -86,13 +86,22 @@ class ProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // Name
-                  Text(
-                    userProfile.name,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
+                  // Name (Responsive)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        userProfile.name,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
+                      ),
                     ),
                   ),
 
@@ -189,9 +198,7 @@ class ProfileScreen extends StatelessWidget {
                           AppLocalizations.of(context)!.memberSince,
                           _formatBirthday(
                             context,
-                            userProfile.createdAt ??
-                                userProfile.birthday ??
-                                DateTime.now(),
+                            userProfile.createdAt ?? DateTime.now(),
                           ),
                           LucideIcons.calendar,
                         ),
@@ -223,7 +230,7 @@ class ProfileScreen extends StatelessWidget {
                         _buildStatItem(
                           '${userProfile.stars}',
                           AppLocalizations.of(context)!.stars,
-                          LucideIcons.star,
+                          Icons.star_rounded,
                         ),
                         _buildStatItem(
                           '${userProfile.lessonsCompleted}',
@@ -310,6 +317,8 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -453,7 +462,7 @@ class ProfileScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(15)),
                   ),
                   child: Text(AppLocalizations.of(context)!.saveChanges,
-                      style: TextStyle(color: Colors.white)),
+                      style: const TextStyle(color: Colors.white)),
                 ),
               ),
               const SizedBox(height: 20),

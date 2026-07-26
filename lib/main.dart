@@ -21,17 +21,14 @@ final RouteObserver<PageRoute<dynamic>> routeObserver =
 
 // ========== MODULE BACKGROUND MUSIC MAP ==========
 class ModuleMusic {
-  static const matematika =
-      'audio/modules_bg/Aylex - Fun and Catchy (freetouse.com).mp3';
-  static const pamilya =
-      'audio/modules_bg/Aetheric - Coconut Kind of Love (freetouse.com).mp3';
-  static const kulay =
-      'audio/modules_bg/Aylex - Happy Day (freetouse.com).mp3';
-  static const traceIt =
-      'audio/modules_bg/Aylex - Fun is Fun (freetouse.com).mp3';
-  static const magbasa =
-      'audio/modules_bg/Lukrembo - Storybook (freetouse.com).mp3';
-  static const tandaan = 'audio/modules_bg/Piki - Kitty (freetouse.com).mp3';
+  static const matematika = 'audio/modules_bg/mathematics_module.mp3';
+  static const pamilya = 'audio/modules_bg/about_bg.mp3';
+  static const kulay = 'audio/modules_bg/color-fun_module.mp3';
+  static const traceIt = 'audio/modules_bg/trace-it_bg.mp3';
+  static const magbasa = 'audio/modules_bg/lets-read_module.mp3';
+  static const tandaan = 'audio/modules_bg/remember-it_module.mp3';
+  static const mainBg = 'audio/modules_bg/main_bg.mp3';
+  static const aboutBg = 'audio/modules_bg/about_bg.mp3';
 }
 
 // ========== AUDIO MANAGER (FOR BACKGROUND MUSIC) ==========
@@ -116,7 +113,7 @@ class AudioManager extends ChangeNotifier with WidgetsBindingObserver {
   // this resumes when returning home. Because startBackgroundMusic ignores
   // a request for the track that's already playing, navigating within the
   // same module (or re-entering it) never restarts the music.
-  static const String homeMusicAsset = 'audio/tunog.mp3';
+  static const String homeMusicAsset = 'audio/modules_bg/main_bg.mp3';
 
   Future<void> playModuleMusic(String assetPath) =>
       startBackgroundMusic(assetPath);

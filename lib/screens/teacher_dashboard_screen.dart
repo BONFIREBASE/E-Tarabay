@@ -1955,7 +1955,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _buildStatCard(
-                        icon: LucideIcons.star,
+                        icon: Icons.star_rounded,
                         value: '$totalStars',
                         label: 'Stars',
                         color: Colors.amber,
@@ -2436,8 +2436,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(LucideIcons.star,
-                          color: Colors.amber, size: 16),
+                      const Icon(Icons.star_rounded,
+                          color: Color(0xFFFFB800), size: 16),
                       const SizedBox(width: 4),
                       Text(
                         '$stars',

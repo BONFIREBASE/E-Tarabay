@@ -358,6 +358,7 @@ class AuthService {
           'middleName': middleName.trim(),
           'gender': gender,
           'birthday': birthday?.toIso8601String(),
+          'createdAt': DateTime.now().toIso8601String(),
           'parentName': parentName,
           'parentContact': parentContact,
           'avatar': avatar,

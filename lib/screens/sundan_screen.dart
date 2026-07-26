@@ -3,7 +3,6 @@ import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../widgets/custom_back_button.dart';
-import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/user_provider.dart';
@@ -169,7 +168,7 @@ class _SundanScreenState extends State<SundanScreen>
   int _wrongAttempts = 0;
 
   // Store kid's drawing per letter so they can review it later
-  Map<int, List<Offset>> _completedTraces = {};
+  final Map<int, List<Offset>> _completedTraces = {};
 
   // ── Feedback ───────────────────────────────────────────────────────────────
   String _feedbackMessage = '';
@@ -563,6 +562,12 @@ class _SundanScreenState extends State<SundanScreen>
 
     // Store the kid's drawing for review
     _completedTraces[_selectedIndex] = List.from(_tracedPoints);
+
+    if (_currentCompletedSet.length >= _currentLetters.length) {
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted) _showCompletionDialog();
+      });
+    }
   }
 
   void _triggerWarning(String msg) {
@@ -720,10 +725,10 @@ class _SundanScreenState extends State<SundanScreen>
 
     final size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 2,
+        elevation: 0,
         leading: CustomBackButton(
           iconColor: AppColors.textDark,
           onPressed: () => Navigator.pop(context),
@@ -735,41 +740,69 @@ class _SundanScreenState extends State<SundanScreen>
                 fontWeight: FontWeight.bold)),
         actions: [
           Container(
-            margin: const EdgeInsets.all(8),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: Colors.amber.withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.amber.withOpacity(0.3), width: 1.5),
             ),
             child: Row(children: [
-              const Icon(LucideIcons.star, color: Colors.amber, size: 16),
+              const Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 16),
               const SizedBox(width: 4),
               Text('$_stars',
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: AppColors.primary)),
+                      fontWeight: FontWeight.bold, color: Colors.amber, fontSize: 14)),
             ]),
           ),
+          const SizedBox(width: 4),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
           child: Container(
-            color: Colors.white,
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildModeTab(0, 'ABC', AppLocalizations.of(context)!.upper),
-                  _buildModeTab(1, 'abc', AppLocalizations.of(context)!.lower),
-                  _buildModeTab(
-                      2, '123', AppLocalizations.of(context)!.numbers),
-                ]),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 4, offset: const Offset(0, 2)),
+              ],
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEEF1F8),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(child: _buildModeTab(0, 'ABC', AppLocalizations.of(context)!.upper)),
+                    Expanded(child: _buildModeTab(1, 'abc', AppLocalizations.of(context)!.lower)),
+                    Expanded(child: _buildModeTab(
+                        2, '123', AppLocalizations.of(context)!.numbers)),
+                  ]),
+            ),
           ),
         ),
       ),
-      body: Column(children: [
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF8F9FE), Color(0xFFEDF1F9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(children: [
         // Header
         Container(
           padding: const EdgeInsets.all(14),
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 2)),
+            ],
+          ),
           child: Row(children: [
             Container(
               width: 56,
@@ -1026,6 +1059,7 @@ class _SundanScreenState extends State<SundanScreen>
           ),
         ),
       ]),
+      ),
     );
   }
 
@@ -1040,24 +1074,46 @@ class _SundanScreenState extends State<SundanScreen>
         });
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        margin: const EdgeInsets.symmetric(vertical: 6),
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          gradient: isSelected
+              ? const LinearGradient(
+                  colors: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isSelected ? null : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF00F2FE).withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
         ),
-        child: Row(children: [
-          Text(icon,
-              style: TextStyle(
-                  fontSize: 14,
-                  color: isSelected ? Colors.white : Colors.grey.shade600)),
-          const SizedBox(width: 4),
-          Text(label,
-              style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey.shade600,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 13)),
-        ]),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(icon,
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: isSelected ? Colors.white : Colors.grey.shade600)),
+            const SizedBox(width: 4),
+            Text(label,
+                style: TextStyle(
+                    color: isSelected ? Colors.white : Colors.grey.shade600,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 13)),
+          ],
+        ),
       ),
     );
   }

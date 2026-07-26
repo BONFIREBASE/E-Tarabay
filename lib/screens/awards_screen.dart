@@ -482,7 +482,7 @@ class AwardsScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                       child:
-                          const Icon(LucideIcons.star, color: Colors.white, size: 14),
+                          const Icon(Icons.star_rounded, color: Colors.white, size: 16),
                     ),
                   ),
                 ],
@@ -588,7 +588,7 @@ class AwardsScreen extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(LucideIcons.star, color: Colors.white, size: 14),
+                        const Icon(Icons.star_rounded, color: Colors.white, size: 16),
                         const SizedBox(width: 4),
                         Text(
                           '+${badge['stars']}',
@@ -656,7 +656,7 @@ class AwardsScreen extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(LucideIcons.star, color: Colors.amber, size: 20),
+                  const Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 20),
                   const SizedBox(width: 6),
                   Text(
                     loc.plusStarsLabel(badge['stars'] as int),
@@ -781,7 +781,7 @@ class AwardsScreen extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(LucideIcons.star, color: Colors.white, size: 20),
+                      const Icon(Icons.star_rounded, color: Colors.white, size: 22),
                       const SizedBox(width: 6),
                       Text(
                         '+${badge['stars']}',

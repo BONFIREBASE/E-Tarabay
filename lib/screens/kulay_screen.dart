@@ -93,6 +93,7 @@ class MyCreation {
   final DateTime date;
   final String thumbnailPath;
   final String sourcePagePath;
+  final String base64Image;
   final List<ColoringStroke> strokes;
   bool isFavorite;
   int? stars;
@@ -103,6 +104,7 @@ class MyCreation {
     required this.date,
     required this.thumbnailPath,
     this.sourcePagePath = '',
+    this.base64Image = '',
     required this.strokes,
     this.isFavorite = false,
     this.stars,
@@ -778,12 +780,11 @@ class _KulayScreenState extends State<KulayScreen>
                       duration: const Duration(milliseconds: 150),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
                       child: Icon(
-                        LucideIcons.star,
+                        idx <= selectedStars ? Icons.star_rounded : Icons.star_outline_rounded,
                         size: 40,
                         color: idx <= selectedStars
-                            ? const Color(0xFFFFD700)
-                            : Colors.grey.shade300,
-                        fill: idx <= selectedStars ? 1.0 : 0.0,
+                            ? const Color(0xFFFFB800)
+                            : const Color(0xFFCBD5E1),
                       ),
                     ),
                   );
@@ -805,6 +806,13 @@ class _KulayScreenState extends State<KulayScreen>
                 _saveCreationsToHive();
                 Navigator.pop(context);
                 _snack(AppLocalizations.of(context)!.saved);
+                setState(() {
+                  _strokes.clear();
+                  _redoStack.clear();
+                  _activeStroke = null;
+                  _editingCreation = null;
+                  _selectedPage = null;
+                });
               },
               child: Text(AppLocalizations.of(context)!.done,
                   style: const TextStyle(
@@ -816,15 +824,19 @@ class _KulayScreenState extends State<KulayScreen>
     );
   }
 
-  Future<String> _captureThumbnail() async {
+  Future<Map<String, String>> _captureThumbnailData() async {
     try {
       final boundary = _canvasKey.currentContext?.findRenderObject()
           as RenderRepaintBoundary?;
-      if (boundary == null) return _selectedPage!.imagePath;
+      if (boundary == null) {
+        return {'path': _selectedPage!.imagePath, 'base64': ''};
+      }
 
-      final image = await boundary.toImage(pixelRatio: 2.0);
+      final image = await boundary.toImage(pixelRatio: 1.5);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return _selectedPage!.imagePath;
+      if (byteData == null) {
+        return {'path': _selectedPage!.imagePath, 'base64': ''};
+      }
 
       final pngBytes = byteData.buffer.asUint8List();
       final dir = await getApplicationDocumentsDirectory();
@@ -832,10 +844,23 @@ class _KulayScreenState extends State<KulayScreen>
           '${dir.path}/creation_${DateTime.now().millisecondsSinceEpoch}.png';
       final file = File(path);
       await file.writeAsBytes(pngBytes);
-      return path;
+
+      String base64Str = '';
+      try {
+        final decoded = img.decodeImage(pngBytes);
+        if (decoded != null) {
+          final resized = img.copyResize(decoded, width: 220);
+          final jpegBytes = img.encodeJpg(resized, quality: 60);
+          base64Str = base64Encode(jpegBytes);
+        }
+      } catch (e) {
+        debugPrint('Error encoding base64 thumbnail: $e');
+      }
+
+      return {'path': path, 'base64': base64Str};
     } catch (e) {
       debugPrint('Error capturing thumbnail: $e');
-      return _selectedPage!.imagePath;
+      return {'path': _selectedPage!.imagePath, 'base64': ''};
     }
   }
 
@@ -907,7 +932,9 @@ class _KulayScreenState extends State<KulayScreen>
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12))),
             onPressed: () async {
-              final thumbnailPath = await _captureThumbnail();
+              final thumbData = await _captureThumbnailData();
+              final thumbnailPath = thumbData['path'] ?? _selectedPage!.imagePath;
+              final base64Img = thumbData['base64'] ?? '';
               final elapsed = _coloringStartTime != null
                   ? DateTime.now().difference(_coloringStartTime!).inSeconds
                   : 0;
@@ -923,6 +950,9 @@ class _KulayScreenState extends State<KulayScreen>
                     date: DateTime.now(),
                     thumbnailPath: thumbnailPath,
                     sourcePagePath: _selectedPage!.imagePath,
+                    base64Image: base64Img.isNotEmpty
+                        ? base64Img
+                        : _editingCreation!.base64Image,
                     strokes: List.from(_strokes),
                     isFavorite: _editingCreation!.isFavorite,
                     stars: _editingCreation!.stars,
@@ -942,6 +972,7 @@ class _KulayScreenState extends State<KulayScreen>
                   date: DateTime.now(),
                   thumbnailPath: thumbnailPath,
                   sourcePagePath: _selectedPage!.imagePath,
+                  base64Image: base64Img,
                   strokes: List.from(_strokes),
                   durationSeconds: elapsed,
                 );
@@ -981,6 +1012,13 @@ class _KulayScreenState extends State<KulayScreen>
                   _showStarRatingDialog(creation);
                 } else {
                   _snack(AppLocalizations.of(context)!.saved);
+                  setState(() {
+                    _strokes.clear();
+                    _redoStack.clear();
+                    _activeStroke = null;
+                    _editingCreation = null;
+                    _selectedPage = null;
+                  });
                 }
               }
             },
@@ -1025,6 +1063,7 @@ class _KulayScreenState extends State<KulayScreen>
                 date: DateTime.fromMillisecondsSinceEpoch(item['date']),
                 thumbnailPath: item['thumbnailPath'],
                 sourcePagePath: item['sourcePagePath'] ?? '',
+                base64Image: item['base64Image'] ?? '',
                 strokes: strokes,
                 isFavorite: item['isFavorite'] ?? false,
                 stars: item['stars'],
@@ -1065,6 +1104,7 @@ class _KulayScreenState extends State<KulayScreen>
           'date': c.date.millisecondsSinceEpoch,
           'thumbnailPath': c.thumbnailPath,
           'sourcePagePath': c.sourcePagePath,
+          'base64Image': c.base64Image,
           'isFavorite': c.isFavorite,
           'stars': c.stars,
           'durationSeconds': c.durationSeconds,
@@ -1140,11 +1180,20 @@ class _KulayScreenState extends State<KulayScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F3F8),
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: _appBar(),
-      body: IndexedStack(
-        index: _selectedTab,
-        children: [_buildColoringTab(), _buildCreationsTab()],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF8F9FE), Color(0xFFEDF1F9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: IndexedStack(
+          index: _selectedTab,
+          children: [_buildColoringTab(), _buildCreationsTab()],
+        ),
       ),
     );
   }
@@ -1183,21 +1232,37 @@ class _KulayScreenState extends State<KulayScreen>
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _selectedTab = idx),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 13),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(
-                      color: on ? AppColors.primary : Colors.transparent,
-                      width: 3))),
+            gradient: on
+                ? const LinearGradient(
+                    colors: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: on
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF00F2FE).withOpacity(0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    )
+                  ]
+                : [],
+          ),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(icon, size: 16, color: on ? AppColors.primary : Colors.grey),
+            Icon(icon, size: 16, color: on ? Colors.white : Colors.grey.shade600),
             const SizedBox(width: 6),
             Text(label,
                 style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: on ? AppColors.primary : Colors.grey)),
+                    fontWeight: on ? FontWeight.bold : FontWeight.w500,
+                    color: on ? Colors.white : Colors.grey.shade600)),
           ]),
         ),
       ),
@@ -2082,12 +2147,11 @@ class _KulayScreenState extends State<KulayScreen>
                     ...List.generate(
                         5,
                         (i) => Icon(
-                              LucideIcons.star,
+                              i < creation.stars! ? Icons.star_rounded : Icons.star_outline_rounded,
                               size: 14,
                               color: i < creation.stars!
-                                  ? const Color(0xFFFFD700)
-                                  : Colors.grey.shade300,
-                              fill: i < creation.stars! ? 1.0 : 0.0,
+                                  ? const Color(0xFFFFB800)
+                                  : const Color(0xFFCBD5E1),
                             )),
                   ],
                 )
@@ -2145,18 +2209,30 @@ class _KulayScreenState extends State<KulayScreen>
             if (creation.stars != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                      5,
-                      (i) => Icon(
-                            LucideIcons.star,
-                            size: 28,
-                            color: i < creation.stars!
-                                ? const Color(0xFFFFD700)
-                                : Colors.grey.shade300,
-                            fill: i < creation.stars! ? 1.0 : 0.0,
-                          )),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                          5,
+                          (i) => Icon(
+                                i < creation.stars! ? Icons.star_rounded : Icons.star_outline_rounded,
+                                size: 28,
+                                color: i < creation.stars!
+                                    ? const Color(0xFFFFB800)
+                                    : const Color(0xFFCBD5E1),
+                              )),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${creation.stars} / 5 Stars • Color Detail & Completeness',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             Flexible(

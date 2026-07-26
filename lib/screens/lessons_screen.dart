@@ -680,10 +680,9 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        LucideIcons.star,
-                        color: Color(0xFFFFD700),
-                        fill: 1.0,
-                        size: 20,
+                        Icons.star_rounded,
+                        color: Color(0xFFFFB800),
+                        size: 22,
                       ),
                     )
                   else

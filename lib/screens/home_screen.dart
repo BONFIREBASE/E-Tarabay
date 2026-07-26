@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // Start background music safely
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AudioManager>(context, listen: false)
-          .startBackgroundMusic('audio/tunog.mp3');
+          .startBackgroundMusic(AudioManager.homeMusicAsset);
       _checkBirthday();
     });
   }
@@ -340,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: Row(
                               children: [
-                                Icon(
+                                const Icon(
                                   LucideIcons.award,
                                   color: AppColors.success,
                                   size: 20,
@@ -348,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 4),
                                 Text(
                                   '${userProvider.earnedCertificates.length}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.success,
@@ -383,8 +383,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         _buildStatItem(
                           '${stats['stars']}',
                           AppLocalizations.of(context)!.stars,
-                          LucideIcons.star,
-                          Colors.amber,
+                          Icons.star_rounded,
+                          const Color(0xFFFFB800),
                         ),
                         Container(
                           height: 20,

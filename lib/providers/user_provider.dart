@@ -327,6 +327,7 @@ class UserProvider extends ChangeNotifier {
       middleName: middleName ?? _userProfile!.middleName,
       gender: gender ?? _userProfile!.gender,
       birthday: birthday ?? _userProfile!.birthday,
+      createdAt: _userProfile!.createdAt ?? DateTime.now(),
       parentName: parentName ?? _userProfile!.parentName,
       parentContact: parentContact ?? _userProfile!.parentContact,
       lrn: lrn ?? _userProfile!.lrn,
@@ -371,21 +372,27 @@ class UserProvider extends ChangeNotifier {
 
         // THEN extract root fields and overwrite the nested ones (if root is not empty),
         // because previous versions of the app might have saved empty strings inside the nested profile map.
-        if (data['name'] != null && data['name'].toString().isNotEmpty)
+        if (data['name'] != null && data['name'].toString().isNotEmpty) {
           mergedProfileData['name'] = data['name'];
-        if (data['gender'] != null && data['gender'].toString().isNotEmpty)
+        }
+        if (data['gender'] != null && data['gender'].toString().isNotEmpty) {
           mergedProfileData['gender'] = data['gender'];
-        if (data['lrn'] != null && data['lrn'].toString().isNotEmpty)
+        }
+        if (data['lrn'] != null && data['lrn'].toString().isNotEmpty) {
           mergedProfileData['lrn'] = data['lrn'];
+        }
         if (data['parentName'] != null &&
-            data['parentName'].toString().isNotEmpty)
+            data['parentName'].toString().isNotEmpty) {
           mergedProfileData['parentName'] = data['parentName'];
+        }
         if (data['parentContact'] != null &&
-            data['parentContact'].toString().isNotEmpty)
+            data['parentContact'].toString().isNotEmpty) {
           mergedProfileData['parentContact'] = data['parentContact'];
+        }
         if (data['birthday'] != null &&
-            data['birthday'].toString().isNotEmpty)
+            data['birthday'].toString().isNotEmpty) {
           mergedProfileData['birthday'] = data['birthday'];
+        }
         // Use Firestore's enrolledAt timestamp as createdAt if available and
         // we don't already have one locally.
         if (mergedProfileData['createdAt'] == null) {
@@ -397,6 +404,8 @@ class UserProvider extends ChangeNotifier {
             } else if (enrolled is String) {
               mergedProfileData['createdAt'] = enrolled;
             }
+          } else {
+            mergedProfileData['createdAt'] = DateTime.now().toIso8601String();
           }
         }
 
@@ -1146,8 +1155,9 @@ class UserProvider extends ChangeNotifier {
           'Y',
           'Z'
         ];
-        if (index >= 0 && index < allUpper.length)
+        if (index >= 0 && index < allUpper.length) {
           prefKey = 'traceit_upper_${allUpper[index]}';
+        }
       } else if (mode == 'lowercase') {
         const allLower = [
           'a',
@@ -1177,12 +1187,14 @@ class UserProvider extends ChangeNotifier {
           'y',
           'z'
         ];
-        if (index >= 0 && index < allLower.length)
+        if (index >= 0 && index < allLower.length) {
           prefKey = 'traceit_lower_${allLower[index]}';
+        }
       } else if (mode == 'numbers') {
         const allNums = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-        if (index >= 0 && index < allNums.length)
+        if (index >= 0 && index < allNums.length) {
           prefKey = 'traceit_num_${allNums[index]}';
+        }
       }
       if (prefKey.isNotEmpty && _prefs!.getBool(prefKey) == true) return true;
     }
@@ -1433,6 +1445,27 @@ class UserProvider extends ChangeNotifier {
         if (val != null) rawProgressData[key] = val;
       }
 
+      List<Map<String, dynamic>> cloudCreations = [];
+      final rawCreations = _progressBox.get('coloring_creations');
+      if (rawCreations is List) {
+        for (var item in rawCreations) {
+          if (item is Map) {
+            cloudCreations.add({
+              'name': item['name'] ?? 'My Artwork',
+              'date': item['date'] ?? 0,
+              'stars': item['stars'],
+              'durationSeconds': item['durationSeconds'] ?? 0,
+              'sourcePagePath': item['sourcePagePath'] ?? '',
+              'base64Image': item['base64Image'] ?? '',
+            });
+          }
+        }
+        cloudCreations.sort((a, b) => (b['date'] as int).compareTo(a['date'] as int));
+        if (cloudCreations.length > 15) {
+          cloudCreations = cloudCreations.sublist(0, 15);
+        }
+      }
+
       await FirebaseFirestore.instance
           .collection('students')
           .doc(_currentStudentId)
@@ -1440,7 +1473,7 @@ class UserProvider extends ChangeNotifier {
         'progress': progressData,
         'profile': profileData,
         'rawProgress': rawProgressData,
-        'creations': _progressBox.get('coloring_creations'),
+        'creations': cloudCreations,
         'lastActive': FieldValue.serverTimestamp(),
       });
     } catch (e) {
@@ -1688,21 +1721,26 @@ class UserProvider extends ChangeNotifier {
   bool isMagbasaActivityCompleted(String category, int index) {
     if (!_isInitialized) return false;
     if (_prefs != null &&
-        _prefs!.getBool('${category}_activity_$index') == true) return true;
+        _prefs!.getBool('${category}_activity_$index') == true) {
+      return true;
+    }
     return _progressBox.get('magbasa_${category}_$index') ?? false;
   }
 
   bool isKulayActivityCompleted(String activity) {
     if (!_isInitialized) return false;
-    if (_prefs != null && _prefs!.getBool('kulay_$activity') == true)
+    if (_prefs != null && _prefs!.getBool('kulay_$activity') == true) {
       return true;
+    }
     return _progressBox.get('kulay_$activity') ?? false;
   }
 
   bool isKulayPageCompleted(String category, int index) {
     if (!_isInitialized) return false;
     if (_prefs != null &&
-        _prefs!.getBool('kulay_page_${category}_$index') == true) return true;
+        _prefs!.getBool('kulay_page_${category}_$index') == true) {
+      return true;
+    }
     return _progressBox.get('kulay_page_${category}_$index') ?? false;
   }
 
@@ -1711,8 +1749,9 @@ class UserProvider extends ChangeNotifier {
     List<dynamic> completedLevels = _progressBox.get('matematika_levels') ??
         [false, false, false, false, false, false, false];
 
-    if (_prefs != null && _prefs!.getBool('mat_level_complete_$level') == true)
+    if (_prefs != null && _prefs!.getBool('mat_level_complete_$level') == true) {
       return true;
+    }
 
     return level < completedLevels.length ? completedLevels[level] : false;
   }
@@ -1723,10 +1762,12 @@ class UserProvider extends ChangeNotifier {
         Map<String, dynamic>.from(_progressBox.get('matematika_games') ?? {});
 
     if (_prefs != null) {
-      if (_prefs!.getBool('mat_level_${level}_game_$gameIndex') == true)
+      if (_prefs!.getBool('mat_level_${level}_game_$gameIndex') == true) {
         return true;
-      if (_prefs!.getBool('matematika_game_${level}_$gameIndex') == true)
+      }
+      if (_prefs!.getBool('matematika_game_${level}_$gameIndex') == true) {
         return true;
+      }
     }
 
     return games['level${level}_game$gameIndex'] ?? false;

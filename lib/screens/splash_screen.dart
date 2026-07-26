@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _startBackgroundMusic() async {
     final audioManager = Provider.of<AudioManager>(context, listen: false);
-    await audioManager.startBackgroundMusic('audio/tunog.mp3');
+    await audioManager.startBackgroundMusic(AudioManager.homeMusicAsset);
   }
 
   Future<void> _checkUserLoggedIn() async {

@@ -1282,10 +1282,10 @@ class _TraceItScreenState extends State<TraceItScreen>
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 2,
+        elevation: 0,
         leadingWidth: 60,
         leading: Center(
           child: CustomBackButton(
@@ -1305,31 +1305,46 @@ class _TraceItScreenState extends State<TraceItScreen>
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.all(8),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: Colors.amber.withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.amber.withOpacity(0.3), width: 1.5),
             ),
             child: Row(children: [
-              const Icon(LucideIcons.star, color: Colors.amber, size: 16),
+              const Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 16),
               const SizedBox(width: 4),
               Text('$_stars',
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, color: AppColors.primary)),
+                      fontWeight: FontWeight.bold, color: Colors.amber, fontSize: 14)),
             ]),
           ),
+          const SizedBox(width: 4),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(52),
           child: _buildModeTabs(),
         ),
       ),
-      body: Column(children: [
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF8F9FE), Color(0xFFEDF1F9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(children: [
         // Header
         Container(
           padding: const EdgeInsets.all(14),
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: const Offset(0, 2)),
+            ],
+          ),
           child: Row(children: [
             Container(
               width: 56,
@@ -1630,6 +1645,7 @@ class _TraceItScreenState extends State<TraceItScreen>
           ),
         ),
       ]),
+      ),
     );
   }
 

@@ -1060,21 +1060,30 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FF),
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: _buildAppBar(),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              _buildLevelTabs(),
-              _buildProgressHeader(),
-              Expanded(child: _buildGameContent()),
-              _buildFeedbackBanner(),
-            ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF8F9FE), Color(0xFFEDF1F9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          if (_showCorrectOverlay) _buildCorrectOverlay(),
-          if (_showWrongOverlay) _buildWrongOverlay(),
-        ],
+        ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                _buildLevelTabs(),
+                _buildProgressHeader(),
+                Expanded(child: _buildGameContent()),
+                _buildFeedbackBanner(),
+              ],
+            ),
+            if (_showCorrectOverlay) _buildCorrectOverlay(),
+            if (_showWrongOverlay) _buildWrongOverlay(),
+          ],
+        ),
       ),
     );
   }
@@ -1104,7 +1113,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
               child: Container(
                 margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
                   color: urgent
                       ? Colors.red.withOpacity(0.15)
@@ -1142,7 +1151,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(LucideIcons.star, color: Colors.amber, size: 16),
+              const Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 16),
               const SizedBox(width: 4),
               Text(
                 '$_totalStars',
@@ -1159,18 +1168,38 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     );
   }
 
+  static const List<List<Color>> _levelGradients = [
+    [Color(0xFFFF6B6B), Color(0xFFFF8E53)], // Level 0: Coral Sunset
+    [Color(0xFF4FACFE), Color(0xFF00F2FE)], // Level 1: Ocean Blue
+    [Color(0xFF11998E), Color(0xFF38EF7D)], // Level 2: Emerald Green
+    [Color(0xFF8E2DE2), Color(0xFF4A00E0)], // Level 3: Royal Purple
+    [Color(0xFFFFB75E), Color(0xFFED8F03)], // Level 4: Sunburst Amber
+    [Color(0xFFFF512F), Color(0xFFDD2476)], // Level 5: Warm Rose
+    [Color(0xFF4364F7), Color(0xFF6FB1FC)], // Level 6: Electric Blue
+  ];
+
   Widget _buildLevelTabs() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     return Container(
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Row(
           children: List.generate(_levelTitles.length, (i) {
             final active = _selectedLevel == i;
             final completed = userProvider.isMatematikaLevelCompleted(i);
+            final gradientColors = _levelGradients[i % _levelGradients.length];
 
             return GestureDetector(
               onTap: () {
@@ -1197,20 +1226,37 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                 _switchLevel(i);
               },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                margin: const EdgeInsets.symmetric(horizontal: 5),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
                 decoration: BoxDecoration(
-                  color: active
-                      ? AppColors.primary
-                      : (completed
-                          ? Colors.green.withOpacity(0.08)
-                          : Colors.grey.shade100),
-                  borderRadius: BorderRadius.circular(20),
-                  border: completed && !active
-                      ? Border.all(color: Colors.green.withOpacity(0.3))
+                  gradient: active
+                      ? LinearGradient(
+                          colors: gradientColors,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
                       : null,
+                  color: active
+                      ? null
+                      : (completed
+                          ? const Color(0xFFE8F5E9)
+                          : Colors.grey.shade100),
+                  borderRadius: BorderRadius.circular(25),
+                  border: completed && !active
+                      ? Border.all(color: Colors.green.withOpacity(0.4), width: 1.5)
+                      : null,
+                  boxShadow: active
+                      ? [
+                          BoxShadow(
+                            color: gradientColors.last.withOpacity(0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      : [],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1219,21 +1265,21 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                         completed && !active
                             ? LucideIcons.circle_check
                             : _levelIcons[i],
-                        size: 14,
+                        size: 16,
                         color: active
                             ? Colors.white
                             : (completed
                                 ? Colors.green
-                                : Colors.grey.shade500)),
-                    const SizedBox(width: 6),
+                                : Colors.grey.shade600)),
+                    const SizedBox(width: 7),
                     Text(
                       _getLevelTitleLocalized(i),
                       style: TextStyle(
                         color: active
                             ? Colors.white
-                            : (completed ? Colors.green : Colors.grey.shade600),
+                            : (completed ? Colors.green.shade800 : Colors.grey.shade700),
                         fontWeight:
-                            active ? FontWeight.bold : FontWeight.normal,
+                            active ? FontWeight.bold : FontWeight.w600,
                         fontSize: 13,
                       ),
                     ),
@@ -1249,32 +1295,86 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   Widget _buildProgressHeader() {
     final total = _currentGames.length;
-    final progress = total == 0 ? 0.0 : _currentGameIndex / total;
+    final progress = total == 0 ? 0.0 : (_currentGameIndex + 1) / total;
+    final activeGradient = _levelGradients[_selectedLevel % _levelGradients.length];
+
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_getLevelTitleLocalized(_selectedLevel),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(colors: activeGradient),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(_levelIcons[_selectedLevel],
+                        color: Colors.white, size: 14),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(_getLevelTitleLocalized(_selectedLevel),
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${_currentGameIndex + 1} / $total',
                   style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w600)),
-              Text('${_currentGameIndex + 1} / $total',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.grey.shade200,
-              color: AppColors.primary,
-              minHeight: 6,
-            ),
+          const SizedBox(height: 8),
+          Stack(
+            children: [
+              Container(
+                height: 10,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              FractionallySizedBox(
+                widthFactor: progress.clamp(0.02, 1.0),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: 10,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: activeGradient),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: activeGradient.last.withOpacity(0.4),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1286,16 +1386,23 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: _feedbackColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: _feedbackColor.withOpacity(0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
       ),
       child: Text(
         _feedbackMessage,
         textAlign: TextAlign.center,
         style: const TextStyle(
-            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
       ),
     );
   }
@@ -1306,14 +1413,18 @@ class _MatematikaScreenState extends State<MatematikaScreen>
         child: ScaleTransition(
           scale: _starBurstAnim,
           child: Container(
-            width: 220,
-            height: 220,
+            width: 230,
+            height: 230,
             decoration: BoxDecoration(
-              color: const Color(0xFF2E7D32).withOpacity(0.93),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF26A96C), Color(0xFF11998E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.green.withOpacity(0.45),
+                  color: Colors.green.withOpacity(0.5),
                   blurRadius: 35,
                   spreadRadius: 12,
                 )
@@ -1325,19 +1436,20 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(LucideIcons.circle_check,
-                      color: Colors.white, size: 54),
+                      color: Colors.white, size: 58),
                   const SizedBox(height: 8),
                   Text(
                     AppLocalizations.of(context)!.goodJob,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    '🎉',
-                    style: TextStyle(fontSize: 20),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '🎉 ⭐ ✨',
+                    style: TextStyle(fontSize: 22),
                   ),
                 ],
               ),
@@ -1354,18 +1466,22 @@ class _MatematikaScreenState extends State<MatematikaScreen>
         child: AnimatedBuilder(
           animation: _shakeAnim,
           builder: (_, child) => Transform.translate(
-            offset: Offset(sin(_shakeAnim.value * pi * 5) * 10, 0),
+            offset: Offset(sin(_shakeAnim.value * pi * 5) * 12, 0),
             child: child,
           ),
           child: Container(
             width: 220,
             height: 220,
             decoration: BoxDecoration(
-              color: const Color(0xFFC62828).withOpacity(0.93),
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF512F), Color(0xFFDD2476)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.red.withOpacity(0.45),
+                  color: Colors.red.withOpacity(0.5),
                   blurRadius: 35,
                   spreadRadius: 12,
                 )
@@ -1377,14 +1493,14 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(LucideIcons.circle_x,
-                      color: Colors.white, size: 54),
+                      color: Colors.white, size: 56),
                   const SizedBox(height: 8),
                   Text(
                     AppLocalizations.of(context)!.wrong,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold),
                   ),
                 ],

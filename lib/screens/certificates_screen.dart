@@ -447,9 +447,9 @@ class _CertificatesScreenState extends State<CertificatesScreen>
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               const Icon(
-                                                LucideIcons.star,
+                                                Icons.star_rounded,
                                                 color: Colors.white,
-                                                size: 14,
+                                                size: 16,
                                               ),
                                               const SizedBox(width: 4),
                                               Text(

@@ -11,9 +11,9 @@
 - [x] **Item 16. Comprehensive progress tracking**: Ensured all student progress metrics sync to Firestore and are viewable in real-time on the teacher dashboard.
 
 ## 3. Audio & Soundtrack Enhancements
-- [ ] **Item 5. Remove legacy background song**: Remove existing background music track.
+- [x] **Item 5. Remove legacy background song**: Remove existing background music track.
 - [ ] **Item 6. Voice over integration**: Insert provided voice recordings into lesson and activity modules.
-- [ ] **Item 7. Change overall music**: Replace existing audio with a motivated and upbeat soundtrack.
+- [x] **Item 7. Change overall music**: Replace existing audio with a motivated and upbeat soundtrack.
 
 ## 4. UI/UX & Visual Design Polish
 - [x] **Item 2. App color palette**: Selected vibrant, harmonious app colors (`AppColors` indigo `#5C52E5`, warm rose `#FF5B79`, gold `#FFD700`) matching game and educational context.

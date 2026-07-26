@@ -663,6 +663,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         _badges[badgeIdx].isEarned = true;
         _newlyEarnedBadges = [_badges[badgeIdx]];
       });
+      _showBadgesModal();
     }
   }
 
@@ -958,6 +959,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         subtitle: _getLevelTitle(_selectedMainCategory, _selectedLevel),
         score: _levelScore,
         stars: avgStars,
+        badges: _newlyEarnedBadges.map((b) => '${b.emoji} ${b.title}').toList(),
         primaryLabel: _selectedLevel <
                 _categoryLevelTitles[_selectedMainCategory].length - 1
             ? AppLocalizations.of(context)!.next
@@ -1024,7 +1026,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                     borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 16),
             Text(AppLocalizations.of(context)!.badgesWithIcon,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             GridView.builder(
               shrinkWrap: true,
@@ -1211,21 +1213,30 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FF),
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: _buildAppBar(),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              _buildMainCategoryTabs(),
-              _buildLevelTabs(),
-              _buildProgressHeader(),
-              Expanded(child: _buildGameContent()),
-              _buildFeedbackBanner(),
-            ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF8F9FE), Color(0xFFEDF1F9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          if (_showCorrectOverlay) _buildCorrectOverlay(),
-        ],
+        ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                _buildMainCategoryTabs(),
+                _buildLevelTabs(),
+                _buildProgressHeader(),
+                Expanded(child: _buildGameContent()),
+                _buildFeedbackBanner(),
+              ],
+            ),
+            if (_showCorrectOverlay) _buildCorrectOverlay(),
+          ],
+        ),
       ),
     );
   }
@@ -1234,14 +1245,42 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   //  TABS
   // ─────────────────────────────────────────────────────────────────────────
 
+  // ── Gradient themes per level ─────────────────────────────────────────────
+  static const List<List<Color>> _levelGradients = [
+    [Color(0xFFFF6B6B), Color(0xFFFF8E53)], // 0: Coral Sunset
+    [Color(0xFF4FACFE), Color(0xFF00F2FE)], // 1: Ocean Blue
+    [Color(0xFF11998E), Color(0xFF38EF7D)], // 2: Emerald Green
+    [Color(0xFF8E2DE2), Color(0xFF4A00E0)], // 3: Royal Purple
+    [Color(0xFFFFB75E), Color(0xFFED8F03)], // 4: Sunburst Amber
+    [Color(0xFFFF512F), Color(0xFFDD2476)], // 5: Warm Rose
+    [Color(0xFF4364F7), Color(0xFF6FB1FC)], // 6: Electric Blue
+    [Color(0xFF43E97B), Color(0xFF38F9D7)], // 7: Mint
+    [Color(0xFFF093FB), Color(0xFFF5576C)], // 8: Pink Flamingo
+  ];
+
+  List<Color> _currentGradient() {
+    final idx = _selectedMainCategory == 0
+        ? _selectedLevel
+        : 4 + _selectedLevel;
+    return _levelGradients[idx % _levelGradients.length];
+  }
+
   Widget _buildMainCategoryTabs() {
     return Container(
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: List.generate(_mainCategories.length, (i) {
           final active = _selectedMainCategory == i;
           final color = _mainCategories[i]['color'] as Color;
+          final gradientColors = i == 0
+              ? [const Color(0xFF4FACFE), const Color(0xFF00F2FE)]
+              : [const Color(0xFFFF6B6B), const Color(0xFFFF8E53)];
           return Expanded(
             child: GestureDetector(
               onTap: () => _switchMainCategory(i),
@@ -1250,16 +1289,24 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: active ? color : color.withOpacity(0.1),
+                  gradient: active
+                      ? LinearGradient(
+                          colors: gradientColors,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
+                  color: active ? null : color.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                      color: active ? color : color.withOpacity(0.3), width: 2),
+                  border: active
+                      ? null
+                      : Border.all(color: color.withOpacity(0.2), width: 1.5),
                   boxShadow: active
                       ? [
                           BoxShadow(
-                              color: color.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3))
+                              color: gradientColors.last.withOpacity(0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4))
                         ]
                       : [],
                 ),
@@ -1295,16 +1342,23 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     final icons = _categoryLevelIcons[_selectedMainCategory];
     final titlesCount = _categoryLevelIcons[_selectedMainCategory].length;
     return Container(
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Row(
           children: List.generate(titlesCount, (i) {
             final active = _selectedLevel == i;
             final badgeIdx = _selectedMainCategory == 0 ? i : 4 + i;
             final earned =
                 badgeIdx < _badges.length && _badges[badgeIdx].isEarned;
+            final gradientColors = _levelGradients[
+                (_selectedMainCategory == 0 ? i : 4 + i) % _levelGradients.length];
             return GestureDetector(
               onTap: () {
                 if (earned && !active) {
@@ -1318,20 +1372,37 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                 _switchLevel(i);
               },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                margin: const EdgeInsets.symmetric(horizontal: 5),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
                 decoration: BoxDecoration(
-                  color: active
-                      ? _currentMainColor
-                      : (earned
-                          ? Colors.green.withOpacity(0.08)
-                          : Colors.grey.shade100),
-                  borderRadius: BorderRadius.circular(20),
-                  border: earned && !active
-                      ? Border.all(color: Colors.green.withOpacity(0.3))
+                  gradient: active
+                      ? LinearGradient(
+                          colors: gradientColors,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
                       : null,
+                  color: active
+                      ? null
+                      : (earned
+                          ? const Color(0xFFE8F5E9)
+                          : Colors.grey.shade100),
+                  borderRadius: BorderRadius.circular(25),
+                  border: earned && !active
+                      ? Border.all(color: Colors.green.withOpacity(0.4), width: 1.5)
+                      : null,
+                  boxShadow: active
+                      ? [
+                          BoxShadow(
+                            color: gradientColors.last.withOpacity(0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      : [],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -1340,19 +1411,21 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                         earned && !active
                             ? LucideIcons.circle_check
                             : icons[i],
-                        size: 14,
+                        size: 16,
                         color: active
                             ? Colors.white
-                            : (earned ? Colors.green : Colors.grey.shade500)),
-                    const SizedBox(width: 6),
+                            : (earned
+                                ? Colors.green
+                                : Colors.grey.shade600)),
+                    const SizedBox(width: 7),
                     Text(
                       _getLevelTitle(_selectedMainCategory, i),
                       style: TextStyle(
                         color: active
                             ? Colors.white
-                            : (earned ? Colors.green : Colors.grey.shade600),
+                            : (earned ? Colors.green.shade800 : Colors.grey.shade700),
                         fontWeight:
-                            active ? FontWeight.bold : FontWeight.normal,
+                            active ? FontWeight.bold : FontWeight.w600,
                         fontSize: 13,
                       ),
                     ),
@@ -1367,51 +1440,93 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   }
 
   Widget _buildProgressHeader() {
+    final total = _currentGames.length;
+    final progress = total == 0 ? 0.0 : (_currentGameIndex + 1) / total;
+    final activeGradient = _currentGradient();
+    final icons = _categoryLevelIcons[_selectedMainCategory];
+
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(_getLevelTitle(_selectedMainCategory, _selectedLevel),
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: _currentMainColor)),
-                    Text(
-                        _getLevelSubTitle(
-                            _selectedMainCategory, _selectedLevel),
-                        style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade600)),
-                  ]),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: activeGradient),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icons[_selectedLevel],
+                      color: Colors.white, size: 14),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_getLevelTitle(_selectedMainCategory, _selectedLevel),
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold)),
+                      Text(
+                          _getLevelSubTitle(
+                              _selectedMainCategory, _selectedLevel),
+                          style: TextStyle(
+                              fontSize: 10, color: Colors.grey.shade600)),
+                    ]),
+              ],
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
               decoration: BoxDecoration(
-                  color: _currentMainColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16)),
-              child: Text('${_currentGameIndex + 1} / ${_currentGames.length}',
-                  style: TextStyle(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text('${_currentGameIndex + 1} / $total',
+                  style: const TextStyle(
                       fontSize: 12,
-                      color: _currentMainColor,
-                      fontWeight: FontWeight.bold)),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary)),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: _levelProgress,
-            backgroundColor: Colors.grey.shade200,
-            valueColor: AlwaysStoppedAnimation<Color>(_currentMainColor),
-            minHeight: 6,
-          ),
+        Stack(
+          children: [
+            Container(
+              height: 10,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            FractionallySizedBox(
+              widthFactor: progress.clamp(0.02, 1.0),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                height: 10,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: activeGradient),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: activeGradient.last.withOpacity(0.4),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ]),
     );
@@ -1424,11 +1539,20 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-          color: _feedbackColor, borderRadius: BorderRadius.circular(12)),
+        color: _feedbackColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: _feedbackColor.withOpacity(0.35),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
       child: Text(_feedbackMessage,
           textAlign: TextAlign.center,
           style: const TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 
@@ -1438,28 +1562,41 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         child: ScaleTransition(
           scale: _starBurstAnim,
           child: Container(
-            width: 160,
-            height: 160,
+            width: 230,
+            height: 230,
             decoration: BoxDecoration(
-              color: const Color(0xFF2E7D32).withOpacity(0.92),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF26A96C), Color(0xFF11998E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
                     color: Colors.green.withOpacity(0.5),
-                    blurRadius: 30,
-                    spreadRadius: 10)
+                    blurRadius: 35,
+                    spreadRadius: 12)
               ],
             ),
-            child:
-                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(LucideIcons.circle_check, color: Colors.white, size: 60),
-              SizedBox(height: 6),
-              Text(AppLocalizations.of(context)!.straightOrCorrect,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold)),
-            ]),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child:
+                  Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Icon(LucideIcons.circle_check, color: Colors.white, size: 58),
+                const SizedBox(height: 8),
+                Text(AppLocalizations.of(context)!.straightOrCorrect,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                const Text(
+                  '🎉 ⭐ ✨',
+                  style: TextStyle(fontSize: 22),
+                ),
+              ]),
+            ),
           ),
         ),
       ),
@@ -1725,7 +1862,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             const SizedBox(width: 12),
             if (_characterHappy)
               Text(AppLocalizations.of(context)!.straightOrCorrect,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.green))
@@ -1871,7 +2008,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               backgroundColor: _currentMainColor,
               foregroundColor: Colors.white),
           child: Text(AppLocalizations.of(context)!.iKnowIt,
-              style: TextStyle(fontSize: 15)),
+              style: const TextStyle(fontSize: 15)),
         ),
       ]),
     );
@@ -2274,7 +2411,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
               onPressed: _handleFamilyTreeComplete,
               icon: const Icon(LucideIcons.circle_check, color: Colors.white),
               label: Text(AppLocalizations.of(context)!.iLearnedFamilyTree,
-                  style: TextStyle(fontSize: 15, color: Colors.white)),
+                  style: const TextStyle(fontSize: 15, color: Colors.white)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _currentMainColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -2398,7 +2535,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
                 onPressed: _handleMyHomeComplete,
                 icon: const Icon(LucideIcons.house, color: Colors.white),
                 label: Text(AppLocalizations.of(context)!.thatIsOurHome,
-                    style: TextStyle(fontSize: 15, color: Colors.white)),
+                    style: const TextStyle(fontSize: 15, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _currentMainColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),

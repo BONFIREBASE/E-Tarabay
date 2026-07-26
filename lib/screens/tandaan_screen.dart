@@ -668,25 +668,34 @@ class _TandaanScreenState extends State<TandaanScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FF),
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: _buildAppBar(),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              _buildCategoryTabs(),
-              if (!_currentCategoryCompleted) _buildProgressHeader(),
-              Expanded(
-                child: _currentCategoryCompleted
-                    ? _buildCompletedView()
-                    : _buildCardGrid(),
-              ),
-              _buildFeedbackBanner(),
-            ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF8F9FE), Color(0xFFEDF1F9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          if (_showCorrectOverlay) _buildCorrectOverlay(),
-          if (_showWrongOverlay) _buildWrongOverlay(),
-        ],
+        ),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                _buildCategoryTabs(),
+                if (!_currentCategoryCompleted) _buildProgressHeader(),
+                Expanded(
+                  child: _currentCategoryCompleted
+                      ? _buildCompletedView()
+                      : _buildCardGrid(),
+                ),
+                _buildFeedbackBanner(),
+              ],
+            ),
+            if (_showCorrectOverlay) _buildCorrectOverlay(),
+            if (_showWrongOverlay) _buildWrongOverlay(),
+          ],
+        ),
       ),
     );
   }
@@ -757,7 +766,7 @@ class _TandaanScreenState extends State<TandaanScreen>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(LucideIcons.star, color: Colors.amber, size: 16),
+              const Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 16),
               const SizedBox(width: 4),
               Text(
                 '$_totalStars',
@@ -777,15 +786,21 @@ class _TandaanScreenState extends State<TandaanScreen>
 
   Widget _buildCategoryTabs() {
     return Container(
-      color: Colors.white,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: Row(
           children: List.generate(_categories.length, (i) {
             final active = _selectedCategory == i;
             final color = _categories[i]['color'] as Color;
             final completed = _completedCategories.contains(i);
+            final gradientColors = [color, color.withOpacity(0.75)];
 
             return GestureDetector(
               onTap: () {
@@ -796,20 +811,37 @@ class _TandaanScreenState extends State<TandaanScreen>
                 _switchCategory(i);
               },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: active
-                      ? color
-                      : (completed
-                          ? Colors.green.withOpacity(0.08)
-                          : Colors.grey.shade100),
-                  borderRadius: BorderRadius.circular(20),
-                  border: completed && !active
-                      ? Border.all(color: Colors.green.withOpacity(0.3))
+                  gradient: active
+                      ? LinearGradient(
+                          colors: gradientColors,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
                       : null,
+                  color: active
+                      ? null
+                      : (completed
+                          ? const Color(0xFFE8F5E9)
+                          : Colors.grey.shade100),
+                  borderRadius: BorderRadius.circular(22),
+                  border: completed && !active
+                      ? Border.all(color: Colors.green.withOpacity(0.4), width: 1.5)
+                      : null,
+                  boxShadow: active
+                      ? [
+                          BoxShadow(
+                            color: color.withOpacity(0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      : [],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -821,12 +853,12 @@ class _TandaanScreenState extends State<TandaanScreen>
                           completed && !active
                               ? LucideIcons.circle_check
                               : _categoryIcons[i],
-                          size: 14,
+                          size: 15,
                           color: active
                               ? Colors.white
                               : (completed
                                   ? Colors.green
-                                  : Colors.grey.shade500),
+                                  : Colors.grey.shade600),
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -835,10 +867,10 @@ class _TandaanScreenState extends State<TandaanScreen>
                             color: active
                                 ? Colors.white
                                 : (completed
-                                    ? Colors.green
-                                    : Colors.grey.shade600),
+                                    ? Colors.green.shade800
+                                    : Colors.grey.shade700),
                             fontWeight:
-                                active ? FontWeight.bold : FontWeight.normal,
+                                active ? FontWeight.bold : FontWeight.w600,
                             fontSize: 13,
                           ),
                         ),
@@ -880,38 +912,89 @@ class _TandaanScreenState extends State<TandaanScreen>
   }
 
   Widget _buildProgressHeader() {
-    final progress = _totalRounds == 0 ? 0.0 : _currentRound / _totalRounds;
+    final progress = _totalRounds == 0 ? 0.0 : (_currentRound + 1) / _totalRounds;
+    final color = _currentCategory['color'] as Color;
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: Colors.grey.shade200),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${AppLocalizations.of(context)!.round} ${_currentRound + 1}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(_categoryIcons[_selectedCategory],
+                        color: color, size: 14),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${AppLocalizations.of(context)!.round} ${_currentRound + 1}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                '${_currentRound + 1} / $_totalRounds',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${_currentRound + 1} / $_totalRounds',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: color),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.grey.shade200,
-              color: _currentCategory['color'] as Color,
-              minHeight: 6,
-            ),
+          const SizedBox(height: 8),
+          Stack(
+            children: [
+              Container(
+                height: 10,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              FractionallySizedBox(
+                widthFactor: progress.clamp(0.02, 1.0),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: 10,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [color, color.withOpacity(0.75)]),
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.4),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1021,7 +1104,7 @@ class _TandaanScreenState extends State<TandaanScreen>
                 3,
                 (_) => const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 2),
-                  child: Icon(LucideIcons.star, color: Colors.amber, size: 26),
+                  child: Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 28),
                 ),
               ),
             ),
@@ -1086,12 +1169,12 @@ class _TandaanScreenState extends State<TandaanScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3), width: 2),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: color.withOpacity(0.35), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
-            blurRadius: 10,
+            color: color.withOpacity(0.12),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],

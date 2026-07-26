@@ -111,7 +111,7 @@ class AchievementsScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(LucideIcons.star, size: 40, color: Colors.amber),
+                  const Icon(Icons.star_rounded, size: 40, color: Color(0xFFFFB800)),
                   const SizedBox(width: 10),
                   Text(
                     '${userProvider.userProfile?.stars ?? 0}',
@@ -363,12 +363,11 @@ class AchievementsScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      LucideIcons.star,
+                      isCompleted ? Icons.star_rounded : Icons.star_outline_rounded,
                       color: isCompleted
-                          ? const Color(0xFFFFD700)
-                          : Colors.grey.shade300,
-                      fill: isCompleted ? 1.0 : 0.0,
-                      size: 16,
+                          ? const Color(0xFFFFB800)
+                          : const Color(0xFFCBD5E1),
+                      size: 18,
                     ),
                   ],
                 ),

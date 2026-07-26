@@ -1,6 +1,8 @@
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../providers/user_provider.dart';
 import '../utils/constants.dart';
 import '../utils/page_transitions.dart';
 import 'parent_account_screen.dart';
@@ -221,10 +223,26 @@ class _ForParentsScreenState extends State<ForParentsScreen>
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
     _loadAllProgress();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.addListener(_onUserProviderChanged);
+      }
+    });
+  }
+
+  void _onUserProviderChanged() {
+    if (mounted) {
+      _loadAllProgress();
+    }
   }
 
   @override
   void dispose() {
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.removeListener(_onUserProviderChanged);
+    } catch (_) {}
     _tabController.dispose();
     super.dispose();
   }
@@ -981,7 +999,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         _tipCard(LucideIcons.repeat, AppLocalizations.of(context)!.tipRepeatTitle,
             AppLocalizations.of(context)!.tipRepeatBody),
         const SizedBox(height: 8),
-        _tipCard(LucideIcons.star, AppLocalizations.of(context)!.tipPraiseTitle,
+        _tipCard(Icons.star_rounded, AppLocalizations.of(context)!.tipPraiseTitle,
             AppLocalizations.of(context)!.tipPraiseBody),
       ]),
     );
@@ -1339,7 +1357,7 @@ class _ForParentsScreenState extends State<ForParentsScreen>
         _tipCard(LucideIcons.calculator, AppLocalizations.of(context)!.tipCountingTitle,
             AppLocalizations.of(context)!.tipCountingBody),
         const SizedBox(height: 8),
-        _tipCard(LucideIcons.star, AppLocalizations.of(context)!.tipPraiseMatTitle,
+        _tipCard(Icons.star_rounded, AppLocalizations.of(context)!.tipPraiseMatTitle,
             AppLocalizations.of(context)!.tipPraiseMatBody),
         const SizedBox(height: 8),
         _tipCard(LucideIcons.gamepad_2, AppLocalizations.of(context)!.tipGameFunTitle,

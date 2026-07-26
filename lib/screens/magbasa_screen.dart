@@ -404,7 +404,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
         totalActivities > 0 ? totalCompleted / totalActivities : 0.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -424,7 +424,15 @@ class _MagbasaScreenState extends State<MagbasaScreen>
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
       ),
-      body: Column(children: [
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF8F9FE), Color(0xFFEDF1F9)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Column(children: [
         // Overall progress card
         Padding(
           padding: const EdgeInsets.all(16),
@@ -436,12 +444,12 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(22),
               boxShadow: [
                 BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4))
+                    color: Colors.blue.withOpacity(0.35),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6))
               ],
             ),
             child: Row(children: [
@@ -451,7 +459,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                 margin: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
                   child: Image.asset(
@@ -512,11 +520,17 @@ class _MagbasaScreenState extends State<MagbasaScreen>
 
         // Tabs
         Container(
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 4, offset: const Offset(0, 2)),
+            ],
+          ),
           child: TabBar(
             controller: _tabController,
             indicatorColor: AppColors.primary,
             indicatorSize: TabBarIndicatorSize.tab,
+            indicatorWeight: 3,
             labelColor: AppColors.primary,
             unselectedLabelColor: Colors.grey.shade500,
             tabs: [
@@ -544,6 +558,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
           ),
         ),
       ]),
+      ),
     );
   }
 
@@ -562,7 +577,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
             : AppLocalizations.of(context)!.songs;
 
     return Container(
-      color: Colors.grey.shade50,
+      color: Colors.transparent,
       child: Column(children: [
         // Category header
         Container(
@@ -570,11 +585,12 @@ class _MagbasaScreenState extends State<MagbasaScreen>
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
             boxShadow: [
               BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2))
+                  color: color.withOpacity(0.12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4))
             ],
           ),
           child: Row(children: [
@@ -583,11 +599,11 @@ class _MagbasaScreenState extends State<MagbasaScreen>
               height: 70,
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: color.withOpacity(0.3), width: 2),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(13),
+                borderRadius: BorderRadius.circular(14),
                 child: Image.asset(
                   catImage,
                   fit: BoxFit.cover,
@@ -610,14 +626,36 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                   const SizedBox(height: 8),
                   Row(children: [
                     Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          backgroundColor: Colors.grey.shade200,
-                          valueColor: AlwaysStoppedAnimation<Color>(color),
-                          minHeight: 6,
-                        ),
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 8,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          FractionallySizedBox(
+                            widthFactor: progress.clamp(0.02, 1.0),
+                            child: Container(
+                              height: 8,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [color, color.withOpacity(0.7)],
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: color.withOpacity(0.4),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -690,16 +728,18 @@ class _MagbasaScreenState extends State<MagbasaScreen>
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
             color: isCompleted
-                ? color.withOpacity(0.6)
-                : color.withOpacity(0.25),
-            width: 2),
+                ? color.withOpacity(0.5)
+                : Colors.grey.shade200,
+            width: 1.5),
         boxShadow: [
           BoxShadow(
-              color: color.withOpacity(0.10),
-              blurRadius: 10,
+              color: isCompleted
+                  ? color.withOpacity(0.15)
+                  : Colors.black.withOpacity(0.06),
+              blurRadius: 12,
               offset: const Offset(0, 4))
         ],
       ),
@@ -707,9 +747,9 @@ class _MagbasaScreenState extends State<MagbasaScreen>
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             child: Row(children: [
               Container(
                 width: 60,
@@ -718,7 +758,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                   color: isCompleted
                       ? color.withOpacity(0.1)
                       : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                       color: isCompleted
                           ? color.withOpacity(0.3)
@@ -726,7 +766,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
                       width: 1.5),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   child: Image.asset(
                     imagePath,
                     fit: BoxFit.cover,
@@ -987,24 +1027,38 @@ class PoemScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _markComplete(context),
-                    icon: const Icon(LucideIcons.circle_check,
-                        color: Colors.white),
-                    label: Text(
-                      AppLocalizations.of(context)!.iReadThePoem,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [_poemColor, _poemColor.withOpacity(0.8)],
+                      ),
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _poemColor.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        )
+                      ],
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _poemColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18)),
-                      elevation: 4,
-                      shadowColor: _poemColor.withOpacity(0.4),
+                    child: ElevatedButton.icon(
+                      onPressed: () => _markComplete(context),
+                      icon: const Icon(LucideIcons.circle_check,
+                          color: Colors.white),
+                      label: Text(
+                        AppLocalizations.of(context)!.iReadThePoem,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22)),
+                      ),
                     ),
                   ),
                 ),

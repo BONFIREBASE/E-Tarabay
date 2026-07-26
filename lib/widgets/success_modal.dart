@@ -109,19 +109,69 @@ class _SuccessModalState extends State<SuccessModal> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(3, (index) {
                     final bool isFull = index < widget.stars;
-                    return Icon(
-                      LucideIcons.star,
-                      color: isFull ? const Color(0xFFFFD700) : Colors.grey.shade300,
-                      fill: isFull ? 1.0 : 0.0,
-                      size: 48,
-                    )
-                        .animate(delay: (400 + (index * 150)).ms)
-                        .scale(duration: 400.ms, curve: Curves.easeOutBack)
-                        .shimmer(delay: 1200.ms, duration: 800.ms);
+                    return GestureDetector(
+                      onTap: () => _showStarBreakdownDialog(context),
+                      child: Icon(
+                        isFull ? Icons.star_rounded : Icons.star_outline_rounded,
+                        color: isFull ? const Color(0xFFFFB800) : const Color(0xFFCBD5E1),
+                        size: 52,
+                      )
+                          .animate(delay: (400 + (index * 150)).ms)
+                          .scale(duration: 400.ms, curve: Curves.easeOutBack)
+                          .shimmer(delay: 1200.ms, duration: 800.ms),
+                    );
                   }),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
+
+                // Star Details Banner
+                GestureDetector(
+                  onTap: () => _showStarBreakdownDialog(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: widget.stars == 3
+                          ? const Color(0xFFFFFBEB)
+                          : const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: widget.stars == 3
+                            ? const Color(0xFFFFD700)
+                            : Colors.grey.shade300,
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          LucideIcons.info,
+                          size: 16,
+                          color: widget.stars == 3
+                              ? const Color(0xFFD97706)
+                              : Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            _getStarDetailSummary(widget.stars),
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: widget.stars == 3
+                                  ? const Color(0xFFB45309)
+                                  : Colors.grey.shade800,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 600.ms),
+
+                const SizedBox(height: 20),
 
                 // Stats Container
                 Container(
@@ -342,5 +392,164 @@ class _SuccessModalState extends State<SuccessModal> {
     final path = Path();
     path.addOval(Rect.fromLTWH(0, 0, size.width, size.height));
     return path;
+  }
+
+  String _getStarDetailSummary(int stars) {
+    switch (stars) {
+      case 3:
+        return '3/3 Stars • Perfect Score! Outstanding!';
+      case 2:
+        return '2/3 Stars • 1 empty star remaining. Replay with 0 errors!';
+      case 1:
+        return '1/3 Star • 2 empty stars remaining. Practice to earn all 3!';
+      default:
+        return '0/3 Stars • Replay to fill your stars!';
+    }
+  }
+
+  void _showStarBreakdownDialog(BuildContext context) {
+    final earned = widget.stars;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Row(
+          children: [
+            Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 24),
+            SizedBox(width: 8),
+            Text(
+              'Star Requirements',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'How stars are earned in this activity:',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 16),
+            _buildStarCriterionItem(
+              starNumber: 1,
+              title: 'Activity Completion',
+              description: 'Completed all steps in this module.',
+              isEarned: earned >= 1,
+            ),
+            const SizedBox(height: 12),
+            _buildStarCriterionItem(
+              starNumber: 2,
+              title: 'High Accuracy',
+              description: 'Completed with 80%+ accuracy or minimal retries.',
+              isEarned: earned >= 2,
+            ),
+            const SizedBox(height: 12),
+            _buildStarCriterionItem(
+              starNumber: 3,
+              title: 'Perfect Performance',
+              description: 'Flawless clean run with zero errors!',
+              isEarned: earned >= 3,
+            ),
+            if (earned < 3) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade200),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(LucideIcons.lightbulb,
+                        color: Colors.amber, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Tip: Replay this activity with fewer mistakes to fill all empty stars!',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.amber.shade900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Got it!',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStarCriterionItem({
+    required int starNumber,
+    required String title,
+    required String description,
+    required bool isEarned,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          isEarned ? Icons.star_rounded : Icons.star_outline_rounded,
+          color: isEarned ? const Color(0xFFFFB800) : const Color(0xFFCBD5E1),
+          size: 26,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Star $starNumber: $title',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isEarned ? AppColors.textDark : Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: isEarned ? Colors.green.shade50 : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      isEarned ? 'Earned' : 'Empty',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isEarned ? Colors.green.shade700 : Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description,
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

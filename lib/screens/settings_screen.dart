@@ -51,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await audioManager.setMusicEnabled(value);
 
     if (value) {
-      await audioManager.startBackgroundMusic('audio/tunog.mp3');
+      await audioManager.startBackgroundMusic(AudioManager.homeMusicAsset);
     }
   }
 

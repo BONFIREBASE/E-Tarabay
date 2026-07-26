@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
@@ -39,6 +40,7 @@ class StudentDetailScreen extends StatelessWidget {
     final traceit = safeMap(progress['traceit']);
     final matematika = safeMap(progress['matematika']);
     final pamilya = safeMap(progress['pamilya']);
+    final List creations = studentData['creations'] is List ? studentData['creations'] as List : [];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -161,6 +163,25 @@ class StudentDetailScreen extends StatelessWidget {
               extraInfo: AppLocalizations.of(context)!
                   .scoreLabel(pamilya['totalScore'] ?? 0),
             ),
+            const SizedBox(height: 24),
+
+            // Student Artworks / Kulay Gallery Section
+            Row(
+              children: [
+                const Icon(LucideIcons.palette, color: AppColors.colors, size: 22),
+                const SizedBox(width: 8),
+                Text(
+                  'Student Artworks (${creations.length})',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _buildArtworksGallery(context, creations),
           ],
         ),
       ),
@@ -248,6 +269,190 @@ class StudentDetailScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildArtworksGallery(BuildContext context, List creations) {
+    if (creations.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          children: [
+            Icon(LucideIcons.image_off, color: Colors.grey.shade400, size: 36),
+            const SizedBox(height: 8),
+            Text(
+              'No artwork creations saved yet.',
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 170,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: creations.length,
+        itemBuilder: (context, index) {
+          final creation = creations[index] is Map ? creations[index] as Map : {};
+          final name = creation['name'] ?? 'Artwork';
+          final base64Img = creation['base64Image'] as String? ?? '';
+          final stars = creation['stars'] as int?;
+
+          Widget imageWidget;
+          if (base64Img.isNotEmpty) {
+            try {
+              final bytes = base64Decode(base64Img);
+              imageWidget = Image.memory(bytes, fit: BoxFit.cover);
+            } catch (_) {
+              imageWidget = Container(
+                color: Colors.grey.shade200,
+                child: const Icon(LucideIcons.image, color: Colors.grey),
+              );
+            }
+          } else {
+            imageWidget = Container(
+              color: Colors.grey.shade200,
+              child: const Icon(LucideIcons.palette, color: AppColors.colors),
+            );
+          }
+
+          return Container(
+            width: 140,
+            margin: const EdgeInsets.only(right: 12),
+            child: GestureDetector(
+              onTap: () => _showArtworkPreview(context, name, base64Img, stars),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(14),
+                        ),
+                        child: imageWidget,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (stars != null && stars > 0)
+                            Row(
+                              children: [
+                                const Icon(Icons.star_rounded,
+                                    color: Color(0xFFFFB800), size: 14),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '$stars Stars',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showArtworkPreview(BuildContext context, String name, String base64Img, int? stars) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: base64Img.isNotEmpty
+                    ? Image.memory(
+                        base64Decode(base64Img),
+                        width: 260,
+                        height: 260,
+                        fit: BoxFit.contain,
+                      )
+                    : Container(
+                        width: 260,
+                        height: 260,
+                        color: Colors.grey.shade100,
+                        child: const Icon(LucideIcons.palette, size: 60, color: Colors.grey),
+                      ),
+              ),
+              if (stars != null && stars > 0) ...[
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    stars,
+                    (index) => const Icon(
+                      Icons.star_rounded,
+                      color: Color(0xFFFFB800),
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

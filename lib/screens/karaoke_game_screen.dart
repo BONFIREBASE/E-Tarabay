@@ -203,7 +203,7 @@ class KaraokeGameScreenState extends State<KaraokeGameScreen> {
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            Icon(LucideIcons.star, color: Colors.amber, size: 14),
+                            const Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 16),
                             SizedBox(width: 4),
                             Text(
                               AppLocalizations.of(context)!.completed,
@@ -247,7 +247,7 @@ class KaraokeGameScreenState extends State<KaraokeGameScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(LucideIcons.star, color: Colors.amber),
+            const Icon(Icons.star_rounded, color: Color(0xFFFFB800)),
             const SizedBox(width: 8),
             Text(AppLocalizations.of(context)!.mathPoints(3)),
           ],
