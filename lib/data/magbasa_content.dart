@@ -565,6 +565,7 @@ class MagbasaContent {
           'Up, up in the sky.',
         ],
         'image': 'assets/images/poem1.png',
+        'audioPath': 'poems sfx/Sipsipat.mp3',
       },
       'adda_asok': {
         'title': 'My Dog',
@@ -592,6 +593,7 @@ class MagbasaContent {
           'Please give me food today.',
         ],
         'image': 'assets/images/poem3.png',
+        'audioPath': 'poems sfx/Ti Pusak.mp3',
       },
       'ni_tatang': {
         'title': 'My Father',
@@ -606,6 +608,7 @@ class MagbasaContent {
           'Food for our family always.',
         ],
         'image': 'assets/images/poem4.png',
+        'audioPath': 'poems sfx/Ni Tatang.mp3',
       },
       'panagsepilio': {
         'title': 'Brushing Teeth',
@@ -616,6 +619,7 @@ class MagbasaContent {
           'Feeling so bright.',
         ],
         'image': 'assets/images/poem5.png',
+        'audioPath': 'poems sfx/Panagsepelio.mp3',
       },
     },
     'fil': {
@@ -628,6 +632,7 @@ class MagbasaContent {
           'Habang nagbabasa.',
         ],
         'image': 'assets/images/poem1.png',
+        'audioPath': 'poems sfx/Sipsipat.mp3',
       },
       'adda_asok': {
         'title': 'Ang Aso Ko',
@@ -655,6 +660,7 @@ class MagbasaContent {
           'Bigyan mo ako ng pagkain.',
         ],
         'image': 'assets/images/poem3.png',
+        'audioPath': 'poems sfx/Ti Pusak.mp3',
       },
       'ni_tatang': {
         'title': 'Ang Tatay Ko',
@@ -669,6 +675,7 @@ class MagbasaContent {
           'Pagkain ng pamilya namin.',
         ],
         'image': 'assets/images/poem4.png',
+        'audioPath': 'poems sfx/Ni Tatang.mp3',
       },
       'panagsepilio': {
         'title': 'Pagsisepilyo',
@@ -679,6 +686,7 @@ class MagbasaContent {
           'Pakiramdam ay ginhawa.',
         ],
         'image': 'assets/images/poem5.png',
+        'audioPath': 'poems sfx/Panagsepelio.mp3',
       },
     },
     'ilo': {
@@ -691,6 +699,7 @@ class MagbasaContent {
           'Bayat ti panagbasak',
         ],
         'image': 'assets/images/poem1.png',
+        'audioPath': 'poems sfx/Sipsipat.mp3',
       },
       'adda_asok': {
         'title': 'Adda Asok',
@@ -718,6 +727,7 @@ class MagbasaContent {
           'Ikkak metten iti kanenna',
         ],
         'image': 'assets/images/poem3.png',
+        'audioPath': 'poems sfx/Ti Pusak.mp3',
       },
       'ni_tatang': {
         'title': 'Ni Tatang',
@@ -733,6 +743,7 @@ class MagbasaContent {
           'A taraon ti pamiliana.',
         ],
         'image': 'assets/images/poem4.png',
+        'audioPath': 'poems sfx/Ni Tatang.mp3',
       },
       'panagsepilio': {
         'title': 'Panagsepilio',
@@ -743,6 +754,7 @@ class MagbasaContent {
           'Nakaprespresko',
         ],
         'image': 'assets/images/poem5.png',
+        'audioPath': 'poems sfx/Panagsepelio.mp3',
       },
     },
   };

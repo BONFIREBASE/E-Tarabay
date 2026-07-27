@@ -855,13 +855,11 @@ class _MagbasaScreenState extends State<MagbasaScreen>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  POEM SCREEN  — full single-scroll display
+//  POEM SCREEN  — Karaoke-style reading with audio sync
 // ─────────────────────────────────────────────────────────────────────────────
-class PoemScreen extends StatelessWidget {
+class PoemScreen extends StatefulWidget {
   final String poemTitle;
   final Map<String, dynamic> poemData;
-
-  static const Color _poemColor = Color(0xFFFF6B6B);
 
   const PoemScreen({
     super.key,
@@ -870,215 +868,238 @@ class PoemScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final content = poemData['content'] as List;
-    final imagePath = poemData['image'] as String;
+  State<PoemScreen> createState() => _PoemScreenState();
+}
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF5F5),
-      body: CustomScrollView(
-        slivers: [
-          // ── Decorative header ─────────────────────────────────────────────
-          SliverAppBar(
-            expandedHeight: 260,
-            pinned: true,
-            backgroundColor: _poemColor,
-            leading: CustomBackButton(
-              iconColor: Colors.white,
-              onPressed: () => Navigator.pop(context, false),
-            ),
-            actions: [
-              TextButton.icon(
-                onPressed: () => _markComplete(context),
-                icon: const Icon(LucideIcons.circle_check,
-                    color: Colors.white, size: 18),
-                label: Text(
-                  AppLocalizations.of(context)!.done,
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: Text(
-                poemTitle,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              background: Stack(fit: StackFit.expand, children: [
-                Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: _poemColor.withOpacity(0.4),
-                    child: const Center(
-                        child: Text('📖', style: TextStyle(fontSize: 80))),
-                  ),
-                ),
-                // Gradient overlay so title is readable
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        _poemColor.withOpacity(0.85),
-                      ],
-                    ),
-                  ),
-                ),
-              ]),
-            ),
-          ),
+class _PoemScreenState extends State<PoemScreen>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  static const Color _poemColor = Color(0xFFFF6B6B);
+  static const Color _karaokeHighlight = Color(0xFFFF6B6B);
 
-          // ── Poem content ──────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _poemColor.withOpacity(0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Decorative divider top
-                    _decorativeDivider(),
-                    const SizedBox(height: 20),
+  bool _isCompleted = false;
+  int _currentLineIndex = 0;
+  bool _isPlaying = false;
+  bool _wasPlayingBeforePause = false;
+  late AnimationController _pulseController;
+  late AudioPlayer _audioPlayer;
+  late ConfettiController _confettiController;
 
-                    // All lines
-                    ...content.map((line) {
-                      final text = line as String;
-                      if (text.isEmpty) {
-                        return const SizedBox(height: 18); // stanza break
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Text(
-                          text,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            height: 1.65,
-                            color: Color(0xFF2D2D2D),
-                            fontStyle: FontStyle.italic,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      );
-                    }),
+  int _totalDurationMs = 0;
+  int _currentPositionMs = 0;
+  Timer? _fallbackTimer;
 
-                    const SizedBox(height: 20),
-                    _decorativeDivider(),
-                  ],
-                ),
-              ),
-            ),
-          ),
+  StreamSubscription? _positionSubscription;
+  StreamSubscription? _durationSubscription;
+  StreamSubscription? _completeSubscription;
 
-          // ── "Basak" button ────────────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 40),
-              child: Column(children: [
-                // Small reading hint
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: _poemColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(LucideIcons.info,
-                            color: _poemColor, size: 16),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            AppLocalizations.of(context)!
-                                .readFullPoemBeforeBack,
-                            style: TextStyle(
-                                fontSize: 13,
-                                color: _poemColor.withOpacity(0.9)),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ]),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [_poemColor, _poemColor.withOpacity(0.8)],
-                      ),
-                      borderRadius: BorderRadius.circular(22),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _poemColor.withOpacity(0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        )
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: () => _markComplete(context),
-                      icon: const Icon(LucideIcons.circle_check,
-                          color: Colors.white),
-                      label: Text(
-                        AppLocalizations.of(context)!.iReadThePoem,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22)),
-                      ),
-                    ),
-                  ),
-                ),
-              ]),
-            ),
-          ),
-        ],
+  List<String> get _lines {
+    final raw = widget.poemData['content'] as List? ?? [];
+    return raw.map((e) => e.toString()).toList();
+  }
+
+  String? get _audioPath => widget.poemData['audioPath'] as String?;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _pulseController = AnimationController(
+        duration: const Duration(milliseconds: 800), vsync: this);
+    _audioPlayer = AudioPlayer();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 5));
+
+    _setupAudioListeners();
+  }
+
+  void _setupAudioListeners() {
+    _positionSubscription = _audioPlayer.onPositionChanged.listen((pos) {
+      if (mounted) {
+        setState(() => _currentPositionMs = pos.inMilliseconds);
+        _syncLineFromPosition();
+      }
+    });
+
+    _durationSubscription = _audioPlayer.onDurationChanged.listen((dur) {
+      if (mounted) setState(() => _totalDurationMs = dur.inMilliseconds);
+    });
+
+    _completeSubscription = _audioPlayer.onPlayerComplete.listen((_) {
+      if (mounted) _onPlaybackComplete();
+    });
+  }
+
+  void _syncLineFromPosition() {
+    if (_totalDurationMs <= 0 || _lines.isEmpty) return;
+    final nonEmpty = _lines.where((l) => l.trim().isNotEmpty).toList();
+    if (nonEmpty.isEmpty) return;
+
+    final msPerLine = _totalDurationMs / nonEmpty.length;
+    final target =
+        (_currentPositionMs / msPerLine).floor().clamp(0, _lines.length - 1);
+    if (target != _currentLineIndex) {
+      setState(() => _currentLineIndex = target);
+    }
+  }
+
+  void _onPlaybackComplete() {
+    setState(() {
+      _isPlaying = false;
+      _isCompleted = true;
+      _currentLineIndex = _lines.length - 1;
+    });
+    _pulseController.stop();
+    _confettiController.play();
+    _showCompletionDialog();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isPlaying) {
+        _wasPlayingBeforePause = true;
+        _audioPlayer.pause();
+        _pulseController.stop();
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      if (_wasPlayingBeforePause) {
+        _audioPlayer.resume();
+        _pulseController.repeat(reverse: true);
+        _wasPlayingBeforePause = false;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pulseController.dispose();
+    _confettiController.dispose();
+    _fallbackTimer?.cancel();
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
+    _completeSubscription?.cancel();
+    _audioPlayer.dispose();
+
+    if (_isPlaying) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AudioManager.instance.resumeMusic();
+      });
+    }
+    super.dispose();
+  }
+
+  Future<void> _togglePlay() async {
+    if (_isPlaying) {
+      await _stopPlayback();
+    } else {
+      await _startPlayback();
+    }
+  }
+
+  Future<void> _startPlayback() async {
+    setState(() {
+      _isPlaying = true;
+      _pulseController.repeat(reverse: true);
+    });
+    await AudioManager.instance.pauseMusic();
+
+    if (_isCompleted) {
+      setState(() {
+        _isCompleted = false;
+        _currentLineIndex = 0;
+      });
+    }
+
+    if (_audioPath != null) {
+      try {
+        await _audioPlayer.play(AssetSource(_audioPath!));
+      } catch (e) {
+        debugPrint('Error playing poem audio: $e');
+        _startFallbackTimer();
+      }
+    } else {
+      _startFallbackTimer();
+    }
+  }
+
+  void _startFallbackTimer() {
+    _fallbackTimer?.cancel();
+    final nonEmpty = _lines.where((l) => l.trim().isNotEmpty).toList();
+    final secPerLine = nonEmpty.isEmpty ? 3 : max(3, 18 ~/ nonEmpty.length);
+
+    _fallbackTimer = Timer.periodic(Duration(seconds: secPerLine), (timer) {
+      if (!mounted || !_isPlaying) {
+        timer.cancel();
+        return;
+      }
+      if (_currentLineIndex < _lines.length - 1) {
+        setState(() => _currentLineIndex++);
+      } else {
+        timer.cancel();
+        _onPlaybackComplete();
+      }
+    });
+  }
+
+  Future<void> _stopPlayback() async {
+    setState(() {
+      _isPlaying = false;
+      _pulseController.stop();
+    });
+    _fallbackTimer?.cancel();
+    await _audioPlayer.stop();
+    await AudioManager.instance.resumeMusic();
+  }
+
+  Future<void> _seekToLine(int index) async {
+    if (index < 0 || index >= _lines.length) return;
+    setState(() => _currentLineIndex = index);
+
+    if (_audioPath != null && _totalDurationMs > 0) {
+      final nonEmpty = _lines.where((l) => l.trim().isNotEmpty).toList();
+      final msPerLine = _totalDurationMs / max(1, nonEmpty.length);
+      final seekPos = Duration(
+          milliseconds: (index * msPerLine).round().clamp(0, _totalDurationMs));
+      await _audioPlayer.seek(seekPos);
+    } else if (_isPlaying) {
+      _fallbackTimer?.cancel();
+      _startFallbackTimer();
+    }
+  }
+
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => SuccessModal(
+        title: AppLocalizations.of(context)!.congratulations,
+        subtitle: AppLocalizations.of(context)!.readingFinishedGood,
+        score: 50,
+        stars: 3,
+        primaryLabel: AppLocalizations.of(context)!.done,
+        onPrimaryTap: () {
+          Navigator.of(dialogContext).pop();
+          Navigator.of(context).pop(true);
+        },
+        secondaryLabel: AppLocalizations.of(context)!.repeat,
+        onSecondaryTap: () {
+          Navigator.of(dialogContext).pop();
+          setState(() {
+            _isCompleted = false;
+            _currentLineIndex = 0;
+          });
+          _startPlayback();
+        },
       ),
     );
   }
 
-  Widget _decorativeDivider() {
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Container(width: 40, height: 1.5, color: _poemColor.withOpacity(0.3)),
-      const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12),
-        child: Text('🌸', style: TextStyle(fontSize: 16, color: _poemColor)),
-      ),
-      Container(width: 40, height: 1.5, color: _poemColor.withOpacity(0.3)),
-    ]);
+  String _formatTime(int ms) {
+    final s = (ms ~/ 1000) % 60;
+    final m = (ms ~/ 60000);
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
   void _markComplete(BuildContext context) {
@@ -1105,6 +1126,396 @@ class PoemScreen extends StatelessWidget {
         Navigator.pop(context, true); // Pop screen
       }
     });
+  }
+
+  Widget _decorativeDivider() {
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      Container(width: 40, height: 1.5, color: _poemColor.withOpacity(0.3)),
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12),
+        child: Text('🌸', style: TextStyle(fontSize: 16, color: _poemColor)),
+      ),
+      Container(width: 40, height: 1.5, color: _poemColor.withOpacity(0.3)),
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final content = _lines;
+    final imagePath = widget.poemData['image'] as String;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF5F5),
+      body: Stack(
+        children: [
+          // Confetti
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Colors.pink,
+                Colors.red,
+                Colors.orange,
+                Colors.yellow,
+                Colors.white,
+              ],
+              numberOfParticles: 25,
+              gravity: 0.15,
+            ),
+          ),
+
+          CustomScrollView(
+            slivers: [
+              // ── Decorative header ─────────────────────────────────────
+              SliverAppBar(
+                expandedHeight: 260,
+                pinned: true,
+                backgroundColor: _poemColor,
+                leading: CustomBackButton(
+                  iconColor: Colors.white,
+                  onPressed: () => Navigator.pop(context, _isCompleted),
+                ),
+                actions: [
+                  TextButton.icon(
+                    onPressed: () => _markComplete(context),
+                    icon: const Icon(LucideIcons.circle_check,
+                        color: Colors.white, size: 18),
+                    label: Text(
+                      AppLocalizations.of(context)!.done,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  title: Text(
+                    widget.poemTitle,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  background: Stack(fit: StackFit.expand, children: [
+                    Image.asset(
+                      imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: _poemColor.withOpacity(0.4),
+                        child: const Center(
+                            child:
+                                Text('📖', style: TextStyle(fontSize: 80))),
+                      ),
+                    ),
+                    // Gradient overlay so title is readable
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            _poemColor.withOpacity(0.85),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+
+              // ── Progress bar ──────────────────────────────────────────
+              if (_audioPath != null && _totalDurationMs > 0)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: Row(
+                      children: [
+                        Text(
+                          _formatTime(_currentPositionMs),
+                          style: TextStyle(
+                              fontSize: 11, color: Colors.grey.shade500),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: _totalDurationMs > 0
+                                  ? (_currentPositionMs / _totalDurationMs)
+                                      .clamp(0.0, 1.0)
+                                  : 0,
+                              minHeight: 4,
+                              backgroundColor: _poemColor.withOpacity(0.15),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  _poemColor),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _formatTime(_totalDurationMs),
+                          style: TextStyle(
+                              fontSize: 11, color: Colors.grey.shade500),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // ── Poem content with karaoke highlighting ────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _poemColor.withOpacity(0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Decorative divider top
+                        _decorativeDivider(),
+                        const SizedBox(height: 20),
+
+                        // All lines with karaoke highlighting
+                        ...List.generate(content.length, (index) {
+                          final text = content[index];
+                          if (text.isEmpty) {
+                            return const SizedBox(height: 18); // stanza break
+                          }
+
+                          final isCurrent =
+                              index == _currentLineIndex && _isPlaying;
+                          final isPast = _isPlaying && index < _currentLineIndex;
+
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            margin: const EdgeInsets.only(bottom: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isCurrent
+                                  ? _karaokeHighlight.withOpacity(0.10)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(14),
+                              border: isCurrent
+                                  ? Border.all(
+                                      color:
+                                          _karaokeHighlight.withOpacity(0.45),
+                                      width: 1.5)
+                                  : null,
+                            ),
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeInOut,
+                              style: TextStyle(
+                                fontSize:
+                                    isCurrent ? 24 : (isPast ? 17 : 20),
+                                fontWeight: isCurrent
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                                color: isCurrent
+                                    ? _poemColor
+                                    : (isPast
+                                        ? Colors.grey.shade400
+                                        : const Color(0xFF2D2D2D)),
+                                fontStyle: FontStyle.italic,
+                                letterSpacing: 0.3,
+                                height: 1.65,
+                                shadows: isCurrent
+                                    ? [
+                                        Shadow(
+                                          blurRadius: 10,
+                                          color: _karaokeHighlight
+                                              .withOpacity(0.3),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Text(
+                                text,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          );
+                        }),
+
+                        const SizedBox(height: 20),
+                        _decorativeDivider(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // ── Playback controls ─────────────────────────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                  child: Column(children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: () =>
+                                _seekToLine(_currentLineIndex - 1),
+                            icon: const Icon(LucideIcons.skip_back, size: 32),
+                            color: _poemColor,
+                          ),
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: _togglePlay,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    _poemColor,
+                                    _poemColor.withOpacity(0.8),
+                                  ],
+                                ),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _poemColor.withOpacity(0.4),
+                                    blurRadius: 16,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                _isPlaying
+                                    ? LucideIcons.pause
+                                    : LucideIcons.play,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          IconButton(
+                            onPressed: () =>
+                                _seekToLine(_currentLineIndex + 1),
+                            icon:
+                                const Icon(LucideIcons.skip_forward, size: 32),
+                            color: _poemColor,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${_currentLineIndex + 1} / ${content.length}',
+                      style: TextStyle(
+                          color: Colors.grey.shade500, fontSize: 12),
+                    ),
+                  ]),
+                ),
+              ),
+
+              // ── "I read the poem" button ──────────────────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
+                  child: Column(children: [
+                    // Small reading hint
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: _poemColor.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(LucideIcons.info,
+                                color: _poemColor, size: 16),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                AppLocalizations.of(context)!
+                                    .readFullPoemBeforeBack,
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: _poemColor.withOpacity(0.9)),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ]),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              _poemColor,
+                              _poemColor.withOpacity(0.8)
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: [
+                            BoxShadow(
+                              color: _poemColor.withOpacity(0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
+                        ),
+                        child: ElevatedButton.icon(
+                          onPressed: () => _markComplete(context),
+                          icon: const Icon(LucideIcons.circle_check,
+                              color: Colors.white),
+                          label: Text(
+                            AppLocalizations.of(context)!.iReadThePoem,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(22)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 

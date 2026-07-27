@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
@@ -305,6 +306,27 @@ class _MaterialFallback extends LocalizationsDelegate<MaterialLocalizations> {
   bool shouldReload(_MaterialFallback old) => false;
 }
 
+// Fallback delegate that loads English CupertinoLocalizations for unsupported locales
+class _CupertinoFallback extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _CupertinoFallback();
+
+  static const delegate = _CupertinoFallback();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) async {
+    final target = GlobalCupertinoLocalizations.delegate.isSupported(locale)
+        ? locale
+        : const Locale('en');
+    return GlobalCupertinoLocalizations.delegate.load(target);
+  }
+
+  @override
+  bool shouldReload(_CupertinoFallback old) => false;
+}
+
 class ETarabayApp extends StatelessWidget {
   const ETarabayApp({super.key});
 
@@ -328,6 +350,7 @@ class ETarabayApp extends StatelessWidget {
       localizationsDelegates: const [
         AppLocalizations.delegate,
         _MaterialFallback.delegate,
+        _CupertinoFallback.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

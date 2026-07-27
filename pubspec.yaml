@@ -92,6 +92,7 @@ flutter:
     - assets/images/app_logo-transparent.png
     - assets/audio/Ania ti Nagan Mo by Kurtjam Kyle Silva Nono.mp3
     - assets/audio/modules_bg/
+    - assets/poems sfx/
 flutter_launcher_icons:
   android: true
   ios: true
