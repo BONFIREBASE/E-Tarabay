@@ -364,6 +364,24 @@ class _KaraokePlayerScreenState extends State<KaraokePlayerScreen>
     final nonEmptyLines = _lyrics.where((l) => l.trim().isNotEmpty).toList();
     if (nonEmptyLines.isEmpty) return;
 
+    final rawTs = widget.songData['lineTimestampsMs'] ?? widget.songData['timestampsMs'];
+    if (rawTs is List && rawTs.isNotEmpty) {
+      final timestamps = rawTs.cast<int>();
+      int targetIndex = 0;
+      for (int i = 0; i < timestamps.length; i++) {
+        if (_currentPositionMs >= timestamps[i]) {
+          targetIndex = i;
+        } else {
+          break;
+        }
+      }
+      final clamped = targetIndex.clamp(0, _lyrics.length - 1);
+      if (clamped != _currentLineIndex) {
+        setState(() => _currentLineIndex = clamped);
+      }
+      return;
+    }
+
     final msPerLine = _totalDurationMs / nonEmptyLines.length;
     final targetIndex =
         (_currentPositionMs / msPerLine).floor().clamp(0, _lyrics.length - 1);

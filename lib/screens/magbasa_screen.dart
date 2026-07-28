@@ -883,6 +883,7 @@ class _PoemScreenState extends State<PoemScreen>
   late AnimationController _pulseController;
   late AudioPlayer _audioPlayer;
   late ConfettiController _confettiController;
+  late ScrollController _scrollController;
 
   int _totalDurationMs = 0;
   int _currentPositionMs = 0;
@@ -906,6 +907,7 @@ class _PoemScreenState extends State<PoemScreen>
     _pulseController = AnimationController(
         duration: const Duration(milliseconds: 800), vsync: this);
     _audioPlayer = AudioPlayer();
+    _scrollController = ScrollController();
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
 
@@ -934,12 +936,42 @@ class _PoemScreenState extends State<PoemScreen>
     final nonEmpty = _lines.where((l) => l.trim().isNotEmpty).toList();
     if (nonEmpty.isEmpty) return;
 
+    final rawTs = widget.poemData['lineTimestampsMs'] ?? widget.poemData['timestampsMs'];
+    if (rawTs is List && rawTs.isNotEmpty) {
+      final timestamps = rawTs.cast<int>();
+      int targetIndex = 0;
+      for (int i = 0; i < timestamps.length; i++) {
+        if (_currentPositionMs >= timestamps[i]) {
+          targetIndex = i;
+        } else {
+          break;
+        }
+      }
+      final clamped = targetIndex.clamp(0, _lines.length - 1);
+      if (clamped != _currentLineIndex) {
+        setState(() => _currentLineIndex = clamped);
+        _scrollToCurrentLine();
+      }
+      return;
+    }
+
     final msPerLine = _totalDurationMs / nonEmpty.length;
     final target =
         (_currentPositionMs / msPerLine).floor().clamp(0, _lines.length - 1);
     if (target != _currentLineIndex) {
       setState(() => _currentLineIndex = target);
+      _scrollToCurrentLine();
     }
+  }
+
+  void _scrollToCurrentLine() {
+    if (!_scrollController.hasClients || !_isPlaying) return;
+    final double targetOffset = 260.0 + (_currentLineIndex * 48.0);
+    _scrollController.animateTo(
+      targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _onPlaybackComplete() {
@@ -976,6 +1008,7 @@ class _PoemScreenState extends State<PoemScreen>
     WidgetsBinding.instance.removeObserver(this);
     _pulseController.dispose();
     _confettiController.dispose();
+    _scrollController.dispose();
     _fallbackTimer?.cancel();
     _positionSubscription?.cancel();
     _durationSubscription?.cancel();
@@ -1168,6 +1201,7 @@ class _PoemScreenState extends State<PoemScreen>
           ),
 
           CustomScrollView(
+            controller: _scrollController,
             slivers: [
               // ── Decorative header ─────────────────────────────────────
               SliverAppBar(
@@ -1522,14 +1556,9 @@ class _PoemScreenState extends State<PoemScreen>
 // ─────────────────────────────────────────────────────────────────────────────
 //  STORY SCREEN  — full single-scroll display
 // ─────────────────────────────────────────────────────────────────────────────
-class StoryScreen extends StatelessWidget {
+class StoryScreen extends StatefulWidget {
   final String storyTitle;
   final Map<String, dynamic> storyData;
-
-  static const Color _storyColor = Color(0xFFFFB347);
-
-  // Decorative paragraph dividers
-  static const List<String> _dividerEmojis = ['🌟', '🌿', '☀️', '🌙', '🍀'];
 
   const StoryScreen({
     super.key,
@@ -1538,16 +1567,187 @@ class StoryScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final content = storyData['content'] as List;
-    final imagePath = storyData['image'] as String;
+  State<StoryScreen> createState() => _StoryScreenState();
+}
 
-    // Split paragraphs on empty strings
+class _StoryScreenState extends State<StoryScreen> with WidgetsBindingObserver {
+  static const Color _storyColor = Color(0xFFFFB347);
+  static const List<String> _dividerEmojis = ['🌟', '🌿', '☀️', '🌙', '🍀'];
+
+  late AudioPlayer _audioPlayer;
+  late ScrollController _scrollController;
+  bool _isPlaying = false;
+  int _currentLineIndex = 0;
+  int _totalDurationMs = 0;
+  int _currentPositionMs = 0;
+  Timer? _fallbackTimer;
+
+  String? get _audioPath => widget.storyData['audioPath'] as String?;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _audioPlayer = AudioPlayer();
+    _scrollController = ScrollController();
+    _initAudio();
+  }
+
+  Future<void> _initAudio() async {
+    if (_audioPath != null) {
+      _audioPlayer.onDurationChanged.listen((dur) {
+        if (mounted) setState(() => _totalDurationMs = dur.inMilliseconds);
+      });
+      _audioPlayer.onPositionChanged.listen((pos) {
+        if (mounted) {
+          setState(() {
+            _currentPositionMs = pos.inMilliseconds;
+            _updateCurrentLineFromPosition();
+          });
+        }
+      });
+      _audioPlayer.onPlayerComplete.listen((_) {
+        if (mounted) {
+          setState(() {
+            _isPlaying = false;
+            final content = widget.storyData['content'] as List;
+            _currentLineIndex = content.isEmpty ? 0 : content.length - 1;
+          });
+        }
+      });
+    }
+  }
+
+  void _updateCurrentLineFromPosition() {
+    final content = widget.storyData['content'] as List;
+    if (content.isEmpty || _totalDurationMs == 0) return;
+
+    final rawTs = widget.storyData['lineTimestampsMs'] ?? widget.storyData['timestampsMs'];
+    if (rawTs is List && rawTs.isNotEmpty) {
+      final timestamps = rawTs.cast<int>();
+      final effectivePos = _currentPositionMs + 400;
+      int targetIndex = 0;
+      for (int i = 0; i < timestamps.length; i++) {
+        if (effectivePos >= timestamps[i]) {
+          targetIndex = i;
+        } else {
+          break;
+        }
+      }
+      final clamped = targetIndex.clamp(0, content.length - 1);
+      if (clamped != _currentLineIndex) {
+        setState(() => _currentLineIndex = clamped);
+        _scrollToCurrentLine();
+      }
+      return;
+    }
+
+    final nonEmpCount = content.where((e) => (e as String).isNotEmpty).length;
+    if (nonEmpCount == 0) return;
+
+    final progress = (_currentPositionMs / _totalDurationMs).clamp(0.0, 1.0);
+    int activeLineIdx = 0;
+    int curNonEmp = 0;
+    final targetNonEmp =
+        ((progress * nonEmpCount).floor()).clamp(0, nonEmpCount - 1);
+
+    for (int i = 0; i < content.length; i++) {
+      if ((content[i] as String).isNotEmpty) {
+        if (curNonEmp == targetNonEmp) {
+          activeLineIdx = i;
+          break;
+        }
+        curNonEmp++;
+      }
+    }
+    if (activeLineIdx != _currentLineIndex) {
+      setState(() => _currentLineIndex = activeLineIdx);
+      _scrollToCurrentLine();
+    }
+  }
+
+  void _scrollToCurrentLine() {
+    if (!_scrollController.hasClients || !_isPlaying) return;
+    final double targetOffset = 340.0 + (_currentLineIndex * 52.0);
+    _scrollController.animateTo(
+      targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Future<void> _togglePlay() async {
+    final content = widget.storyData['content'] as List;
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+      _fallbackTimer?.cancel();
+      setState(() => _isPlaying = false);
+    } else {
+      if (_audioPath != null) {
+        if (_currentPositionMs >= _totalDurationMs && _totalDurationMs > 0) {
+          await _audioPlayer.seek(Duration.zero);
+        }
+        await _audioPlayer.play(AssetSource(_audioPath!));
+        setState(() => _isPlaying = true);
+      } else {
+        setState(() => _isPlaying = true);
+        _startFallbackTimer(content);
+      }
+    }
+  }
+
+  void _startFallbackTimer(List content) {
+    _fallbackTimer?.cancel();
+    _fallbackTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (!mounted || !_isPlaying) {
+        timer.cancel();
+        return;
+      }
+      if (_currentLineIndex < content.length - 1) {
+        setState(() {
+          _currentLineIndex++;
+          _scrollToCurrentLine();
+        });
+      } else {
+        timer.cancel();
+        setState(() => _isPlaying = false);
+      }
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isPlaying) {
+        _audioPlayer.pause();
+        _fallbackTimer?.cancel();
+        setState(() => _isPlaying = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _fallbackTimer?.cancel();
+    _audioPlayer.stop();
+    _audioPlayer.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final content = widget.storyData['content'] as List;
+    final imagePath = widget.storyData['image'] as String;
+
     final List<List<String>> paragraphs = _splitIntoParagraphs(content);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFAF0),
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // ── Cover header ──────────────────────────────────────────────────
           SliverAppBar(
@@ -1573,7 +1773,7 @@ class StoryScreen extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: true,
               title: Text(
-                storyTitle,
+                widget.storyTitle,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -1610,10 +1810,114 @@ class StoryScreen extends StatelessWidget {
             ),
           ),
 
+          // ── Audio Playback Bar ──────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _storyColor.withOpacity(0.12),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                  border: Border.all(
+                    color: _storyColor.withOpacity(0.25),
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _togglePlay,
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              _storyColor,
+                              _storyColor.withOpacity(0.85),
+                            ],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: _storyColor.withOpacity(0.4),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          _isPlaying
+                              ? LucideIcons.pause
+                              : LucideIcons.play,
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _isPlaying ? 'Agdama a Magbasa...' : 'Denggen ti Kwento',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Color(0xFF2D2D2D),
+                                ),
+                              ),
+                              if (_audioPath != null && _totalDurationMs > 0)
+                                Text(
+                                  '${(_currentPositionMs / 1000).floor()}s / ${(_totalDurationMs / 1000).floor()}s',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: (_totalDurationMs > 0)
+                                  ? (_currentPositionMs / _totalDurationMs)
+                                      .clamp(0.0, 1.0)
+                                  : 0.0,
+                              backgroundColor: _storyColor.withOpacity(0.15),
+                              valueColor:
+                                  const AlwaysStoppedAnimation<Color>(_storyColor),
+                              minHeight: 6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           // ── Story body ────────────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -1634,7 +1938,7 @@ class StoryScreen extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: _buildStoryContent(paragraphs),
+                  children: _buildStoryContent(paragraphs, content),
                 ),
               ),
             ),
@@ -1679,7 +1983,7 @@ class StoryScreen extends StatelessWidget {
                     icon: const Icon(LucideIcons.book_open, color: Colors.white),
                     label: Text(
                       AppLocalizations.of(context)!.iReadTheStory,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
                           fontWeight: FontWeight.bold),
@@ -1720,19 +2024,38 @@ class StoryScreen extends StatelessWidget {
     return paragraphs;
   }
 
-  List<Widget> _buildStoryContent(List<List<String>> paragraphs) {
+  List<Widget> _buildStoryContent(
+      List<List<String>> paragraphs, List fullContent) {
     final widgets = <Widget>[];
+    int lineCounter = 0;
+
     for (int pi = 0; pi < paragraphs.length; pi++) {
-      // Paragraph lines
       for (final line in paragraphs[pi]) {
-        widgets.add(Padding(
-          padding: const EdgeInsets.only(bottom: 10),
+        final lineIndex = lineCounter;
+        final isCurrent = lineIndex == _currentLineIndex && _isPlaying;
+        lineCounter++;
+
+        widgets.add(AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: isCurrent
+                ? _storyColor.withOpacity(0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: isCurrent
+                ? Border.all(color: _storyColor.withOpacity(0.5), width: 1.5)
+                : null,
+          ),
           child: Text(
             line,
-            style: const TextStyle(
-              fontSize: 17,
+            style: TextStyle(
+              fontSize: isCurrent ? 18.5 : 17,
               height: 1.75,
-              color: Color(0xFF2D2D2D),
+              fontWeight: isCurrent ? FontWeight.bold : FontWeight.w400,
+              color: isCurrent ? _storyColor : const Color(0xFF2D2D2D),
               letterSpacing: 0.2,
             ),
             textAlign: TextAlign.justify,
@@ -1740,7 +2063,6 @@ class StoryScreen extends StatelessWidget {
         ));
       }
 
-      // Decorative divider between paragraphs (not after last)
       if (pi < paragraphs.length - 1) {
         final emoji = _dividerEmojis[pi % _dividerEmojis.length];
         widgets.add(Padding(
@@ -1771,18 +2093,18 @@ class StoryScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(LucideIcons.circle_check, color: _storyColor, size: 48),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(AppLocalizations.of(context)!.readingFinishedHappy,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),
     );
     Future.delayed(const Duration(seconds: 1), () {
       if (context.mounted) {
-        Navigator.pop(context); // Pop dialog
-        Navigator.pop(context, true); // Pop screen
+        Navigator.pop(context);
+        Navigator.pop(context, true);
       }
     });
   }
@@ -1867,6 +2189,24 @@ class _SongScreenState extends State<SongScreen>
     if (_totalDurationMs <= 0 || _lyrics.isEmpty) return;
     final nonEmpty = _lyrics.where((l) => l.trim().isNotEmpty).toList();
     if (nonEmpty.isEmpty) return;
+
+    final rawTs = widget.songData['lineTimestampsMs'] ?? widget.songData['timestampsMs'];
+    if (rawTs is List && rawTs.isNotEmpty) {
+      final timestamps = rawTs.cast<int>();
+      int targetIndex = 0;
+      for (int i = 0; i < timestamps.length; i++) {
+        if (_currentPositionMs >= timestamps[i]) {
+          targetIndex = i;
+        } else {
+          break;
+        }
+      }
+      final clamped = targetIndex.clamp(0, _lyrics.length - 1);
+      if (clamped != _currentLineIndex) {
+        setState(() => _currentLineIndex = clamped);
+      }
+      return;
+    }
 
     final msPerLine = _totalDurationMs / nonEmpty.length;
     final target =

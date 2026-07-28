@@ -700,6 +700,7 @@ class MagbasaContent {
         ],
         'image': 'assets/images/poem1.png',
         'audioPath': 'poems sfx/Sipsipat.mp3',
+        'lineTimestampsMs': [0, 1000, 2000, 3000],
       },
       'adda_asok': {
         'title': 'Adda Asok',
@@ -712,6 +713,8 @@ class MagbasaContent {
           'Titit, asok, gog-gog-gog-gog!',
         ],
         'image': 'assets/images/poem2.png',
+        'audioPath': 'poems sfx/adda asok .mp3',
+        'lineTimestampsMs': [0, 2500, 4800, 7200, 9500, 12000],
       },
       'ti_pusak': {
         'title': 'Ti Pusak',
@@ -728,6 +731,7 @@ class MagbasaContent {
         ],
         'image': 'assets/images/poem3.png',
         'audioPath': 'poems sfx/Ti Pusak.mp3',
+        'lineTimestampsMs': [0, 1200, 2400, 3600, 4800, 5200, 6500, 7800, 9000],
       },
       'ni_tatang': {
         'title': 'Ni Tatang',
@@ -744,6 +748,7 @@ class MagbasaContent {
         ],
         'image': 'assets/images/poem4.png',
         'audioPath': 'poems sfx/Ni Tatang.mp3',
+        'lineTimestampsMs': [0, 1100, 2200, 3300, 4400, 5400, 5600, 6700, 7700],
       },
       'panagsepilio': {
         'title': 'Panagsepilio',
@@ -755,7 +760,9 @@ class MagbasaContent {
         ],
         'image': 'assets/images/poem5.png',
         'audioPath': 'poems sfx/Panagsepelio.mp3',
+        'lineTimestampsMs': [0, 1800, 3600, 5400],
       },
+
     },
   };
 
@@ -925,6 +932,8 @@ class MagbasaContent {
           'Makaay-ayat ni Marti ta natulonganna ti kalapati.',
         ],
         'image': 'assets/images/kwento1.png',
+        'audioPath': 'mabasa_sfx/Ni marti ken kallapati.mp3',
+        'lineTimestampsMs': [0, 5200, 10800, 16500, 25500, 32800, 40200, 48500],
       },
       'ni_didi': {
         'title': 'Ni Didi a Naayat iti Kendi',
@@ -940,6 +949,8 @@ class MagbasaContent {
           'Nanipud idin, saanen a mangmangan ni Didi iti kendi.',
         ],
         'image': 'assets/images/kwento2.png',
+        'audioPath': 'mabasa_sfx/Ni didi a naayat iti kendi.mp3',
+        'lineTimestampsMs': [0, 6000, 13800, 22000, 25800, 34200, 38500, 43000, 50000],
       },
       'ni_milio': {
         'title': 'Ni Milio a Managsepilio',
@@ -982,7 +993,12 @@ class MagbasaContent {
           'Immadu dagiti gagayyemna ket kanayon payen a naragsak ni Kikay.',
         ],
         'image': 'assets/images/kwento5.png',
+        'audioPath': 'mabasa_sfx/Ni kikay a di ag sagaysay.mp3',
+        'lineTimestampsMs': [0, 6000, 15500, 24500, 30500, 39500, 50500, 55000, 63500, 72500],
       },
+
+
+
     },
   };
 
