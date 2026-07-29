@@ -964,6 +964,7 @@ class MagbasaContent {
           'Intultuloy ni Milio ti kanayon nga inna panagsepilio.',
         ],
         'image': 'assets/images/kwento3.png',
+        'audioPath': 'mabasa_sfx/Ni milio a manag sepelio.mp3',
       },
       'ni_neneng': {
         'title': 'Ni Neneng a Dina Kayat ti Nateng',
@@ -977,6 +978,7 @@ class MagbasaContent {
           'Manipud idin, kanayonen nga agsidsida ni Neneng iti nateng.',
         ],
         'image': 'assets/images/kwento4.png',
+        'audioPath': 'mabasa_sfx/Ni Neneng a dina kayat ag sida iti nateng.mp3',
       },
       'ni_kikay': {
         'title': 'Ni Kikay a di Agsagsaysay',
