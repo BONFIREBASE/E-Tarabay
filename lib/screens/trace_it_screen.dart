@@ -131,10 +131,9 @@ class _TracePainter extends CustomPainter {
     );
     canvas.drawParagraph(outlinePara, Offset(0, textOffsetY));
 
-    // 3. Per-letter start marker: map the letter's real stroke-start (and
-    //    direction) from the guide data onto the rendered glyph box.
-    final valid =
-        guidePoints.where((p) => !p.dx.isNaN && !p.dy.isNaN).toList();
+    // 3. Per-stroke start markers: split guidePoints by NaN into distinct strokes,
+    //    and render numbered badge (1, 2, 3...) + direction arrow for each stroke.
+    final valid = guidePoints.where((p) => !p.dx.isNaN && !p.dy.isNaN).toList();
     if (valid.isNotEmpty) {
       double minX = valid.first.dx, maxX = valid.first.dx;
       double minY = valid.first.dy, maxY = valid.first.dy;
@@ -146,26 +145,46 @@ class _TracePainter extends CustomPainter {
       }
       final gw = (maxX - minX).abs() < 1 ? 1.0 : (maxX - minX);
       final gh = (maxY - minY).abs() < 1 ? 1.0 : (maxY - minY);
-      final p0 = valid.first;
-      final nx = ((p0.dx - minX) / gw).clamp(0.0, 1.0);
-      final ny = ((p0.dy - minY) / gh).clamp(0.0, 1.0);
 
-      // Approximate the glyph's visual box within the paragraph.
       final glyphTop = textOffsetY + fillPara.height * 0.16;
       final glyphH = fillPara.height * 0.70;
-      final at = Offset(glyphLeft + nx * glyphWidth, glyphTop + ny * glyphH);
 
-      // Stroke direction from the first segment.
-      double angle = math.pi / 2; // default: downward
-      if (valid.length > 1) {
-        final p1 = valid[1];
-        angle = math.atan2(p1.dy - p0.dy, p1.dx - p0.dx);
+      // Group guidePoints into stroke sub-lists
+      final List<List<Offset>> strokeLists = [];
+      List<Offset> currentStroke = [];
+      for (final p in guidePoints) {
+        if (p.dx.isNaN || p.dy.isNaN) {
+          if (currentStroke.isNotEmpty) {
+            strokeLists.add(List.from(currentStroke));
+            currentStroke.clear();
+          }
+        } else {
+          currentStroke.add(p);
+        }
       }
-      _drawStartMarker(canvas, at, angle);
+      if (currentStroke.isNotEmpty) {
+        strokeLists.add(currentStroke);
+      }
+
+      for (int i = 0; i < strokeLists.length; i++) {
+        final strokePts = strokeLists[i];
+        if (strokePts.isEmpty) continue;
+        final p0 = strokePts.first;
+        final nx = ((p0.dx - minX) / gw).clamp(0.0, 1.0);
+        final ny = ((p0.dy - minY) / gh).clamp(0.0, 1.0);
+        final at = Offset(glyphLeft + nx * glyphWidth, glyphTop + ny * glyphH);
+
+        double angle = math.pi / 2;
+        if (strokePts.length > 1) {
+          final p1 = strokePts[1];
+          angle = math.atan2(p1.dy - p0.dy, p1.dx - p0.dx);
+        }
+        _drawStartMarker(canvas, at, angle, strokeNumber: i + 1);
+      }
     }
   }
 
-  void _drawStartMarker(Canvas canvas, Offset at, double angle) {
+  void _drawStartMarker(Canvas canvas, Offset at, double angle, {int strokeNumber = 1}) {
     final pulse = guideProgress != null && guideProgress! >= 0
         ? (0.85 + 0.15 * math.sin(guideProgress! * math.pi * 2))
         : 1.0;
@@ -176,7 +195,7 @@ class _TracePainter extends CustomPainter {
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
 
-    // Direction arrow pointing the way the first stroke goes.
+    // Direction arrow pointing the way the stroke goes.
     final dir = Offset(math.cos(angle), math.sin(angle));
     final base = at + dir * 15;
     final tip = at + dir * 30;
@@ -188,14 +207,14 @@ class _TracePainter extends CustomPainter {
     canvas.drawLine(tip, head1, arrowPaint);
     canvas.drawLine(tip, head2, arrowPaint);
 
-    // Start dot with a "1".
+    // Start dot badge with stroke number (1, 2, 3...)
     canvas.drawCircle(
         at, 14 * pulse, Paint()..color = Colors.green.withOpacity(0.25));
     canvas.drawCircle(at, 9, Paint()..color = const Color(0xFF2E7D32));
     final tp = TextPainter(
-      text: const TextSpan(
-        text: '1',
-        style: TextStyle(
+      text: TextSpan(
+        text: '$strokeNumber',
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.bold,

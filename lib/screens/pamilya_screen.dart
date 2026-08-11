@@ -161,6 +161,14 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   List<Map<String, dynamic>> get _pamilyaLevel3Games =>
       PamilyaContent.getPamilyaLevel3Games(_currentLang);
 
+  // ── Pamilya Level 4: Family Tree ───────────────────────────────────────────
+  List<Map<String, dynamic>> get _pamilyaLevel4Games =>
+      PamilyaContent.getPamilyaLevel4Games(_currentLang);
+
+  // ── Pamilya Level 5: Our Home ──────────────────────────────────────────────
+  List<Map<String, dynamic>> get _pamilyaLevel5Games =>
+      PamilyaContent.getPamilyaLevel5Games(_currentLang);
+
   // ── Family Tree ────────────────────────────────────────────────────────────
   Map<String, dynamic> get _familyTreeData =>
       PamilyaContent.getFamilyTreeData(_currentLang);
@@ -292,9 +300,9 @@ class _PamilyaScreenState extends State<PamilyaScreen>
         case 2:
           return _pamilyaLevel3Games;
         case 3:
-          return _pamilyaLevel1Games;
+          return _pamilyaLevel4Games;
         case 4:
-          return _pamilyaLevel1Games;
+          return _pamilyaLevel5Games;
         default:
           return _pamilyaLevel1Games;
       }
@@ -306,10 +314,6 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     if (_wrongAttempts == 1) return 2;
     return 1;
   }
-
-  double get _levelProgress => _currentGames.isEmpty
-      ? 0
-      : (_currentGameIndex + 1) / _currentGames.length;
 
   String get _currentMainTitle =>
       _mainCategories[_selectedMainCategory]['title'];

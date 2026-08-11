@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import '../utils/constants.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
@@ -13,6 +14,56 @@ class StudentDetailScreen extends StatelessWidget {
     required this.studentName,
     required this.studentData,
   });
+
+  Future<void> _confirmResetActivity(BuildContext context) async {
+    final studentId = (studentData['id'] ?? studentData['studentId'] ?? '').toString();
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(LucideIcons.rotate_ccw, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('Reset Activity', style: TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to reset all activity progress for $studentName? This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Reset Activity'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && context.mounted) {
+      final auth = AuthService();
+      final success = await auth.resetStudentActivityProgress(studentId);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success ? 'Activity progress reset successfully.' : 'Failed to reset progress.'),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
+        );
+        if (success) {
+          Navigator.pop(context);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +104,13 @@ class StudentDetailScreen extends StatelessWidget {
                 fontSize: 16)),
         backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.rotate_ccw, color: Colors.white),
+            tooltip: 'Reset Activity',
+            onPressed: () => _confirmResetActivity(context),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -182,6 +240,29 @@ class StudentDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _buildArtworksGallery(context, creations),
+            const SizedBox(height: 32),
+
+            // Reset Activity Button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.orange.shade800,
+                  side: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                icon: const Icon(LucideIcons.rotate_ccw),
+                label: const Text(
+                  'Reset Student Activity Progress',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () => _confirmResetActivity(context),
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

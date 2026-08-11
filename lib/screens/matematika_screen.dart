@@ -961,6 +961,13 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
   void _handlePuzzleTap(int index) {
     if (_isPuzzleSolved) return;
+    final correct = List<int>.from(_currentGame['correct'] as List<dynamic>);
+
+    // Requirement 10: Once a number is green (correct position), lock it in place so it cannot be moved
+    if (_puzzleNumbers[index] == correct[index]) {
+      _showFeedback('🔒 Tamang pwesto na! Hindi na pwedeng ilipat.', Colors.green);
+      return;
+    }
 
     if (_puzzleSelectedIndex == null) {
       setState(() => _puzzleSelectedIndex = index);
@@ -979,7 +986,6 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     });
     HapticFeedback.lightImpact();
 
-    final correct = List<int>.from(_currentGame['correct'] as List<dynamic>);
     if (_puzzleNumbers.join() == correct.join()) {
       setState(() => _isPuzzleSolved = true);
       Future.delayed(const Duration(milliseconds: 450), _onCorrect);

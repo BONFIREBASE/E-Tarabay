@@ -759,13 +759,29 @@ class _KaraokePlayerScreenState extends State<KaraokePlayerScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // Replay/Repeat
+        IconButton(
+          onPressed: () {
+            setState(() {
+              _currentLineIndex = 0;
+              _currentPositionMs = 0;
+            });
+            _audioPlayer.seek(Duration.zero);
+            if (!_isPlaying) _togglePlay();
+          },
+          icon: const Icon(LucideIcons.rotate_ccw, size: 30),
+          color: Colors.amber,
+          tooltip: 'Replay Song',
+        ),
+        const SizedBox(width: 16),
+
         // Previous line
         IconButton(
           onPressed: () => _seekToLine(_currentLineIndex - 1),
           icon: const Icon(LucideIcons.skip_back, size: 36),
           color: Colors.white.withOpacity(0.7),
         ),
-        const SizedBox(width: 20),
+        const SizedBox(width: 16),
 
         // Play/Pause
         GestureDetector(
@@ -794,7 +810,7 @@ class _KaraokePlayerScreenState extends State<KaraokePlayerScreen>
             ),
           ),
         ),
-        const SizedBox(width: 20),
+        const SizedBox(width: 16),
 
         // Next line
         IconButton(

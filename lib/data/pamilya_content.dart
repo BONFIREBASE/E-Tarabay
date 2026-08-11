@@ -1586,4 +1586,326 @@ class PamilyaContent {
       },
     ],
   };
+
+  // ── Pamilya Level 4: Family Tree (Puno ng Pamilya) ────────────────────
+  static List<Map<String, dynamic>> getPamilyaLevel4Games(String lang) {
+    return _pamilyaLevel4Games[lang] ?? _pamilyaLevel4Games['fil']!;
+  }
+
+  static const Map<String, List<Map<String, dynamic>>> _pamilyaLevel4Games = {
+    'en': [
+      {
+        'id': 'tree_1',
+        'question': 'Who are the parents of your Father or Mother?',
+        'choices': ['Grandfather and Grandmother', 'Uncles and Aunts', 'Siblings', 'Cousins'],
+        'correct': 0,
+        'explanation': 'Correct! Grandparents are the parents of our parents.'
+      },
+      {
+        'id': 'tree_2',
+        'question': 'Who is the youngest sibling in the family?',
+        'choices': ['Older Brother', 'Older Sister', 'Baby / Youngest', 'Grandmother'],
+        'correct': 2,
+        'explanation': 'Correct! The baby or youngest is the youngest member among siblings.'
+      },
+      {
+        'id': 'tree_3',
+        'question': 'What do you call an older brother in Tagalog/Filipino?',
+        'choices': ['Ate', 'Kuya', 'Bunso', 'Lolo'],
+        'correct': 1,
+        'explanation': 'Correct! Kuya is the term for an older brother.'
+      },
+      {
+        'id': 'tree_4',
+        'question': 'What do you call an older sister in Tagalog/Filipino?',
+        'choices': ['Kuya', 'Ate', 'Bunso', 'Lola'],
+        'correct': 1,
+        'explanation': 'Correct! Ate is the term for an older sister.'
+      },
+      {
+        'id': 'tree_5',
+        'question': 'Who guides and takes care of the children at home?',
+        'choices': ['Father and Mother', 'Neighbors', 'Strangers', 'Only pets'],
+        'correct': 0,
+        'explanation': 'Correct! Father and Mother guide and love their children.'
+      },
+      {
+        'id': 'tree_6',
+        'question': 'What chart shows family relationships across generations?',
+        'choices': ['Family Tree', 'Shopping List', 'Calendar', 'Weather Chart'],
+        'correct': 0,
+        'explanation': 'Correct! A Family Tree illustrates generations of a family.'
+      },
+      {
+        'id': 'tree_7',
+        'question': 'How should family members treat each other?',
+        'choices': ['With love and respect', 'With fighting', 'By ignoring each other', 'Shouting'],
+        'correct': 0,
+        'explanation': 'Correct! Loving and respecting each other makes a happy family.'
+      },
+    ],
+    'fil': [
+      {
+        'id': 'tree_1',
+        'question': 'Sino ang mga magulang ni Tatay o Nanay?',
+        'choices': ['Lolo at Lola', 'Tito at Tita', 'Mga Kapatid', 'Mga Pinsan'],
+        'correct': 0,
+        'explanation': 'Tama! Ang Lolo at Lola ang mga magulang ng ating magulang.'
+      },
+      {
+        'id': 'tree_2',
+        'question': 'Sino ang pinakabatang kapatid sa pamilya?',
+        'choices': ['Kuya', 'Ate', 'Bunso', 'Lola'],
+        'correct': 2,
+        'explanation': 'Tama! Ang bunso ang pinakabata sa mga magkakapatid.'
+      },
+      {
+        'id': 'tree_3',
+        'question': 'Ano ang tawag sa nakatatandang kapatid na lalaki?',
+        'choices': ['Ate', 'Kuya', 'Bunso', 'Lolo'],
+        'correct': 1,
+        'explanation': 'Tama! Kuya ang tawag sa nakatatandang kapatid na lalaki.'
+      },
+      {
+        'id': 'tree_4',
+        'question': 'Ano ang tawag sa nakatatandang kapatid na babae?',
+        'choices': ['Kuya', 'Ate', 'Bunso', 'Lola'],
+        'correct': 1,
+        'explanation': 'Tama! Ate ang tawag sa nakatatandang kapatid na babae.'
+      },
+      {
+        'id': 'tree_5',
+        'question': 'Sino ang nag-aaruga at nagmamahal sa mga anak sa tahanan?',
+        'choices': ['Tatay at Nanay', 'Mga kapitbahay', 'Mga estranghero', 'Alagang hayop'],
+        'correct': 0,
+        'explanation': 'Tama! Ang Tatay at Nanay ang nagmamahal at nag-aalaga sa anak.'
+      },
+      {
+        'id': 'tree_6',
+        'question': 'Ano ang tawag sa tsart na nagpapakita ng ugnayan ng pamilya?',
+        'choices': ['Puno ng Pamilya (Family Tree)', 'Listahan ng Paninda', 'Kalendaryo', 'Orasan'],
+        'correct': 0,
+        'explanation': 'Tama! Ang Puno ng Pamilya ay nagpapakita ng salinlahi ng pamilya.'
+      },
+      {
+        'id': 'tree_7',
+        'question': 'Paano dapat tratuhin ang bawat kasapi ng pamilya?',
+        'choices': ['Magmahalan at magrespetuhan', 'Mag-away araw-araw', 'Magdedmahan', 'Magsigawan'],
+        'correct': 0,
+        'explanation': 'Tama! Ang pagmamahalan at pagrespeto ang pundasyon ng pamilya.'
+      },
+    ],
+    'ilo': [
+      {
+        'id': 'tree_1',
+        'question': 'Sino dagiti nagannak ni Amang wenno Nanang?',
+        'choices': ['Lelong ken Leling', 'Tito ken Tita', 'Dagiti Kabsat', 'Dagiti Pinsan'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Ni Lelong ken Leling dagiti nagannak ti nagannaktayo.'
+      },
+      {
+        'id': 'tree_2',
+        'question': 'Sino ti kaungpusan a kabsat iti pamilya?',
+        'choices': ['Manong', 'Manang', 'Kaungpus / Bunso', 'Leling'],
+        'correct': 2,
+        'explanation': 'Nalinteg! Ti kaungpus ket isu ti ubbing iti magkakabsat.'
+      },
+      {
+        'id': 'tree_3',
+        'question': 'Ania ti awag iti lakay a kabsat nga kabaatan?',
+        'choices': ['Manang', 'Manong', 'Kaungpus', 'Lelong'],
+        'correct': 1,
+        'explanation': 'Nalinteg! Manong ti awag iti lakay nga kabsat.'
+      },
+      {
+        'id': 'tree_4',
+        'question': 'Ania ti awag iti babai a kabsat nga kabaatan?',
+        'choices': ['Manong', 'Manang', 'Kaungpus', 'Leling'],
+        'correct': 1,
+        'explanation': 'Nalinteg! Manang ti awag iti babai nga kabsat.'
+      },
+      {
+        'id': 'tree_5',
+        'question': 'Sino ti mag-alagad ken mag-ayat kadagiti ubbing iti balay?',
+        'choices': ['Amang ken Nanang', 'Dagiti kabsat ti balay', 'Dagiti ganggannaet', 'Awan'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Ni Amang ken Nanang ti mag-ayat ken mag-alagad.'
+      },
+      {
+        'id': 'tree_6',
+        'question': 'Ania ti tsart a mag-pakita ti ugnayan ti pamilya?',
+        'choices': ['Punuan ti Pamilya', 'Lista ti laklako', 'Kalendaryo', 'Orasan'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Ti Punuan ti Pamilya ket isu ti tsart ti salinlahi.'
+      },
+      {
+        'id': 'tree_7',
+        'question': 'Kasano ti pangtrato kadagiti miyembro ti pamilya?',
+        'choices': ['Ag-ayatan ken ag-respeto', 'Ag-apa inaldaw', 'Madi nga agsao', 'Ag-pawayway'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Ti ag-ayatan ken ag-respeto ti mangpainget iti pamilya.'
+      },
+    ],
+  };
+
+  // ── Pamilya Level 5: Our Home (Ang Aming Tahanan) ───────────────────────
+  static List<Map<String, dynamic>> getPamilyaLevel5Games(String lang) {
+    return _pamilyaLevel5Games[lang] ?? _pamilyaLevel5Games['fil']!;
+  }
+
+  static const Map<String, List<Map<String, dynamic>>> _pamilyaLevel5Games = {
+    'en': [
+      {
+        'id': 'home_1',
+        'question': 'In which part of the house do we cook and prepare food?',
+        'choices': ['Kitchen', 'Bedroom', 'Bathroom', 'Garage'],
+        'correct': 0,
+        'explanation': 'Correct! The kitchen is where delicious meals are prepared.'
+      },
+      {
+        'id': 'home_2',
+        'question': 'In which part of the house do we sleep and rest?',
+        'choices': ['Bedroom', 'Kitchen', 'Yard', 'Dining room'],
+        'correct': 0,
+        'explanation': 'Correct! Bedrooms provide rest and peaceful sleep.'
+      },
+      {
+        'id': 'home_3',
+        'question': 'Where does the family gather to talk and watch TV?',
+        'choices': ['Living Room (Sala)', 'Bathroom', 'Storage room', 'Kitchen'],
+        'correct': 0,
+        'explanation': 'Correct! The living room is for family relaxation and gathering.'
+      },
+      {
+        'id': 'home_4',
+        'question': 'Where do we take a bath and wash up?',
+        'choices': ['Bathroom', 'Living Room', 'Garden', 'Bedroom'],
+        'correct': 0,
+        'explanation': 'Correct! We maintain hygiene in the bathroom.'
+      },
+      {
+        'id': 'home_5',
+        'question': 'Where can children safely play outdoors near home?',
+        'choices': ['Yard / Garden', 'Busy road', 'Kitchen stove', 'Roof'],
+        'correct': 0,
+        'explanation': 'Correct! The yard or garden is safe for outdoor fun.'
+      },
+      {
+        'id': 'home_6',
+        'question': 'Why is our home very important to us?',
+        'choices': ['It protects and shelters our family with love', 'It is just a store', 'It is noisy', 'No reason'],
+        'correct': 0,
+        'explanation': 'Correct! Home is our safe haven filled with family love.'
+      },
+      {
+        'id': 'home_7',
+        'question': 'How can we help keep our home clean and neat?',
+        'choices': ['Help sweep and organize toys', 'Throw trash anywhere', 'Break things', 'Make a mess'],
+        'correct': 0,
+        'explanation': 'Correct! Helping clean keeps our home comfortable for everyone.'
+      },
+    ],
+    'fil': [
+      {
+        'id': 'home_1',
+        'question': 'Saang bahagi ng tahanan tayo nagluluto at naghahanda ng pagkain?',
+        'choices': ['Kusina', 'Kwarto', 'Banyo', 'Garahi'],
+        'correct': 0,
+        'explanation': 'Tama! Sa kusina inihahanda ang masasarap na pagkain.'
+      },
+      {
+        'id': 'home_2',
+        'question': 'Saang bahagi ng tahanan tayo natutulog at nagpapahinga?',
+        'choices': ['Kwarto', 'Kusina', 'Bakuran', 'Kainan'],
+        'correct': 0,
+        'explanation': 'Tama! Sa kwarto tayo nagpapahinga at natutulog.'
+      },
+      {
+        'id': 'home_3',
+        'question': 'Saang bahagi ng tahanan nagtitipon ang pamilya para magkuwentuhan at manood?',
+        'choices': ['Sala', 'Banyo', 'Bagsakan', 'Kusina'],
+        'correct': 0,
+        'explanation': 'Tama! Ang sala ang lugar ng pagtitipon ng buong pamilya.'
+      },
+      {
+        'id': 'home_4',
+        'question': 'Saang bahagi ng tahanan tayo naliligo at naglilinis ng katawan?',
+        'choices': ['Banyo', 'Sala', 'Halamanan', 'Kwarto'],
+        'correct': 0,
+        'explanation': 'Tama! Sa banyo tayo naliligo para maging malinis.'
+      },
+      {
+        'id': 'home_5',
+        'question': 'Saang bahagi ng tahanan pwedeng maglaro nang ligtas sa labas?',
+        'choices': ['Bakuran', 'Kalsada', 'Kalan sa kusina', 'Bubong'],
+        'correct': 0,
+        'explanation': 'Tama! Sa bakuran pwedeng maglaro nang ligtas at presko.'
+      },
+      {
+        'id': 'home_6',
+        'question': 'Bakit mahalaga ang ating tahanan?',
+        'choices': ['Nagtataguyod ng proteksyon at pagmamahal sa pamilya', 'Tindahan lamang', 'Maingay na lugar', 'Walang dahilan'],
+        'correct': 0,
+        'explanation': 'Tama! Ang tahanan ay kanlungan ng ating pamilya.'
+      },
+      {
+        'id': 'home_7',
+        'question': 'Paano natin mapapanatiling malinis at maayos ang tahanan?',
+        'choices': ['Magtulong sa pag-aayos at pagwawalis', 'Magkalat sa sahig', 'Manira ng gamit', 'Iwanan ang laruan sa daan'],
+        'correct': 0,
+        'explanation': 'Tama! Ang pagtulong sa paglilinis ay nagpapanatili ng ganda ng bahay.'
+      },
+    ],
+    'ilo': [
+      {
+        'id': 'home_1',
+        'question': 'Sadino ti paglutoan ken pag-sagana iti kanen?',
+        'choices': ['Kusina', 'Kuarto', 'Banio', 'Garahi'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Iti kusina ti pagsagana iti kanen.'
+      },
+      {
+        'id': 'home_2',
+        'question': 'Sadino ti pag-atiddog ken pag-turog?',
+        'choices': ['Kuarto', 'Kusina', 'Bakir', 'Pagan-kanan'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Iti kuarto ti pagturog ken pagpahingaan.'
+      },
+      {
+        'id': 'home_3',
+        'question': 'Sadino ti pagtipunan ti pamilya nga agkukuwentuan ken mangar-ay iti TV?',
+        'choices': ['Sala', 'Banio', 'Bodega', 'Kusina'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Iti sala ti pagtipunan a sangsangkamaysa.'
+      },
+      {
+        'id': 'home_4',
+        'question': 'Sadino ti pag-ligoan ken pag-linabas ti bagyo?',
+        'choices': ['Banio', 'Sala', 'Halamanan', 'Kuarto'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Iti banio ti pagligoan tapno nadalus.'
+      },
+      {
+        'id': 'home_5',
+        'question': 'Sadino ti mabalin nga pag-laruan a natalged iti balay?',
+        'choices': ['Bakir', 'Dalan ti sasakyan', 'Dapogan', 'Bubong'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Iti bakir ti natalged a paglaruan.'
+      },
+      {
+        'id': 'home_6',
+        'question': 'Apay nga napateg ti balaymi?',
+        'choices': ['Mangprotekta ken mangted iti ayat iti pamilya', 'Tiendaan laeng', 'Naringgor', 'Awan serserbi'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Ti balay ket dalan ti proteksyon ken ayat.'
+      },
+      {
+        'id': 'home_7',
+        'question': 'Kasano ti pangalagad tapno nadalus ti balaymi?',
+        'choices': ['Ag-tulong nga agwalis ken ag-urnos', 'Ag-kalat iti dalan', 'Mangringgor iti gamit', 'Baybay-an ti laruan'],
+        'correct': 0,
+        'explanation': 'Nalinteg! Ti agtulong nga aglinis ti mangpabaro iti balay.'
+      },
+    ],
+  };
 }

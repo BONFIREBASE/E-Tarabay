@@ -22,6 +22,19 @@ class AppColors {
   static const Color body = Color(0xFFA0D6B4);
 }
 
+class AppStyles {
+  static const TextStyle instructionText = TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textDark,
+  );
+  static const TextStyle instructionHeader = TextStyle(
+    fontSize: 26,
+    fontWeight: FontWeight.w900,
+    color: AppColors.textDark,
+  );
+}
+
 /// Maps an avatar preset key (e.g. 'boy1', 'girl2', 'female') to the matching
 /// character image so kids can easily tell male from female.
 String avatarAssetForPreset(String preset) {

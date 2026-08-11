@@ -863,7 +863,7 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get lastName => 'Apelyido';
 
   @override
-  String get lRN => 'LRN (Password)';
+  String get lRN => 'Student Number (Password)';
 
   @override
   String get usernameLabel => 'Username (Auto-generated)';
@@ -887,20 +887,20 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get confirmLogout => 'Sigurado ka a kayatmo ti rumwar?';
 
   @override
-  String get verifyLRN => 'I-verify ti LRN';
+  String get verifyLRN => 'I-verify ti Student Number';
 
   @override
-  String get enterLRN => 'Ikabil ti LRN tapno agtuloy';
+  String get enterLRN => 'Ikabil ti Student Number tapno agtuloy';
 
   @override
-  String get invalidLRN => 'Saan nga kusto a LRN. Padasem manen.';
+  String get invalidLRN => 'Saan nga kusto a Student Number. Padasem manen.';
 
   @override
   String get password => 'Password';
 
   @override
   String get enrollmentInfo =>
-      'Ikkan ti username ken LRN iti nagannak/estudiante para iti login.';
+      'Ikkan ti username ken Student Number iti nagannak/estudiante para iti login.';
 
   @override
   String get fillAllFields => 'Kargaan amin nga fields.';
@@ -959,7 +959,7 @@ class AppLocalizationsIlo extends AppLocalizations {
   String get fullName => 'Kompleto nga Nagan';
 
   @override
-  String get lRNPassword => 'LRN (Password)';
+  String get lRNPassword => 'Student Number (Password)';
 
   @override
   String get confirmRemoveStudent =>

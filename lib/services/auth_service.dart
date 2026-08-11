@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'dart:math';
 import 'package:crypto/crypto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -247,7 +248,7 @@ class AuthService {
       return {
         'status': 'Error',
         'message':
-            'The LRN (password) you entered is incorrect. Please try again.',
+            'The Student Number (password) you entered is incorrect. Please try again.',
       };
     } catch (e) {
       debugPrint('Login error: $e');
@@ -264,7 +265,7 @@ class AuthService {
   static Map<String, dynamic> validateDcPasswordFormat(String password) {
     final trimmed = password.trim();
     if (trimmed.isEmpty) {
-      return {'isValid': false, 'message': 'Password (LRN) cannot be empty.'};
+      return {'isValid': false, 'message': 'Password (Student Number) cannot be empty.'};
     }
 
     // Match DC-XXXX-XXXX format (e.g. DC-2026-0001)
@@ -305,7 +306,7 @@ class AuthService {
     String? avatar,
   }) async {
     try {
-      // Check if LRN already exists to prevent duplicates (compare hashes)
+      // Check if Student Number already exists to prevent duplicates (compare hashes)
       final lrnHash = hashLrn(lrn);
       final existingCheck = await _db
           .collection('students')
@@ -315,7 +316,7 @@ class AuthService {
       if (existingCheck.docs.isNotEmpty) {
         return {
           'status': 'Error',
-          'message': 'A student with this LRN is already enrolled.',
+          'message': 'A student with this Student Number is already enrolled.',
         };
       }
 
@@ -572,6 +573,45 @@ class AuthService {
         'status': 'Error',
         'message': 'Failed to reset credentials. Please try again.',
       };
+    }
+  }
+
+  /// Reset student activity progress
+  Future<bool> resetStudentActivityProgress(String studentId) async {
+    try {
+      if (studentId.isNotEmpty) {
+        await _db.collection('students').doc(studentId).update({
+          'progress': {
+            'overallProgress': 0.0,
+            'totalCompleted': 0,
+            'totalActivities': 145,
+            'magbasa': {'totalCompleted': 0, 'totalActivities': 23},
+            'kulay': {'totalCompleted': 0, 'totalActivities': 4},
+            'traceit': {'totalCompleted': 0, 'totalActivities': 62},
+            'matematika': {'gamesCompleted': 0, 'totalGames': 31, 'totalScore': 0},
+            'pamilya': {'gamesCompleted': 0, 'totalGames': 25, 'totalScore': 0},
+          },
+          'profile.stars': 0,
+          'profile.lessonsCompleted': 0,
+          'creations': [],
+        });
+      }
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys().where((k) =>
+        k.startsWith('sundan_') ||
+        k.startsWith('kulay_') ||
+        k.startsWith('matematika_') ||
+        k.startsWith('pamilya_') ||
+        k.startsWith('magbasa_') ||
+        k.startsWith('quiz_')
+      ).toList();
+      for (final k in keys) {
+        await prefs.remove(k);
+      }
+      return true;
+    } catch (e) {
+      debugPrint('Error resetting activity progress: $e');
+      return false;
     }
   }
 }

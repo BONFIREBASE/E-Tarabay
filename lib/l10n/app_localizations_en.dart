@@ -860,7 +860,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lastName => 'Last Name';
 
   @override
-  String get lRN => 'Student ID (Password)';
+  String get lRN => 'Student Number (Password)';
 
   @override
   String get usernameLabel => 'Username (Auto-generated)';
@@ -884,20 +884,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmLogout => 'Are you sure you want to log out?';
 
   @override
-  String get verifyLRN => 'Verify Student ID';
+  String get verifyLRN => 'Verify Student Number';
 
   @override
-  String get enterLRN => 'Please enter your Student ID to proceed';
+  String get enterLRN => 'Please enter your Student Number to proceed';
 
   @override
-  String get invalidLRN => 'Invalid Student ID. Please try again.';
+  String get invalidLRN => 'Invalid Student Number. Please try again.';
 
   @override
   String get password => 'Password';
 
   @override
   String get enrollmentInfo =>
-      'Give the username and Student ID to the parent/student for login.';
+      'Give the username and Student Number to the parent/student for login.';
 
   @override
   String get fillAllFields => 'Please fill in all fields.';
@@ -955,7 +955,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullName => 'Full Name';
 
   @override
-  String get lRNPassword => 'LRN (Password)';
+  String get lRNPassword => 'Student Number (Password)';
 
   @override
   String get confirmRemoveStudent =>

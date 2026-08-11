@@ -174,7 +174,7 @@ class _ParentAccountScreenState extends State<ParentAccountScreen> {
           obscureText: true,
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
-            labelText: "Confirm child's LRN",
+            labelText: "Confirm child's Student Number",
             prefixIcon: const Icon(LucideIcons.key_round, size: 20),
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -204,7 +204,7 @@ class _ParentAccountScreenState extends State<ParentAccountScreen> {
         await _authService.verifyStudentPassword(_studentId!, password);
     if (!valid) {
       if (!mounted) return;
-      _snack('LRN is incorrect.', LucideIcons.circle_alert, Colors.red);
+      _snack('Student Number is incorrect.', LucideIcons.circle_alert, Colors.red);
       return;
     }
 
@@ -278,7 +278,7 @@ class _ParentAccountScreenState extends State<ParentAccountScreen> {
                           obscureText: _obscure,
                           keyboardType: TextInputType.number,
                           decoration: _deco(
-                            'New password (LRN)',
+                            'New password (Student Number)',
                             LucideIcons.lock,
                             suffix: IconButton(
                               icon: Icon(
@@ -351,7 +351,7 @@ class _ParentAccountScreenState extends State<ParentAccountScreen> {
                             ),
                             title: const Text('Fingerprint / Face login'),
                             subtitle: const Text(
-                                'Let your child sign in without typing the LRN'),
+                                'Let your child sign in without typing the Student Number'),
                             value: _biometricEnabled,
                             onChanged: _toggleBiometric,
                           ),

@@ -1735,7 +1735,7 @@ abstract class AppLocalizations {
   /// No description provided for @lRN.
   ///
   /// In en, this message translates to:
-  /// **'Student ID (Password)'**
+  /// **'Student Number (Password)'**
   String get lRN;
 
   /// No description provided for @usernameLabel.
@@ -1783,19 +1783,19 @@ abstract class AppLocalizations {
   /// No description provided for @verifyLRN.
   ///
   /// In en, this message translates to:
-  /// **'Verify Student ID'**
+  /// **'Verify Student Number'**
   String get verifyLRN;
 
   /// No description provided for @enterLRN.
   ///
   /// In en, this message translates to:
-  /// **'Please enter your Student ID to proceed'**
+  /// **'Please enter your Student Number to proceed'**
   String get enterLRN;
 
   /// No description provided for @invalidLRN.
   ///
   /// In en, this message translates to:
-  /// **'Invalid Student ID. Please try again.'**
+  /// **'Invalid Student Number. Please try again.'**
   String get invalidLRN;
 
   /// No description provided for @password.
@@ -1807,7 +1807,7 @@ abstract class AppLocalizations {
   /// No description provided for @enrollmentInfo.
   ///
   /// In en, this message translates to:
-  /// **'Give the username and Student ID to the parent/student for login.'**
+  /// **'Give the username and Student Number to the parent/student for login.'**
   String get enrollmentInfo;
 
   /// No description provided for @fillAllFields.
@@ -1915,7 +1915,7 @@ abstract class AppLocalizations {
   /// No description provided for @lRNPassword.
   ///
   /// In en, this message translates to:
-  /// **'LRN (Password)'**
+  /// **'Student Number (Password)'**
   String get lRNPassword;
 
   /// No description provided for @confirmRemoveStudent.

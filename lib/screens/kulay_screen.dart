@@ -454,11 +454,20 @@ class _KulayScreenState extends State<KulayScreen>
     return frame.image;
   }
 
-  String _autoSaveKey(String pageName) => 'kulay_autosave_$pageName';
+  String _autoSaveKey(String pageName) {
+    String studentId = 'guest';
+    try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      studentId = userProvider.userProfile?.lrn ?? 'guest';
+      if (studentId.isEmpty) studentId = 'guest';
+    } catch (_) {}
+    return 'kulay_autosave_${studentId}_$pageName';
+  }
 
   Future<String> _autoSaveImagePath(String pageName) async {
     final dir = await getApplicationDocumentsDirectory();
-    return '${dir.path}/kulay_autosave_$pageName.png';
+    final key = _autoSaveKey(pageName);
+    return '${dir.path}/$key.png';
   }
 
   Future<void> _autoSave() async {
@@ -1793,6 +1802,16 @@ class _KulayScreenState extends State<KulayScreen>
                                 spreadRadius: 1)
                           ]
                         : [],
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${i + 1}',
+                      style: TextStyle(
+                        color: (c.computeLuminance() > 0.5) ? Colors.black87 : Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: sel ? 15 : 12,
+                      ),
+                    ),
                   ),
                 ),
               );
