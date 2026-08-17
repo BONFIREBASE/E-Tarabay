@@ -579,6 +579,10 @@ class AuthService {
   /// Reset student activity progress
   Future<bool> resetStudentActivityProgress(String studentId) async {
     try {
+      if (studentId.trim().isEmpty) {
+        debugPrint('CRITICAL ERROR: resetStudentActivityProgress called with empty studentId!');
+        return false;
+      }
       if (studentId.isNotEmpty) {
         await _db.collection('students').doc(studentId).update({
           'progress': {
@@ -591,22 +595,54 @@ class AuthService {
             'matematika': {'gamesCompleted': 0, 'totalGames': 31, 'totalScore': 0},
             'pamilya': {'gamesCompleted': 0, 'totalGames': 25, 'totalScore': 0},
           },
+          'rawProgress': {},
           'profile.stars': 0,
           'profile.lessonsCompleted': 0,
+          'profile.achievements': {},
           'creations': [],
+          'coloring_creations': [],
+          'activities': {},
+          'lastResetAt': FieldValue.serverTimestamp(),
         });
       }
       final prefs = await SharedPreferences.getInstance();
-      final keys = prefs.getKeys().where((k) =>
-        k.startsWith('sundan_') ||
-        k.startsWith('kulay_') ||
-        k.startsWith('matematika_') ||
-        k.startsWith('pamilya_') ||
-        k.startsWith('magbasa_') ||
-        k.startsWith('quiz_')
-      ).toList();
-      for (final k in keys) {
-        await prefs.remove(k);
+      const keysToKeep = {
+        'has_seen_onboarding',
+        'notifications_enabled',
+        'sound_enabled',
+        'music_enabled',
+        'session_student_id',
+        'session_role',
+        'language_code',
+      };
+      final allKeys = prefs.getKeys();
+      for (final k in allKeys) {
+        if (!keysToKeep.contains(k)) {
+          if (k.startsWith('sundan_') ||
+              k.startsWith('traceit_') ||
+              k.startsWith('mat_') ||
+              k.startsWith('matematika_') ||
+              k.startsWith('pamilya_') ||
+              k.startsWith('kulay_') ||
+              k.startsWith('magbasa_') ||
+              k.startsWith('tula_') ||
+              k.startsWith('kwento_') ||
+              k.startsWith('kanta_') ||
+              k.startsWith('karaoke_') ||
+              k.startsWith('tandaan_') ||
+              k.startsWith('quiz_') ||
+              k.startsWith('progress_') ||
+              k.startsWith('level_') ||
+              k.startsWith('game_') ||
+              k.contains('_activity') ||
+              k.contains('_completed') ||
+              k.contains('_score') ||
+              k.contains('_stars') ||
+              k.contains('_attempts') ||
+              k.contains('_creations')) {
+            await prefs.remove(k);
+          }
+        }
       }
       return true;
     } catch (e) {
@@ -614,4 +650,99 @@ class AuthService {
       return false;
     }
   }
+
+  /// Reset specific activity categories for a student
+  Future<bool> resetStudentSpecificActivities(
+      String studentId, List<String> categories) async {
+    try {
+      if (studentId.trim().isEmpty || categories.isEmpty) return false;
+
+      final updates = <String, dynamic>{
+        'lastResetAt': FieldValue.serverTimestamp(),
+      };
+
+      for (final cat in categories) {
+        switch (cat) {
+          case 'matematika':
+            updates['progress.matematika'] = {
+              'gamesCompleted': 0,
+              'totalGames': 31,
+              'totalScore': 0
+            };
+            break;
+          case 'pamilya':
+            updates['progress.pamilya'] = {
+              'gamesCompleted': 0,
+              'totalGames': 25,
+              'totalScore': 0
+            };
+            break;
+          case 'magbasa':
+            updates['progress.magbasa'] = {
+              'totalCompleted': 0,
+              'totalActivities': 23
+            };
+            break;
+          case 'traceit':
+            updates['progress.traceit'] = {
+              'totalCompleted': 0,
+              'totalActivities': 62
+            };
+            break;
+          case 'kulay':
+            updates['progress.kulay'] = {
+              'totalCompleted': 0,
+              'totalActivities': 4
+            };
+            updates['creations'] = [];
+            updates['coloring_creations'] = [];
+            break;
+          case 'tandaan':
+            updates['activities.tandaan'] = {};
+            break;
+        }
+      }
+
+      await _db.collection('students').doc(studentId).update(updates);
+
+      // Local prefs cleanup for specified categories
+      final prefs = await SharedPreferences.getInstance();
+      final allKeys = prefs.getKeys();
+
+      for (final k in allKeys) {
+        bool shouldRemove = false;
+        for (final cat in categories) {
+          if (cat == 'matematika' &&
+              (k.startsWith('mat_') || k.startsWith('matematika_'))) {
+            shouldRemove = true;
+          } else if (cat == 'pamilya' && k.startsWith('pamilya_')) {
+            shouldRemove = true;
+          } else if (cat == 'tandaan' && k.startsWith('tandaan_')) {
+            shouldRemove = true;
+          } else if (cat == 'traceit' &&
+              (k.startsWith('sundan_') || k.startsWith('traceit_'))) {
+            shouldRemove = true;
+          } else if (cat == 'magbasa' &&
+              (k.startsWith('magbasa_') ||
+                  k.startsWith('tula_') ||
+                  k.startsWith('kwento_') ||
+                  k.startsWith('kanta_') ||
+                  k.startsWith('karaoke_'))) {
+            shouldRemove = true;
+          } else if (cat == 'kulay' &&
+              (k.startsWith('kulay_') || k.contains('_creations'))) {
+            shouldRemove = true;
+          }
+        }
+        if (shouldRemove) {
+          await prefs.remove(k);
+        }
+      }
+      return true;
+    } catch (e) {
+      debugPrint('Error resetting specific activities: $e');
+      return false;
+    }
+  }
 }
+

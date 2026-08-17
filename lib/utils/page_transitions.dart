@@ -79,6 +79,10 @@ extension PremiumNavigator on NavigatorState {
   Future<T?> pushFadeThrough<T>(Widget child) {
     return push(FadeThroughPageRoute<T>(child: child));
   }
+
+  Future<T?> pushReplacementFadeThrough<T>(Widget child) {
+    return pushReplacement(FadeThroughPageRoute<T>(child: child));
+  }
 }
 
 extension PremiumContext on BuildContext {
@@ -93,5 +97,10 @@ extension PremiumContext on BuildContext {
 
   Future<T?> pushFadeThrough<T>(Widget child) {
     return Navigator.of(this).push(FadeThroughPageRoute<T>(child: child));
+  }
+
+  Future<T?> pushReplacementFadeThrough<T>(Widget child) {
+    return Navigator.of(this)
+        .pushReplacement(FadeThroughPageRoute<T>(child: child));
   }
 }

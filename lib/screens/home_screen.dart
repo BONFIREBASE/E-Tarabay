@@ -144,19 +144,13 @@ class _HomeScreenState extends State<HomeScreen> {
         // Home - no navigation needed
         break;
       case 1:
-        context
-            .pushPremium(const LessonsScreen())
-            .then((_) => setState(() => _selectedIndex = 0));
+        context.pushReplacementFadeThrough(const LessonsScreen());
         break;
       case 2:
-        context
-            .pushPremium(const AwardsScreen())
-            .then((_) => setState(() => _selectedIndex = 0));
+        context.pushReplacementFadeThrough(const AwardsScreen());
         break;
       case 3:
-        context
-            .pushPremium(const SettingsScreen())
-            .then((_) => setState(() => _selectedIndex = 0));
+        context.pushReplacementFadeThrough(const SettingsScreen());
         break;
     }
   }
@@ -367,35 +361,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // Stats Row
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStatItem(
-                          '${stats['lessons']}',
-                          AppLocalizations.of(context)!.lessons,
-                          LucideIcons.book_open,
-                          AppColors.primary,
+                        Expanded(
+                          child: _buildStatItem(
+                            '${stats['lessons']}',
+                            AppLocalizations.of(context)!.lessons,
+                            LucideIcons.book_open,
+                            AppColors.primary,
+                          ),
                         ),
                         Container(
                           height: 20,
                           width: 1,
                           color: Colors.grey.shade300,
                         ),
-                        _buildStatItem(
-                          '${stats['stars']}',
-                          AppLocalizations.of(context)!.stars,
-                          Icons.star_rounded,
-                          const Color(0xFFFFB800),
+                        Expanded(
+                          child: _buildStatItem(
+                            '${stats['stars']}',
+                            AppLocalizations.of(context)!.stars,
+                            Icons.star_rounded,
+                            const Color(0xFFFFB800),
+                          ),
                         ),
                         Container(
                           height: 20,
                           width: 1,
                           color: Colors.grey.shade300,
                         ),
-                        _buildStatItem(
-                          '${stats['awards']}',
-                          AppLocalizations.of(context)!.awards,
-                          LucideIcons.trophy,
-                          AppColors.success,
+                        Expanded(
+                          child: _buildStatItem(
+                            '${stats['awards']}',
+                            AppLocalizations.of(context)!.awards,
+                            LucideIcons.trophy,
+                            AppColors.success,
+                          ),
                         ),
                       ],
                     ),
@@ -410,6 +409,39 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       final cardHeight = (constraints.maxHeight - 24) / 3;
+
+                      final allProgress = userProvider.getAllProgress();
+                      final pamilya = allProgress['pamilya'] as Map? ?? {};
+                      final pamilyaDone = pamilya['completedLevels'] ?? 0;
+                      final pamilyaTotal = pamilya['totalLevels'] ?? 5;
+                      final pamilyaBadge = pamilyaDone > 0
+                          ? '🏅 $pamilyaDone/$pamilyaTotal'
+                          : null;
+
+                      final mat = allProgress['matematika'] as Map? ?? {};
+                      final matDone = mat['gamesCompleted'] ?? 0;
+                      final matTotal = mat['totalGames'] ?? 31;
+                      final matBadge =
+                          matDone > 0 ? '⭐ $matDone/$matTotal' : null;
+
+                      final kulay = allProgress['kulay'] as Map? ?? {};
+                      final kulayDone = kulay['totalCompleted'] ?? 0;
+                      final kulayTotal = kulay['totalActivities'] ?? 9;
+                      final kulayBadge =
+                          kulayDone > 0 ? '🎨 $kulayDone/$kulayTotal' : null;
+
+                      final trace = allProgress['traceit'] as Map? ?? {};
+                      final traceDone = trace['totalCompleted'] ?? 0;
+                      final traceTotal = trace['totalActivities'] ?? 62;
+                      final traceBadge =
+                          traceDone > 0 ? '✏️ $traceDone/$traceTotal' : null;
+
+                      final magbasa = allProgress['magbasa'] as Map? ?? {};
+                      final magbasaDone = magbasa['totalCompleted'] ?? 0;
+                      final magbasaTotal = magbasa['totalActivities'] ?? 23;
+                      final magbasaBadge = magbasaDone > 0
+                          ? '📖 $magbasaDone/$magbasaTotal'
+                          : null;
 
                       return Column(
                         children: [
@@ -427,6 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .sundanMoKayaMo,
                                       imagePath: 'assets/images/card1.png',
                                       color: AppColors.numbers,
+                                      badgeText: matBadge,
                                       onTap: () => context.pushPremium(
                                         const MatematikaScreen(),
                                       ),
@@ -444,6 +477,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .atAkingPamilya,
                                       imagePath: 'assets/images/card2.png',
                                       color: AppColors.family,
+                                      badgeText: pamilyaBadge,
                                       onTap: () => context.pushPremium(
                                         const PamilyaScreen(),
                                       ),
@@ -468,6 +502,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .magkulayTayo,
                                       imagePath: 'assets/images/card3.png',
                                       color: AppColors.colors,
+                                      badgeText: kulayBadge,
                                       onTap: () => context.pushPremium(
                                         const KulayScreen(),
                                       ),
@@ -485,6 +520,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .traceItSubtitle,
                                       imagePath: 'assets/images/card4.png',
                                       color: AppColors.success,
+                                      badgeText: traceBadge,
                                       onTap: () => context.pushPremium(
                                         const TraceItScreen(),
                                       ),
@@ -509,6 +545,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           .alpabetoAtMgaSalita,
                                       imagePath: 'assets/images/card5.png',
                                       color: AppColors.alphabet,
+                                      badgeText: magbasaBadge,
                                       onTap: () => context.pushPremium(
                                         const MagbasaScreen(),
                                       ),
@@ -585,25 +622,37 @@ class _HomeScreenState extends State<HomeScreen> {
     Color color,
   ) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: color, size: 16),
         const SizedBox(width: 4),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                  maxLines: 1,
+                ),
               ),
-            ),
-            Text(
-              label.isNotEmpty ? label : '',
-              style: TextStyle(fontSize: 9, color: Colors.grey.shade500),
-            ),
-          ],
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label.isNotEmpty ? label : '',
+                  style: TextStyle(fontSize: 9, color: Colors.grey.shade500),
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -615,6 +664,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String imagePath,
     required Color color,
     required VoidCallback onTap,
+    String? badgeText,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -647,6 +697,34 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(4),
                       child: Image.asset(imagePath, fit: BoxFit.contain),
                     ),
+                    if (badgeText != null && badgeText.isNotEmpty)
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withOpacity(0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            badgeText,
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: color,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -666,16 +744,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             if (subtitle.isNotEmpty)
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 8.5,
-                  color: _darken(color, 0.15),
-                  fontWeight: FontWeight.w600,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 8.5,
+                    color: _darken(color, 0.15),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
           ],
         ),
@@ -689,6 +769,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color color,
     required Widget child,
     required VoidCallback onTap,
+    String? badgeText,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -713,7 +794,40 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: child,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    child,
+                    if (badgeText != null && badgeText.isNotEmpty)
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withOpacity(0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            badgeText,
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              color: color,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 6),
@@ -731,16 +845,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             if (subtitle.isNotEmpty)
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 8.5,
-                  color: _darken(color, 0.15),
-                  fontWeight: FontWeight.w600,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 8.5,
+                    color: _darken(color, 0.15),
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
           ],
         ),

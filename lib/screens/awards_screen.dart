@@ -10,6 +10,8 @@ import '../widgets/staggered_entrance.dart';
 import '../utils/page_transitions.dart';
 import 'lessons_screen.dart';
 import 'settings_screen.dart';
+import 'parents_lock_screen.dart';
+import 'home_screen.dart';
 
 class AwardsScreen extends StatelessWidget {
   const AwardsScreen({super.key});
@@ -30,21 +32,26 @@ class AwardsScreen extends StatelessWidget {
           if (index == 2) return;
           switch (index) {
             case 0:
-              Navigator.pop(context);
+              context.pushReplacementFadeThrough(const HomeScreen());
               break;
             case 1:
-              context.pushReplacementPremium(const LessonsScreen());
+              context.pushReplacementFadeThrough(const LessonsScreen());
               break;
             case 3:
-              context.pushReplacementPremium(const SettingsScreen());
+              context.pushReplacementFadeThrough(const SettingsScreen());
               break;
           }
+        },
+        centerIcon: LucideIcons.users,
+        centerLabel: loc.forParents,
+        onCenterTap: () {
+          context.pushPremium(const ParentsLockScreen());
         },
         items: [
           NavItemData(icon: LucideIcons.house, label: loc.home),
           NavItemData(icon: LucideIcons.book_open, label: loc.lessons),
           NavItemData(icon: LucideIcons.trophy, label: loc.awards),
-          NavItemData(icon: LucideIcons.settings, label: loc.settingsTitle),
+          NavItemData(icon: LucideIcons.settings, label: loc.settings),
         ],
       ),
       body: Stack(

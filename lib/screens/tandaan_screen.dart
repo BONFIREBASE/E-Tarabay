@@ -722,32 +722,32 @@ class _TandaanScreenState extends State<TandaanScreen>
             animation: _timerPulseAnim,
             builder: (_, __) {
               final urgent = _secondsLeft <= 10;
+              final color = urgent ? Colors.red : AppColors.primary;
               return Transform.scale(
                 scale: urgent ? _timerPulseAnim.value : 1.0,
                 child: Container(
                   margin:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                   decoration: BoxDecoration(
-                    color: urgent
-                        ? Colors.red.withOpacity(0.15)
-                        : AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    color: color.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: color.withOpacity(0.35), width: 2),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(LucideIcons.timer,
-                          color: urgent ? Colors.red : AppColors.primary,
-                          size: 16),
-                      const SizedBox(width: 4),
+                          color: color,
+                          size: 22),
+                      const SizedBox(width: 6),
                       Text(
                         '$_secondsLeft',
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: urgent ? Colors.red : AppColors.primary,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 20,
+                          color: color,
                         ),
                       ),
                     ],
@@ -1166,11 +1166,11 @@ class _TandaanScreenState extends State<TandaanScreen>
   Widget _buildInstructionCard(Color color) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: color.withOpacity(0.35), width: 1.5),
+        border: Border.all(color: color.withOpacity(0.35), width: 2),
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(0.12),
@@ -1184,25 +1184,28 @@ class _TandaanScreenState extends State<TandaanScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(LucideIcons.lightbulb, color: color, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                AppLocalizations.of(context)!.matchThePairs,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
+              Icon(LucideIcons.lightbulb, color: color, size: 24),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  AppLocalizations.of(context)!.matchThePairs,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             AppLocalizations.of(context)!.flipCardsToMatch,
             style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
             ),
             textAlign: TextAlign.center,
           ),

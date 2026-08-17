@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:e_tarabay/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 import '../services/auth_service.dart';
 import '../utils/constants.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -15,21 +17,151 @@ class StudentDetailScreen extends StatelessWidget {
     required this.studentData,
   });
 
+  Future<void> _showResetSpecificActivityDialog(BuildContext context) async {
+    final targetStudentId = (studentData['id'] ??
+            studentData['studentId'] ??
+            studentData['docId'] ??
+            '')
+        .toString();
+
+    final activities = [
+      {'key': 'matematika', 'label': 'Matematika (Numbers & Counting)', 'icon': LucideIcons.calculator, 'color': Colors.blue},
+      {'key': 'pamilya', 'label': 'Aking Sarili at Pamilya', 'icon': LucideIcons.users, 'color': Colors.purple},
+      {'key': 'traceit', 'label': 'Pagsulat / Trace It (Alphabet & Numbers)', 'icon': LucideIcons.pencil, 'color': Colors.teal},
+      {'key': 'magbasa', 'label': 'Magbasa (Kwento, Tula, Kanta)', 'icon': LucideIcons.book_open, 'color': Colors.indigo},
+      {'key': 'tandaan', 'label': 'Tandaan (Memory Matching Game)', 'icon': LucideIcons.brain, 'color': Colors.amber.shade800},
+      {'key': 'kulay', 'label': 'Kulayan Mo (Coloring & Art)', 'icon': LucideIcons.palette, 'color': Colors.pink},
+    ];
+
+    final selected = <String>{};
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Row(
+                children: [
+                  Icon(LucideIcons.list_restart, color: Colors.orange, size: 24),
+                  SizedBox(width: 8),
+                  Text('Reset Specific Activity',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                ],
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Piliin ang mga activity na nais i-reset para kay $studentName:',
+                      style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+                    ),
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: activities.map((act) {
+                            final key = act['key'] as String;
+                            final isChecked = selected.contains(key);
+                            final color = act['color'] as Color;
+                            return CheckboxListTile(
+                              value: isChecked,
+                              activeColor: color,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+                              secondary: Icon(act['icon'] as IconData, color: color),
+                              title: Text(
+                                act['label'] as String,
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                              ),
+                              onChanged: (val) {
+                                setDialogState(() {
+                                  if (val == true) {
+                                    selected.add(key);
+                                  } else {
+                                    selected.remove(key);
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Kanselahin', style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: selected.isEmpty
+                      ? null
+                      : () async {
+                          Navigator.pop(ctx);
+                          final auth = AuthService();
+                          final success = await auth.resetStudentSpecificActivities(
+                              targetStudentId, selected.toList());
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(success
+                                    ? 'Matagumpay na na-reset ang napiling activities.'
+                                    : 'Hindi na-reset ang activities. Subukan muli.'),
+                                backgroundColor: success ? Colors.green : Colors.red,
+                              ),
+                            );
+                            if (success) {
+                              try {
+                                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                                if (userProvider.currentStudentId == targetStudentId) {
+                                  await userProvider.resetAllProgressLocally();
+                                }
+                              } catch (_) {}
+                            }
+                          }
+                        },
+                  child: Text('I-reset (${selected.length})'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _confirmResetActivity(BuildContext context) async {
-    final studentId = (studentData['id'] ?? studentData['studentId'] ?? '').toString();
+    final targetStudentId = (studentData['id'] ??
+            studentData['studentId'] ??
+            studentData['docId'] ??
+            '')
+        .toString();
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Row(
           children: [
-            Icon(LucideIcons.rotate_ccw, color: Colors.orange),
+            Icon(LucideIcons.rotate_ccw, color: Colors.red),
             SizedBox(width: 8),
-            Text('Reset Activity', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Reset ALL Activities', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
         content: Text(
-          'Are you sure you want to reset all activity progress for $studentName? This cannot be undone.',
+          'Sigurado ka bang nais mong i-reset ang LAHAT ng activity progress para kay $studentName? Hindi na ito maibabalik.',
         ),
         actions: [
           TextButton(
@@ -38,11 +170,11 @@ class StudentDetailScreen extends StatelessWidget {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
+              backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Reset Activity'),
+            child: const Text('Reset All'),
           ),
         ],
       ),
@@ -50,15 +182,24 @@ class StudentDetailScreen extends StatelessWidget {
 
     if (confirm == true && context.mounted) {
       final auth = AuthService();
-      final success = await auth.resetStudentActivityProgress(studentId);
+      final success = await auth.resetStudentActivityProgress(targetStudentId);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(success ? 'Activity progress reset successfully.' : 'Failed to reset progress.'),
+            content: Text(success
+                ? 'Activity progress reset successfully.'
+                : 'Failed to reset progress.'),
             backgroundColor: success ? Colors.green : Colors.red,
           ),
         );
         if (success) {
+          try {
+            final userProvider =
+                Provider.of<UserProvider>(context, listen: false);
+            if (userProvider.currentStudentId == targetStudentId) {
+              await userProvider.resetAllProgressLocally();
+            }
+          } catch (_) {}
           Navigator.pop(context);
         }
       }
@@ -242,22 +383,43 @@ class StudentDetailScreen extends StatelessWidget {
             _buildArtworksGallery(context, creations),
             const SizedBox(height: 32),
 
-            // Reset Activity Button
+            // Reset Activity Buttons
             SizedBox(
               width: double.infinity,
               height: 50,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange.shade700,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 2,
+                ),
+                icon: const Icon(LucideIcons.list_restart, size: 20),
+                label: const Text(
+                  'Reset Specific Activity',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () => _showResetSpecificActivityDialog(context),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
               child: OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.orange.shade800,
-                  side: BorderSide(color: Colors.orange.shade400, width: 1.5),
+                  foregroundColor: Colors.red.shade700,
+                  side: BorderSide(color: Colors.red.shade300, width: 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                icon: const Icon(LucideIcons.rotate_ccw),
+                icon: const Icon(LucideIcons.rotate_ccw, size: 18),
                 label: const Text(
-                  'Reset Student Activity Progress',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  'Reset All Activities',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 onPressed: () => _confirmResetActivity(context),
               ),

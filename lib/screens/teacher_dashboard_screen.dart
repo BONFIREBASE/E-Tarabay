@@ -977,7 +977,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                               context.pushPremium(
                                 StudentDetailScreen(
                                   studentName: nameController.text,
-                                  studentData: studentData,
+                                  studentData: {
+                                    'id': studentId,
+                                    'studentId': studentId,
+                                    ...studentData,
+                                  },
                                 ),
                               );
                             },
@@ -2118,7 +2122,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                             context.pushPremium(
                               StudentDetailScreen(
                                 studentName: name,
-                                studentData: studentData,
+                                studentData: {
+                                  'id': studentId,
+                                  'studentId': studentId,
+                                  ...studentData,
+                                },
                               ),
                             );
                           },

@@ -141,7 +141,7 @@ class _ParentsLockScreenState extends State<ParentsLockScreen> {
               const SizedBox(height: 40),
               TextField(
                 controller: _lrnController,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text,
                 obscureText: true,
                 style: const TextStyle(letterSpacing: 8, fontSize: 18),
                 textAlign: TextAlign.center,

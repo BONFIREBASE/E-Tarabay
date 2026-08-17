@@ -622,8 +622,8 @@ class _KulayScreenState extends State<KulayScreen>
     int fillR,
     int fillG,
     int fillB, {
-    int threshold = 20,
-    int maxPixels = 15000,
+    int threshold = 40,
+    int maxPixels = 500000,
   }) {
     final w = image.width;
     final h = image.height;

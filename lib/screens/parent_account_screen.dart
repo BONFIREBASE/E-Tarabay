@@ -397,7 +397,6 @@ class _ParentAccountScreenState extends State<ParentAccountScreen> {
     required List<Widget> children,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -405,21 +404,28 @@ class _ParentAccountScreenState extends State<ParentAccountScreen> {
           BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            Icon(icon, color: AppColors.primary, size: 20),
-            const SizedBox(width: 8),
-            Text(title,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark)),
-          ]),
-          const SizedBox(height: 14),
-          ...children,
-        ],
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Icon(icon, color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark)),
+              ]),
+              const SizedBox(height: 14),
+              ...children,
+            ],
+          ),
+        ),
       ),
     );
   }

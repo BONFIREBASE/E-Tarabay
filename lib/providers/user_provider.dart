@@ -90,21 +90,36 @@ class UserProvider extends ChangeNotifier {
         .collection('students')
         .doc(_currentStudentId)
         .snapshots()
-        .listen((snapshot) {
+        .listen((snapshot) async {
       if (snapshot.exists) {
         final data = snapshot.data();
-        if (data != null && data.containsKey('profile')) {
-          final profileData = Map<String, dynamic>.from(data['profile'] as Map);
-          // Inject root-level avatar if profile.avatar is missing
-          if (data.containsKey('avatar') &&
-              (profileData['avatar'] == null || profileData['avatar'] == '')) {
-            profileData['avatar'] = data['avatar'];
+        if (data != null) {
+          if (data.containsKey('profile')) {
+            final profileData =
+                Map<String, dynamic>.from(data['profile'] as Map);
+            // Inject root-level avatar if profile.avatar is missing
+            if (data.containsKey('avatar') &&
+                (profileData['avatar'] == null ||
+                    profileData['avatar'] == '')) {
+              profileData['avatar'] = data['avatar'];
+            }
+            if (profileData.isNotEmpty) {
+              _userProfile = UserProfile.fromJson(profileData);
+              _profileBox.put('currentUser', _userProfile!.toJson());
+            }
           }
-          if (profileData.isNotEmpty) {
-            _userProfile = UserProfile.fromJson(profileData);
-            _profileBox.put('currentUser', _userProfile!.toJson());
-            notifyListeners();
+
+          // Real-time reset check: If lastResetAt exists or server progress is 0,
+          // clear local SharedPreferences progress keys on the student device.
+          if (data.containsKey('lastResetAt') ||
+              (data.containsKey('progress') &&
+                  data['progress'] is Map &&
+                  ((data['progress']['totalCompleted'] ?? -1) == 0 ||
+                      (data['progress']['overallProgress'] ?? -1) == 0))) {
+            await _clearLocalStudentProgressKeys();
           }
+
+          notifyListeners();
         }
       } else {
         // Document does not exist - student might have been deleted by teacher
@@ -116,6 +131,76 @@ class UserProvider extends ChangeNotifier {
         }
       }
     });
+  }
+
+  Future<void> _clearLocalStudentProgressKeys() async {
+    try {
+      // 1. Clear Hive progress box
+      if (_gb != null) {
+        await _gb!.clear();
+      }
+
+      // 2. Reset Profile stars & completed counts & achievements
+      if (_userProfile != null) {
+        _userProfile!.stars = 0;
+        _userProfile!.lessonsCompleted = 0;
+        _userProfile!.achievements = {};
+        if (_pb != null) {
+          await _pb!.put('currentUser', _userProfile!.toJson());
+        }
+      }
+
+      // 3. Clear all local SharedPreferences progress & lesson keys
+      final prefs = _prefs ?? await SharedPreferences.getInstance();
+      const keysToKeep = {
+        'has_seen_onboarding',
+        'notifications_enabled',
+        'sound_enabled',
+        'music_enabled',
+        'session_student_id',
+        'session_role',
+        'language_code',
+      };
+
+      final allKeys = prefs.getKeys();
+      for (final k in allKeys) {
+        if (!keysToKeep.contains(k)) {
+          if (k.startsWith('sundan_') ||
+              k.startsWith('traceit_') ||
+              k.startsWith('mat_') ||
+              k.startsWith('matematika_') ||
+              k.startsWith('pamilya_') ||
+              k.startsWith('kulay_') ||
+              k.startsWith('magbasa_') ||
+              k.startsWith('tula_') ||
+              k.startsWith('kwento_') ||
+              k.startsWith('kanta_') ||
+              k.startsWith('karaoke_') ||
+              k.startsWith('tandaan_') ||
+              k.startsWith('quiz_') ||
+              k.startsWith('progress_') ||
+              k.startsWith('level_') ||
+              k.startsWith('game_') ||
+              k.contains('_activity') ||
+              k.contains('_completed') ||
+              k.contains('_score') ||
+              k.contains('_stars') ||
+              k.contains('_attempts') ||
+              k.contains('_creations')) {
+            await prefs.remove(k);
+          }
+        }
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error clearing local student progress keys: $e');
+    }
+  }
+
+  /// Public method to force reset all local student progress state instantly
+  Future<void> resetAllProgressLocally() async {
+    await _clearLocalStudentProgressKeys();
   }
 
   void _stopProfileListener() {

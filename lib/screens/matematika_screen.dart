@@ -934,7 +934,9 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     if (_selectedSide != null) return;
 
     final correct = _currentGame['correct'] as String;
-    final isCorrect = correct == 'equal' ? true : tappedSide == correct;
+    if (correct == 'equal') return; // In equal question mode, child must choose Oo or Hindi button
+
+    final isCorrect = tappedSide == correct;
 
     setState(() => _selectedSide = tappedSide);
 
@@ -948,10 +950,13 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     }
   }
 
-  void _handleEqualButton() {
+  void _handleEqualChoice(bool choseYes) {
     if (_showCorrectOverlay) return;
     final correct = _currentGame['correct'] as String;
-    if (correct == 'equal') {
+    final isActuallyEqual = correct == 'equal';
+    final isCorrect = choseYes == isActuallyEqual;
+
+    if (isCorrect) {
       setState(() => _selectedSide = 'equal');
       Future.delayed(const Duration(milliseconds: 300), _onCorrect);
     } else {
@@ -1114,31 +1119,31 @@ class _MatematikaScreenState extends State<MatematikaScreen>
           animation: _timerPulseAnim,
           builder: (_, __) {
             final urgent = _secondsLeft <= 10;
+            final color = urgent ? Colors.red : AppColors.primary;
             return Transform.scale(
               scale: urgent ? _timerPulseAnim.value : 1.0,
               child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: urgent
-                      ? Colors.red.withOpacity(0.15)
-                      : AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: color.withOpacity(0.35), width: 2),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(LucideIcons.timer,
-                        color: urgent ? Colors.red : AppColors.primary,
-                        size: 16),
-                    const SizedBox(width: 4),
+                        color: color,
+                        size: 22),
+                    const SizedBox(width: 6),
                     Text(
                       '$_secondsLeft',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: urgent ? Colors.red : AppColors.primary,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 20,
+                        color: color,
                       ),
                     ),
                   ],
@@ -2460,7 +2465,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
   Widget _buildGame5() {
     final game = _game5Levels[_currentGameIndex % _game5Levels.length];
     final correct = game['correct'] as String;
-    final isEqual = correct == 'equal';
+    final isEqual = correct == 'equal' || game['type'] == 'equal';
 
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -2473,7 +2478,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                   : game['type'] == 'less'
                       ? AppLocalizations.of(context)!.whichIsLess
                       : AppLocalizations.of(context)!.isSameNumber,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ),
@@ -2489,6 +2494,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                   count: game['leftCount'] as int,
                   label: AppLocalizations.of(context)!.left,
                   correct: correct,
+                  isEqualMode: isEqual,
                 ),
                 _game5Side(
                   sideKey: 'right',
@@ -2497,27 +2503,65 @@ class _MatematikaScreenState extends State<MatematikaScreen>
                   count: game['rightCount'] as int,
                   label: AppLocalizations.of(context)!.right,
                   correct: correct,
+                  isEqualMode: isEqual,
                 ),
               ],
             ),
           ),
           if (isEqual) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _handleEqualButton,
-                icon: const Icon(LucideIcons.scale, color: Colors.white),
-                label: Text(AppLocalizations.of(context)!.theyAreSame,
-                    style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _handleEqualChoice(true),
+                    icon: const Icon(LucideIcons.circle_check, color: Colors.white, size: 28),
+                    label: const Text(
+                      'Oo',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 4,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _handleEqualChoice(false),
+                    icon: const Icon(LucideIcons.circle_x, color: Colors.white, size: 28),
+                    label: const Text(
+                      'Hindi',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 4,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -2531,6 +2575,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
     required int count,
     required String label,
     required String correct,
+    bool isEqualMode = false,
   }) {
     final selected = _selectedSide == sideKey;
     final answered = _selectedSide != null;
@@ -2558,7 +2603,7 @@ class _MatematikaScreenState extends State<MatematikaScreen>
 
     return Expanded(
       child: GestureDetector(
-        onTap: () => _handleSideSelection(sideKey),
+        onTap: isEqualMode ? null : () => _handleSideSelection(sideKey),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.symmetric(horizontal: 6),

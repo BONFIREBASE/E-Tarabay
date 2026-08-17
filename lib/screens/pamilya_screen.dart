@@ -86,7 +86,10 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   int? _selectedRoleAnswer;
   int? _selectedActivityAnswer;
   bool _myHomeCompleted = false;
+  int _homeChallengeIndex = 0;
+  final Set<int> _matchedHomeItems = {};
   int? _selectedRoomIndex;
+  int? _selectedTreeQuizAnswer;
 
   // ── Badges ─────────────────────────────────────────────────────────────────
   late List<FamilyBadge> _badges;
@@ -614,6 +617,9 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       _selectedActivityAnswer = null;
       _myHomeCompleted = false;
       _selectedRoomIndex = null;
+      _homeChallengeIndex = 0;
+      _matchedHomeItems.clear();
+      _selectedTreeQuizAnswer = null;
       _showCorrectOverlay = false;
       _feedbackMessage = '';
       _characterHappy = false;
@@ -753,22 +759,39 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     _pauseTimer();
     final trimmed = value.trim();
 
-    // Smart Checker: Prevent random junk/single letters
-    if (trimmed.length < 2) {
-      _showFeedback('❌ ${AppLocalizations.of(context)!.tooShort}', Colors.red);
-      HapticFeedback.heavyImpact();
-      Future.delayed(const Duration(milliseconds: 800), _resumeTimer);
-      return;
-    }
+    // Check if this is an age input — allow single-digit numbers
+    final currentGame = _currentGames[_currentGameIndex];
+    final isAgeInput = currentGame['type'] == 'age_input';
 
-    // Pattern check: Ensure it's not just random repeated characters (e.g., "aaaaa")
-    final uniqueChars = trimmed.toLowerCase().split('').toSet();
-    if (uniqueChars.length == 1 && trimmed.length > 2) {
-      _showFeedback(
-          '❌ ${AppLocalizations.of(context)!.invalidInput}', Colors.red);
-      HapticFeedback.vibrate();
-      Future.delayed(const Duration(milliseconds: 800), _resumeTimer);
-      return;
+    if (isAgeInput) {
+      // Age validation: must be a valid number 1-99
+      final age = int.tryParse(trimmed);
+      if (age == null || age < 1 || age > 99) {
+        _showFeedback(
+            '❌ ${AppLocalizations.of(context)!.invalidInput}', Colors.red);
+        HapticFeedback.heavyImpact();
+        Future.delayed(const Duration(milliseconds: 800), _resumeTimer);
+        return;
+      }
+    } else {
+      // Smart Checker: Prevent random junk/single letters for text inputs
+      if (trimmed.length < 2) {
+        _showFeedback(
+            '❌ ${AppLocalizations.of(context)!.tooShort}', Colors.red);
+        HapticFeedback.heavyImpact();
+        Future.delayed(const Duration(milliseconds: 800), _resumeTimer);
+        return;
+      }
+
+      // Pattern check: Ensure it's not just random repeated characters (e.g., "aaaaa")
+      final uniqueChars = trimmed.toLowerCase().split('').toSet();
+      if (uniqueChars.length == 1 && trimmed.length > 2) {
+        _showFeedback(
+            '❌ ${AppLocalizations.of(context)!.invalidInput}', Colors.red);
+        HapticFeedback.vibrate();
+        Future.delayed(const Duration(milliseconds: 800), _resumeTimer);
+        return;
+      }
     }
 
     if (trimmed.isNotEmpty) {
@@ -780,6 +803,7 @@ class _PamilyaScreenState extends State<PamilyaScreen>
       Future.delayed(const Duration(milliseconds: 500), _resumeTimer);
     }
   }
+
 
   void _handleGenderSelection(int index) {
     _pauseTimer();
@@ -904,19 +928,65 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     Future.delayed(const Duration(seconds: 2), _onCorrect);
   }
 
-  void _handleRoomTap(int index) {
+  void _handleTreeQuizAnswer(int index, int correct, String explanation) {
     _pauseTimer();
-    setState(() => _selectedRoomIndex = index);
-    final room = _homeRooms[index];
-    _showFeedback('🏠 ${room['name']}: ${room['activity']}', _currentMainColor);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (index == _homeRooms.length - 1 ||
-          _selectedRoomIndex == _homeRooms.length - 1) {
-        _handleMyHomeComplete();
-      } else {
+    setState(() => _selectedTreeQuizAnswer = index);
+    if (index == correct) {
+      _showFeedback('✓ ${AppLocalizations.of(context)!.correct} $explanation',
+          Colors.green);
+      Future.delayed(const Duration(seconds: 2), _onCorrect);
+    } else {
+      _showFeedback('✗ ${AppLocalizations.of(context)!.tryAgain}', Colors.red);
+      Future.delayed(const Duration(milliseconds: 500), () {
+        setState(() => _selectedTreeQuizAnswer = null);
         _resumeTimer();
-      }
-    });
+      });
+    }
+  }
+
+  void _handleRoomTap(int roomIdx) {
+    if (_myHomeCompleted) return;
+    _pauseTimer();
+
+    final challenges = _homeItemChallenges;
+    if (_homeChallengeIndex >= challenges.length) return;
+
+    final currentChallenge = challenges[_homeChallengeIndex];
+    final correctRoomIdx = currentChallenge['roomIndex'] as int;
+
+    if (roomIdx == correctRoomIdx) {
+      HapticFeedback.mediumImpact();
+      setState(() {
+        _matchedHomeItems.add(_homeChallengeIndex);
+        _selectedRoomIndex = roomIdx;
+      });
+
+      final room = _homeRooms[roomIdx];
+      _showFeedback(
+        '✓ ${currentChallenge['itemEmoji']} ${room['name']}: ${room['activity']}',
+        Colors.green,
+      );
+
+      Future.delayed(const Duration(milliseconds: 1400), () {
+        if (!mounted) return;
+        if (_homeChallengeIndex + 1 < challenges.length) {
+          setState(() {
+            _homeChallengeIndex++;
+          });
+          _resumeTimer();
+        } else {
+          _handleMyHomeComplete();
+        }
+      });
+    } else {
+      HapticFeedback.vibrate();
+      final wrongRoom = _homeRooms[roomIdx];
+      _showFeedback(
+        '❌ (${wrongRoom['name']}) ${AppLocalizations.of(context)!.incorrectAnswer}',
+        Colors.red,
+      );
+      Future.delayed(const Duration(milliseconds: 1200), _resumeTimer);
+    }
   }
 
   void _handleMyHomeComplete() {
@@ -1165,15 +1235,15 @@ class _PamilyaScreenState extends State<PamilyaScreen>
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: color.withOpacity(0.25), width: 1.5),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: color.withOpacity(0.35), width: 2),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Icon(LucideIcons.timer, color: color, size: 15),
-              const SizedBox(width: 4),
+              Icon(LucideIcons.timer, color: color, size: 22),
+              const SizedBox(width: 6),
               Text('$_secondsLeft',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 13, color: color)),
+                      fontWeight: FontWeight.w900, fontSize: 20, color: color)),
             ]),
           ),
         );
@@ -1642,10 +1712,24 @@ class _PamilyaScreenState extends State<PamilyaScreen>
           gameWidget = _buildFamilyActivitiesGame();
           break;
         case 3:
-          gameWidget = _buildFamilyTreeGame();
+          // Show quiz questions first, visual Family Tree only at last index
+          if (_currentGameIndex < _pamilyaLevel4Games.length - 1) {
+            gameWidget = _buildPamilyaQuizGame(
+              _pamilyaLevel4Games[_currentGameIndex],
+            );
+          } else {
+            gameWidget = _buildFamilyTreeGame();
+          }
           break;
         case 4:
-          gameWidget = _buildMyHomeGame();
+          // Show quiz questions first, visual My Home only at last index
+          if (_currentGameIndex < _pamilyaLevel5Games.length - 1) {
+            gameWidget = _buildPamilyaQuizGame(
+              _pamilyaLevel5Games[_currentGameIndex],
+            );
+          } else {
+            gameWidget = _buildMyHomeGame();
+          }
           break;
         default:
           gameWidget = _buildFamilyMembersGame();
@@ -2303,8 +2387,60 @@ class _PamilyaScreenState extends State<PamilyaScreen>
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  //  PAMILYA QUIZ GAME (for Family Tree & Aming Tahanan quiz questions)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  Widget _buildPamilyaQuizGame(Map<String, dynamic> game) {
+    final choices = game['choices'] as List;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(children: [
+        _buildCharacterWidget(),
+        const SizedBox(height: 12),
+        _gameCard(
+            child: Column(children: [
+          _questionBox(game['question']),
+          const SizedBox(height: 20),
+          ...List.generate(choices.length, (i) {
+            final sel = _selectedTreeQuizAnswer == i;
+            final correct = i == game['correct'];
+            return _choiceTile(
+              label: choices[i],
+              isSelected: sel,
+              isCorrect: sel ? correct : null,
+              onTap: () => _handleTreeQuizAnswer(
+                  i, game['correct'], game['explanation'] ?? ''),
+            );
+          }),
+          if (_selectedTreeQuizAnswer != null &&
+              _selectedTreeQuizAnswer == game['correct'] &&
+              game['explanation'] != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.withOpacity(0.3)),
+                ),
+                child: Text(
+                  '💡 ${game['explanation']}',
+                  style: const TextStyle(fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+        ])),
+      ]),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   //  PAMILYA GAME 4: Family Tree (Interactive)
   // ─────────────────────────────────────────────────────────────────────────
+
 
   Widget _buildFamilyTreeGame() {
     final generations = _familyTreeData['generations'] as List;
@@ -2429,126 +2565,301 @@ class _PamilyaScreenState extends State<PamilyaScreen>
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  //  PAMILYA GAME 5: My Home (Interactive Room Tap)
-  // ─────────────────────────────────────────────────────────────────────────
+  // ── PAMILYA GAME 5: My Home (Interactive Object-to-Room Matching Game) ───
+
+  List<Map<String, dynamic>> get _homeItemChallenges => [
+        {
+          'itemEmoji': '📺',
+          'itemName': _currentLang == 'en'
+              ? 'Television'
+              : (_currentLang == 'fil' ? 'Telebisyon' : 'TV / Buya'),
+          'roomIndex': 0, // Living Room / Sala
+          'question': _currentLang == 'en'
+              ? 'Where do we watch TV together as a family?'
+              : (_currentLang == 'fil'
+                  ? 'Saan tayo nanonood ng TV nang magkakasama?'
+                  : 'Adino ti pagbuyaantayo iti TV a sangsangkamaysa?'),
+        },
+        {
+          'itemEmoji': '🍳',
+          'itemName': _currentLang == 'en'
+              ? 'Frying Pan & Stove'
+              : (_currentLang == 'fil' ? 'Kaldero at Lutuan' : 'Paglutuan'),
+          'roomIndex': 1, // Kitchen / Kusina
+          'question': _currentLang == 'en'
+              ? 'Where does Nanang cook delicious meals?'
+              : (_currentLang == 'fil'
+                  ? 'Saan nagluluto si Nanay ng masarap na pagkain?'
+                  : 'Adino ti paglutlutoan ni Nanang iti naimbag a taraon?'),
+        },
+        {
+          'itemEmoji': '🛏️',
+          'itemName': _currentLang == 'en'
+              ? 'Bed & Pillow'
+              : (_currentLang == 'fil' ? 'Kama at Unan' : 'Kama ken Pango'),
+          'roomIndex': 2, // Bedroom / Kwarto
+          'question': _currentLang == 'en'
+              ? 'Where do we rest and sleep at night?'
+              : (_currentLang == 'fil'
+                  ? 'Saan tayo nagpapahinga at natutulog?'
+                  : 'Adino ti pagturturogantayo no rabii?'),
+        },
+        {
+          'itemEmoji': '🧼',
+          'itemName': _currentLang == 'en'
+              ? 'Soap & Shampoo'
+              : (_currentLang == 'fil' ? 'Sabon at Shampo' : 'Sabon ken Digos'),
+          'roomIndex': 3, // Bathroom / Banyo
+          'question': _currentLang == 'en'
+              ? 'Where do we take a bath and wash clean?'
+              : (_currentLang == 'fil'
+                  ? 'Saan tayo naliligo at naghuhugas?'
+                  : 'Adino ti pagdigosantayo ken pagbugguantayo?'),
+        },
+        {
+          'itemEmoji': '🌷',
+          'itemName': _currentLang == 'en'
+              ? 'Garden & Plants'
+              : (_currentLang == 'fil' ? 'Mga Halaman' : 'Mulmula ken Ay-ayam'),
+          'roomIndex': 4, // Yard / Bakuran
+          'question': _currentLang == 'en'
+              ? 'Where do we play outdoors and water the plants?'
+              : (_currentLang == 'fil'
+                  ? 'Saan tayo naglalaro at nagdidilig ng halaman?'
+                  : 'Adino ti pagay-ayamantayo ken pagsibugantayo iti mulmula?'),
+        },
+      ];
 
   Widget _buildMyHomeGame() {
+    final challenges = _homeItemChallenges;
+    final isFinished = _matchedHomeItems.length >= challenges.length;
+    final safeIndex = _homeChallengeIndex.clamp(0, challenges.length - 1);
+    final activeChallenge = challenges[safeIndex];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(children: [
         _gameCard(
-            child: Column(children: [
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(LucideIcons.house, color: _currentMainColor, size: 26),
-            const SizedBox(width: 8),
-            Text(AppLocalizations.of(context)!.ourHomeTitle,
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: _currentMainColor)),
-          ]),
-          const SizedBox(height: 6),
-          Text(AppLocalizations.of(context)!.tapEachRoomPrompt,
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-              textAlign: TextAlign.center),
-          const SizedBox(height: 20),
+          child: Column(children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(LucideIcons.house, color: _currentMainColor, size: 26),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.ourHomeTitle,
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: _currentMainColor)),
+            ]),
+            const SizedBox(height: 6),
+            Text(
+              isFinished
+                  ? AppLocalizations.of(context)!.finishedAlready
+                  : 'Tap the correct room where this item belongs!',
+              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
 
-          // Simple house illustration
-          _buildHouseIllustration(),
-
-          const SizedBox(height: 20),
-
-          // Room tiles
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            childAspectRatio: 1.3,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            children: List.generate(_homeRooms.length, (i) {
-              final room = _homeRooms[i];
-              final visited =
-                  _selectedRoomIndex != null && _selectedRoomIndex! >= i;
-              final roomColor = room['color'] as Color;
-              return GestureDetector(
-                onTap: () => _handleRoomTap(i),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  decoration: BoxDecoration(
-                    color: visited ? roomColor.withOpacity(0.15) : Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                        color: visited ? roomColor : Colors.grey.shade300,
-                        width: 2),
-                    boxShadow: visited
-                        ? [
-                            BoxShadow(
-                                color: roomColor.withOpacity(0.2),
-                                blurRadius: 8)
-                          ]
-                        : [],
+            // Item Challenge Banner Card
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isFinished
+                      ? [const Color(0xFF11998E), const Color(0xFF38EF7D)]
+                      : [const Color(0xFF4FACFE), const Color(0xFF00F2FE)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: (isFinished
+                            ? const Color(0xFF11998E)
+                            : const Color(0xFF4FACFE))
+                        .withOpacity(0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        isFinished ? '🏡' : activeChallenge['itemEmoji'],
+                        style: const TextStyle(fontSize: 38),
+                      ),
+                    ),
                   ),
-                  child: Column(
+                  const SizedBox(height: 10),
+                  Text(
+                    isFinished
+                        ? '🎉 All Items Placed in Our Home!'
+                        : activeChallenge['itemName'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isFinished
+                        ? 'Great job keeping our family home organized!'
+                        : activeChallenge['question'],
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Challenge Step Progress Indicators
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(challenges.length, (idx) {
+                final done = _matchedHomeItems.contains(idx);
+                final isCurrent = idx == _homeChallengeIndex && !isFinished;
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: isCurrent ? 24 : 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: done
+                        ? Colors.green
+                        : (isCurrent
+                            ? AppColors.primary
+                            : Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                );
+              }),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Room Tiles Grid
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              childAspectRatio: 1.25,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              children: List.generate(_homeRooms.length, (i) {
+                final room = _homeRooms[i];
+                final roomColor = room['color'] as Color;
+
+                // Items placed in this room
+                final matchedEmojisInRoom = <String>[];
+                for (int cIdx = 0; cIdx < challenges.length; cIdx++) {
+                  if (_matchedHomeItems.contains(cIdx) &&
+                      challenges[cIdx]['roomIndex'] == i) {
+                    matchedEmojisInRoom.add(challenges[cIdx]['itemEmoji']);
+                  }
+                }
+
+                return GestureDetector(
+                  onTap: () => _handleRoomTap(i),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: matchedEmojisInRoom.isNotEmpty
+                          ? roomColor.withOpacity(0.15)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: matchedEmojisInRoom.isNotEmpty
+                            ? roomColor
+                            : Colors.grey.shade300,
+                        width: matchedEmojisInRoom.isNotEmpty ? 2.5 : 1.5,
+                      ),
+                      boxShadow: matchedEmojisInRoom.isNotEmpty
+                          ? [
+                              BoxShadow(
+                                color: roomColor.withOpacity(0.25),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              )
+                            ]
+                          : [],
+                    ),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(room['emoji'],
-                            style: const TextStyle(fontSize: 30)),
-                        const SizedBox(height: 6),
-                        Text(room['name'],
+                            style: const TextStyle(fontSize: 28)),
+                        const SizedBox(height: 4),
+                        Text(
+                          room['name'],
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: matchedEmojisInRoom.isNotEmpty
+                                ? roomColor
+                                : Colors.grey.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        if (matchedEmojisInRoom.isNotEmpty)
+                          Text(
+                            matchedEmojisInRoom.join(' '),
+                            style: const TextStyle(fontSize: 14),
+                          )
+                        else
+                          Text(
+                            room['activity'],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: visited
-                                    ? roomColor
-                                    : Colors.grey.shade700)),
-                        if (visited)
-                          const Icon(LucideIcons.circle_check,
-                              color: Colors.green, size: 16),
-                      ]),
-                ),
-              );
-            }),
-          ),
-
-          const SizedBox(height: 16),
-
-          if (_selectedRoomIndex != null)
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: (_homeRooms[_selectedRoomIndex!]['color'] as Color)
-                    .withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Text(
-                '🏠 ${_homeRooms[_selectedRoomIndex!]['name']}: ${_homeRooms[_selectedRoomIndex!]['activity']}',
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
+                                fontSize: 9.5, color: Colors.grey.shade500),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
             ),
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-          if (!_myHomeCompleted)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _handleMyHomeComplete,
-                icon: const Icon(LucideIcons.house, color: Colors.white),
-                label: Text(AppLocalizations.of(context)!.thatIsOurHome,
-                    style: const TextStyle(fontSize: 15, color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _currentMainColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+            if (isFinished || _myHomeCompleted)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _handleMyHomeComplete,
+                  icon: const Icon(LucideIcons.circle_check,
+                      color: Colors.white),
+                  label: Text(AppLocalizations.of(context)!.thatIsOurHome,
+                      style: const TextStyle(
+                          fontSize: 15, color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
                 ),
               ),
-            ),
-        ])),
+          ]),
+        ),
       ]),
     );
   }

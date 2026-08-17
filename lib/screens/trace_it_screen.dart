@@ -1342,7 +1342,7 @@ class _TraceItScreenState extends State<TraceItScreen>
           const SizedBox(width: 4),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(52),
+          preferredSize: const Size.fromHeight(58),
           child: _buildModeTabs(),
         ),
       ),
@@ -1706,36 +1706,58 @@ class _TraceItScreenState extends State<TraceItScreen>
     });
   }
 
-  /// Modern segmented control for the ABC / abc / 123 modes.
+  /// Modern gradient card tabs matching Pamilya / Matematika tab selection style.
   Widget _buildModeTabs() {
     final loc = AppLocalizations.of(context)!;
     final modes = [
-      (0, 'ABC', loc.upper, _completedUpper.length >= uppercaseLetters.length),
-      (1, 'abc', loc.lower, _completedLower.length >= lowercaseLetters.length),
-      (2, '123', loc.numbers, _completedNums.length >= numberLetters.length),
+      (
+        0,
+        'ABC',
+        loc.upper,
+        _completedUpper.length >= uppercaseLetters.length,
+        const Color(0xFF4FACFE),
+        const Color(0xFF00F2FE),
+      ),
+      (
+        1,
+        'abc',
+        loc.lower,
+        _completedLower.length >= lowercaseLetters.length,
+        const Color(0xFF11998E),
+        const Color(0xFF38EF7D),
+      ),
+      (
+        2,
+        '123',
+        loc.numbers,
+        _completedNums.length >= numberLetters.length,
+        const Color(0xFFFF6B6B),
+        const Color(0xFFFF8E53),
+      ),
     ];
+
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: const Color(0xFFEEF1F8),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            for (final m in modes)
-              Expanded(
-                child: _buildModeSegment(
-                  index: m.$1,
-                  badge: m.$2,
-                  label: m.$3,
-                  completed: m.$4,
-                ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: [
+          for (final m in modes)
+            Expanded(
+              child: _buildModeSegment(
+                index: m.$1,
+                badge: m.$2,
+                label: m.$3,
+                completed: m.$4,
+                startColor: m.$5,
+                endColor: m.$6,
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -1745,67 +1767,89 @@ class _TraceItScreenState extends State<TraceItScreen>
     required String badge,
     required String label,
     required bool completed,
+    required Color startColor,
+    required Color endColor,
   }) {
     final active = _selectedMode == index;
-    final Color contentColor = active
-        ? Colors.white
-        : (completed ? Colors.green.shade600 : Colors.grey.shade600);
 
     return GestureDetector(
       onTap: () => _switchMode(index),
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(vertical: 9),
+        duration: const Duration(milliseconds: 250),
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: active ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          gradient: active
+              ? LinearGradient(
+                  colors: [startColor, endColor],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: active ? null : startColor.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: active
+              ? null
+              : Border.all(color: startColor.withOpacity(0.2), width: 1.5),
           boxShadow: active
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.35),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
+                    color: endColor.withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ]
-              : null,
+              : [],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              badge,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.3,
-                color: contentColor,
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: active
+                          ? Colors.white.withOpacity(0.25)
+                          : startColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      badge,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: active ? Colors.white : startColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: active ? FontWeight.bold : FontWeight.w600,
+                      color: active ? Colors.white : startColor,
+                    ),
+                  ),
+                  if (completed) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      LucideIcons.circle_check,
+                      size: 14,
+                      color: active ? Colors.white : Colors.green.shade600,
+                    ),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                  color: contentColor,
-                ),
-              ),
-            ),
-            if (completed) ...[
-              const SizedBox(width: 5),
-              Icon(
-                LucideIcons.circle_check,
-                size: 13,
-                color: active ? Colors.white : Colors.green.shade600,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

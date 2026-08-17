@@ -120,7 +120,7 @@ class _MagbasaScreenState extends State<MagbasaScreen>
         },
         {
           'id': 'ni_kikay',
-          'title': 'Ni Kikay a di Agsagsaysay',
+          'title': 'Ni Kikay a di Agsagaysay',
           'completed': false,
           'type': 'story',
           'image': 'assets/images/kwento5.png'
@@ -433,88 +433,70 @@ class _MagbasaScreenState extends State<MagbasaScreen>
           ),
         ),
         child: Column(children: [
-        // Overall progress card
+        // Overall progress — minimalist layout
         Padding(
-          padding: const EdgeInsets.all(16),
-          child: Container(
-            height: 100,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue.shade400, Colors.purple.shade400],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(22),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.blue.withOpacity(0.35),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6))
-              ],
-            ),
-            child: Row(children: [
-              Container(
-                width: 80,
-                height: 80,
-                margin: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: Image.asset(
-                    'assets/images/progress_icon.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(LucideIcons.book_open,
-                        color: Colors.white, size: 40),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              // Circular progress indicator
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.totalProgress,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: LinearProgressIndicator(
-                            value: overallProgress,
-                            backgroundColor: Colors.white.withOpacity(0.3),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white),
-                            minHeight: 8,
-                          ),
+                    SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: CircularProgressIndicator(
+                        value: overallProgress,
+                        strokeWidth: 5,
+                        backgroundColor: Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          overallProgress >= 1.0
+                              ? const Color(0xFF34C759)
+                              : AppColors.primary,
                         ),
+                        strokeCap: StrokeCap.round,
                       ),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${(overallProgress * 100).toInt()}%',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ]),
-                    const SizedBox(height: 4),
+                    ),
                     Text(
-                      '$totalCompleted/$totalActivities ${AppLocalizations.of(context)!.completed.toLowerCase()}',
-                      style: TextStyle(
-                          color: Colors.white.withOpacity(0.9), fontSize: 12),
+                      '${(overallProgress * 100).toInt()}%',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textDark,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ]),
+              const SizedBox(width: 16),
+              // Text info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.totalProgress,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$totalCompleted/$totalActivities ${AppLocalizations.of(context)!.completed.toLowerCase()}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
 
@@ -939,9 +921,10 @@ class _PoemScreenState extends State<PoemScreen>
     final rawTs = widget.poemData['lineTimestampsMs'] ?? widget.poemData['timestampsMs'];
     if (rawTs is List && rawTs.isNotEmpty) {
       final timestamps = rawTs.cast<int>();
+      final effectivePos = _currentPositionMs + 200; // slight lookahead for smooth reading
       int targetIndex = 0;
       for (int i = 0; i < timestamps.length; i++) {
-        if (_currentPositionMs >= timestamps[i]) {
+        if (effectivePos >= timestamps[i]) {
           targetIndex = i;
         } else {
           break;
@@ -955,9 +938,30 @@ class _PoemScreenState extends State<PoemScreen>
       return;
     }
 
-    final msPerLine = _totalDurationMs / nonEmpty.length;
-    final target =
-        (_currentPositionMs / msPerLine).floor().clamp(0, _lines.length - 1);
+    // Word-weighted timing: longer lines receive proportionally more speaking time
+    int totalWords = 0;
+    final lineWordCounts = <int>[];
+    for (final l in _lines) {
+      final words = l.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+      final count = words == 0 ? 1 : words;
+      lineWordCounts.add(count);
+      totalWords += count;
+    }
+
+    if (totalWords == 0) return;
+
+    final effectivePos = (_currentPositionMs + 250).clamp(0, _totalDurationMs);
+    final currentFraction = (effectivePos / _totalDurationMs).clamp(0.0, 1.0);
+    double accumulatedWords = 0;
+    int target = 0;
+    for (int i = 0; i < lineWordCounts.length; i++) {
+      accumulatedWords += lineWordCounts[i];
+      if (currentFraction <= (accumulatedWords / totalWords) || i == lineWordCounts.length - 1) {
+        target = i;
+        break;
+      }
+    }
+
     if (target != _currentLineIndex) {
       setState(() => _currentLineIndex = target);
       _scrollToCurrentLine();

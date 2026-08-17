@@ -18,6 +18,8 @@ import '../widgets/staggered_entrance.dart';
 import '../utils/page_transitions.dart';
 import 'awards_screen.dart';
 import 'settings_screen.dart';
+import 'parents_lock_screen.dart';
+import 'home_screen.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  SharedPreferences key helpers — must match each feature screen exactly
@@ -297,21 +299,38 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
           if (index == 1) return;
           switch (index) {
             case 0:
-              Navigator.pop(context);
+              context.pushReplacementFadeThrough(const HomeScreen());
               break;
             case 2:
-              context.pushReplacementPremium(const AwardsScreen());
+              context.pushReplacementFadeThrough(const AwardsScreen());
               break;
             case 3:
-              context.pushReplacementPremium(const SettingsScreen());
+              context.pushReplacementFadeThrough(const SettingsScreen());
               break;
           }
         },
-        items: const [
-          NavItemData(icon: LucideIcons.house, label: 'Home'),
-          NavItemData(icon: LucideIcons.book_open, label: 'Lessons'),
-          NavItemData(icon: LucideIcons.trophy, label: 'Awards'),
-          NavItemData(icon: LucideIcons.settings, label: 'Settings'),
+        centerIcon: LucideIcons.users,
+        centerLabel: AppLocalizations.of(context)!.forParents,
+        onCenterTap: () {
+          context.pushPremium(const ParentsLockScreen());
+        },
+        items: [
+          NavItemData(
+            icon: LucideIcons.house,
+            label: AppLocalizations.of(context)!.home,
+          ),
+          NavItemData(
+            icon: LucideIcons.book_open,
+            label: AppLocalizations.of(context)!.lessons,
+          ),
+          NavItemData(
+            icon: LucideIcons.trophy,
+            label: AppLocalizations.of(context)!.awards,
+          ),
+          NavItemData(
+            icon: LucideIcons.settings,
+            label: AppLocalizations.of(context)!.settings,
+          ),
         ],
       ),
       body: Stack(
@@ -426,38 +445,66 @@ class _LessonsScreenState extends State<LessonsScreen> with RouteAware {
   // ─────────────────────────────────────────────────────────────────────────
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.secondary],
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Row(
         children: [
-          Text(
-            AppLocalizations.of(context)!.lessons,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          // Circular progress indicator
+          SizedBox(
+            width: 56,
+            height: 56,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: CircularProgressIndicator(
+                    value: _overallProgress.clamp(0.0, 1.0),
+                    strokeWidth: 5,
+                    backgroundColor: Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      _overallProgress >= 1.0
+                          ? const Color(0xFF34C759)
+                          : AppColors.primary,
+                    ),
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                Text(
+                  '${(_overallProgress.clamp(0.0, 1.0) * 100).toInt()}%',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textDark,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            '$_totalCompleted/$_totalActivities ${AppLocalizations.of(context)!.activities}',
-            style: const TextStyle(color: Colors.white70),
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: _overallProgress.clamp(0.0, 1.0),
-              backgroundColor: Colors.white.withOpacity(0.3),
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-              minHeight: 8,
+          const SizedBox(width: 16),
+          // Text info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.overallProgress,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$_totalCompleted/$_totalActivities ${AppLocalizations.of(context)!.completed.toLowerCase()}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

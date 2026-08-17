@@ -238,7 +238,7 @@ class MagbasaContent {
       },
       {
         'id': 'ni_kikay',
-        'title': 'Ni Kikay a di Agsagsaysay',
+        'title': 'Ni Kikay a di Agsagaysay',
         'completed': false,
         'type': 'story',
         'image': 'assets/images/kwento5.png'
@@ -714,7 +714,7 @@ class MagbasaContent {
         ],
         'image': 'assets/images/poem2.png',
         'audioPath': 'poems sfx/adda asok .mp3',
-        'lineTimestampsMs': [0, 2500, 4800, 7200, 9500, 12000],
+        'lineTimestampsMs': [0, 800, 1800, 3000, 4800, 6800],
       },
       'ti_pusak': {
         'title': 'Ti Pusak',
@@ -981,7 +981,7 @@ class MagbasaContent {
         'audioPath': 'mabasa_sfx/Ni Neneng a dina kayat ag sida iti nateng.mp3',
       },
       'ni_kikay': {
-        'title': 'Ni Kikay a di Agsagsaysay',
+        'title': 'Ni Kikay a di Agsagaysay',
         'content': [
           'Di pulos kayat ni Kikay ti agsagaysay.',
           'Uray ayaban ni Nanangna, di latta pulos kayat ni Kikay ti agsagaysay.',

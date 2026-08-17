@@ -1424,37 +1424,49 @@ const Map<String, List<List<Offset>>> lowercaseStrokes = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const Map<String, List<List<Offset>>> numberStrokes = {
+  '0': [
+    [Offset(150, 62), Offset(125, 76), Offset(118, 115), Offset(118, 135), Offset(125, 174), Offset(150, 186), Offset(175, 174), Offset(182, 135), Offset(182, 115), Offset(175, 76), Offset(150, 62)],
+  ],
   '1': [
-    [Offset(128, 84), Offset(150, 62), Offset(150, 182)],
+    [Offset(128, 84), Offset(150, 62)],
+    [Offset(150, 62), Offset(150, 182)],
   ],
   '2': [
-    [Offset(122, 78), Offset(140, 60), Offset(162, 64), Offset(172, 84), Offset(160, 108), Offset(132, 140), Offset(120, 178), Offset(178, 178)],
+    [Offset(122, 78), Offset(140, 60), Offset(162, 64), Offset(172, 84), Offset(160, 108), Offset(132, 140), Offset(120, 178)],
+    [Offset(120, 178), Offset(178, 178)],
   ],
   '3': [
-    [Offset(124, 68), Offset(150, 60), Offset(172, 76), Offset(156, 110), Offset(176, 140), Offset(160, 170), Offset(130, 172), Offset(118, 158)],
+    [Offset(122, 66), Offset(142, 60), Offset(164, 66), Offset(174, 82), Offset(168, 102), Offset(144, 116)],
+    [Offset(144, 116), Offset(168, 126), Offset(176, 146), Offset(168, 166), Offset(146, 174), Offset(122, 168)],
   ],
   '4': [
-    [Offset(162, 60), Offset(120, 132), Offset(180, 132)],
+    [Offset(162, 60), Offset(120, 132)],
+    [Offset(120, 132), Offset(180, 132)],
     [Offset(162, 60), Offset(162, 185)],
   ],
   '5': [
-    [Offset(172, 62), Offset(122, 62), Offset(118, 110), Offset(150, 110), Offset(174, 128), Offset(172, 156), Offset(146, 172), Offset(120, 166)],
+    [Offset(132, 62), Offset(122, 110)],
+    [Offset(122, 110), Offset(150, 110), Offset(174, 128), Offset(172, 156), Offset(146, 172), Offset(120, 166)],
+    [Offset(132, 62), Offset(172, 62)],
   ],
   '6': [
     [Offset(170, 66), Offset(134, 64), Offset(116, 100), Offset(114, 150), Offset(132, 174), Offset(160, 172), Offset(176, 148), Offset(164, 120), Offset(134, 116), Offset(116, 132)],
   ],
   '7': [
-    [Offset(118, 64), Offset(178, 64), Offset(138, 185)],
+    [Offset(118, 64), Offset(178, 64)],
+    [Offset(178, 64), Offset(138, 185)],
   ],
   '8': [
     [Offset(150, 62), Offset(126, 74), Offset(122, 98), Offset(150, 124), Offset(176, 150), Offset(172, 176), Offset(150, 186), Offset(128, 176), Offset(124, 150), Offset(150, 124), Offset(176, 98), Offset(172, 74), Offset(150, 62)],
   ],
   '9': [
-    [Offset(176, 108), Offset(164, 128), Offset(136, 132), Offset(118, 110), Offset(126, 80), Offset(154, 64), Offset(176, 90), Offset(178, 140), Offset(164, 175), Offset(140, 186)],
+    [Offset(170, 80), Offset(150, 64), Offset(126, 80), Offset(120, 105), Offset(134, 128), Offset(160, 126), Offset(170, 100), Offset(170, 80)],
+    [Offset(170, 80), Offset(170, 150), Offset(155, 180), Offset(135, 186)],
   ],
   '10': [
     // "1" — small flag then a straight downstroke (left digit).
-    [Offset(94, 82), Offset(110, 66), Offset(110, 186)],
+    [Offset(94, 82), Offset(110, 66)],
+    [Offset(110, 66), Offset(110, 186)],
     // "0" — smooth oblong / stadium shape (right digit), matching height of "1".
     [Offset(180, 62), Offset(155, 68), Offset(142, 85), Offset(138, 124), Offset(142, 163), Offset(155, 180), Offset(180, 186), Offset(205, 180), Offset(218, 163), Offset(222, 124), Offset(218, 85), Offset(205, 68), Offset(180, 62)],
   ],

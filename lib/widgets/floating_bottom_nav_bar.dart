@@ -111,8 +111,8 @@ class _FloatingBottomNavBarState extends State<FloatingBottomNavBar>
             else ...[
               for (int i = 0; i < half; i++)
                 Expanded(child: _buildNavColumn(i)),
-              // Reserved space for the raised center button.
-              const SizedBox(width: 64),
+              // Reserved space for the raised center button & label (no overlap).
+              const SizedBox(width: 72),
               for (int i = half; i < widget.items.length; i++)
                 Expanded(child: _buildNavColumn(i)),
             ],
@@ -123,8 +123,8 @@ class _FloatingBottomNavBarState extends State<FloatingBottomNavBar>
 
     return Padding(
       padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
+        left: 16,
+        right: 16,
         top: hasCenter ? 26 : 0,
         bottom: bottomPadding > 0 ? bottomPadding + 8 : 16,
       ),
@@ -174,21 +174,23 @@ class _FloatingBottomNavBarState extends State<FloatingBottomNavBar>
           ),
           if (widget.centerLabel != null) ...[
             const SizedBox(height: 3),
-            // Constrain + center the label so long translations (e.g.
-            // "Para kadagiti Nagannak") wrap neatly under the button instead
-            // of overflowing onto the neighbouring tab icons/labels.
+            // Constrain label to exactly 70px (matching the center gap) so it
+            // NEVER overlaps adjacent tab icons or labels on long strings like Ilokano.
             SizedBox(
-              width: 84,
-              child: Text(
-                widget.centerLabel!,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 9.5,
-                  height: 1.1,
-                  fontWeight: FontWeight.w700,
-                  color: _centerStart,
+              width: 70,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: Text(
+                  widget.centerLabel!,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontSize: 9.5,
+                    height: 1.1,
+                    fontWeight: FontWeight.w700,
+                    color: _centerStart,
+                  ),
                 ),
               ),
             ),
@@ -220,18 +222,29 @@ class _FloatingBottomNavBarState extends State<FloatingBottomNavBar>
               children: [
                 _buildIcon(item.icon, isSelected),
                 const SizedBox(height: 3),
-                AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 250),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected
-                        ? AppColors.primary
-                        : Colors.grey.shade400,
-                    letterSpacing: isSelected ? 0.2 : 0,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: AnimatedDefaultTextStyle(
+                      duration: const Duration(milliseconds: 250),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade400,
+                        letterSpacing: isSelected ? 0.2 : 0,
+                      ),
+                      child: Text(
+                        item.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
-                  child: Text(item.label),
                 ),
               ],
             ),
